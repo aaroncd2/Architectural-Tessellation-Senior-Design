@@ -75,3 +75,49 @@ def tileRegularPolygon(polygon, xNum, yNum):
         yCount = yCount + 1
         xCount = 1
     displayPolygons(polygons)
+
+"""
+INCOMPLETE: NEED TO CONSULT WITH NEIL/JOSHUA ABOUT MATH
+def tileIrregularPolygon(polygon, xNum, yNum): 
+    # calculate the directed distance between the center and each vertex of the polygon
+    center = polygon.centroid
+    xDistances = []
+    yDistances = []
+    for p in polygon:
+        xDistances.append(p.x - center.x)
+        yDistances.append(p.y - center.y)
+        
+    bounds = polygon.bounds # returns a tuple of (xmin, ymin, xmax, ymax)
+    xLine = LineString([(bounds[0],center.y),(bounds[2],center.y)])
+    yLine = LineString([(center.x,bounds[1]),(center.x, bounds[3])])
+    print(center.x)
+    print(center.y)
+    print(xLine)
+    print(xLine.length)
+    print(yLine)
+    print(yLine.length)
+    print(polygon.geoms.intersects(xLine))
+    print(polygon.geoms.intersects(xLine))
+    displayPolygon(polygon)
+        
+    increment = polygon[1].distance(center)
+    
+    polygons = []
+    temp = []
+    xCount = 1
+    yCount = 1
+    while yCount <= yNum:
+        while xCount <= xNum:
+            xCenter = xCount * (2*increment)
+            yCenter = yCount * (2*increment)
+            i = 0
+            while i < len(polygon):
+                temp.append((xCenter + xDistances[i], yCenter + yDistances[i]))
+                i = i + 1
+            polygons.append(MultiPoint(temp))
+            xCount = xCount + 1
+            temp = []
+        yCount = yCount + 1
+        xCount = 1
+    displayPolygons(polygons)
+"""
