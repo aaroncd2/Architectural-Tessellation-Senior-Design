@@ -2,8 +2,8 @@ import numpy as np
 import cv2 as cv
 from matplotlib import pyplot as plt
 
-def processImage():
-    sketch = cv.imread('square.jpg')
+def processImage(image):
+    sketch = cv.imread(image)
 
     imgray = cv.cvtColor(sketch, cv.COLOR_BGR2GRAY)
     ret, thresh = cv.threshold(imgray, 127, 255, 0)
@@ -17,15 +17,19 @@ def processImage():
     print("Number of Vertices: ", len(contours[0]))
     if (numVertices == 4):
         for i in range (0, len(contours[0])):
+            # x coordinate
             coords.append(contours[0][i][0][0])
+            # y coordinate
             coords.append(contours[0][i][0][1])
     else:
         for i in range (0, len(contours[0])):
             if (i % 10):
+                # x coordinate
                 coords.append(contours[0][i][0][0])
+                # y coordinate
                 coords.append(contours[0][i][0][1])
 
-    print("Coords Length ", len(coords))
+    print("Number of Vertices in Final ", len(coords) / 2)
     for i in coords:
         print(i)
 
@@ -34,4 +38,4 @@ def processImage():
     cv.destroyAllWindows()
     return coords
 
-processImage()
+processImage('ellipse.jpg')
