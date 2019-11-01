@@ -3,6 +3,7 @@
 Created on Tue Oct 29 15:47:02 2019
 
 @author: Aaron Dodge
+file for testing the recommendation system
 """
 
 from shapely.geometry import * # for geometric objects

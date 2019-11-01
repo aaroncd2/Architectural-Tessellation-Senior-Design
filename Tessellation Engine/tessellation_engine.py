@@ -12,6 +12,7 @@ from shapely.geometry import * # for geometric objects
 from shapely.affinity import * # for transformations
 import matplotlib.pyplot as plt # for display
 import math # for trig functions
+import pandas as pd # for export
 
 # simple function for displaying a single polygon with matplotlib.
 # Used to display a base unit
@@ -75,6 +76,26 @@ def tileRegularPolygon(polygon, xNum, yNum):
         yCount = yCount + 1
         xCount = 1
     displayPolygons(polygons)
+
+# Exports array of multipoints into a column of X coordinates and Y coordinates
+# in a CSV file called output.csv
+def exportTiling(polygons):
+    xs = []
+    ys = []
+    for poly in polygons:
+        for p in poly:
+            xs.append(p.x)
+            ys.append(p.y)
+    points = {'X': xs,
+              'Y': ys 
+            }
+    df = pd.DataFrame(points)
+    df.to_csv(r'output\output.csv')
+    print(df)
+    
+square = MultiPoint([(0,0),(0,1),(1,1),(1,0)])
+print("4x4 tiling of a square")
+tileRegularPolygon(square, 4, 4)
 
 """
 INCOMPLETE: NEED TO CONSULT WITH NEIL/JOSHUA ABOUT MATH
