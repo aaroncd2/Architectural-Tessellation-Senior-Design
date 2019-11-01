@@ -12,6 +12,7 @@ import math # for trig functions
 import tessellation_engine as te # for displaying shapes
 from shapely import affinity # for transformation
 
+# determines details about polygon then calls various generation functions
 def generateRecommendations(polygon, xNum, yNum):
      length = polygon[0].distance(polygon[1]) # side length
      numSides = len(polygon) # total number of sides
@@ -19,10 +20,27 @@ def generateRecommendations(polygon, xNum, yNum):
      angle = angleSum / numSides # degree of single interior angle
      rotated(polygon, angleSum, angle, xNum, yNum)
      
+# generates alternate tilings by rotating base unit by half of interior angle
 def rotated(polygon, angleSum, angle, xNum, yNum):
     increment = angle / 2
     current = 0
+    generated = []
     while current < (angleSum - angle):
-        te.tileRegularPolygon(polygon, xNum, yNum)
+        start = (polygon[0].x,polygon[0].y)
+        if not isRedundant(start, generated):
+            te.tileRegularPolygon(polygon, xNum, yNum)
+        for p in polygon:
+            generated.append((p.x,p.y))
         polygon = affinity.rotate(polygon, increment)
         current = current + increment
+        
+def isRedundant(point, generated):
+    #print(point)
+    #print(generated)
+    for p in generated:
+        if p == point:
+            return True
+        elif abs(p[0] - point[0]) <= 0.1 and abs(p[1] - point[1]) <= 0.1:
+            return True
+    return False
+            

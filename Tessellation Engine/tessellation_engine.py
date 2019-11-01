@@ -92,10 +92,11 @@ def exportTiling(polygons):
     df = pd.DataFrame(points)
     df.to_csv(r'output\output.csv')
     print(df)
-    
+"""   
 square = MultiPoint([(0,0),(0,1),(1,1),(1,0)])
 print("4x4 tiling of a square")
 tileRegularPolygon(square, 4, 4)
+"""
 
 """
 INCOMPLETE: NEED TO CONSULT WITH NEIL/JOSHUA ABOUT MATH
