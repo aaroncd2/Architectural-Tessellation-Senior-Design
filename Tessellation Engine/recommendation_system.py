@@ -21,8 +21,14 @@ def generateRecommendations(polygon, xNum, yNum):
      rotated(polygon, angleSum, angle, xNum, yNum)
      
 # generates alternate tilings by rotating base unit by half of interior angle
+# for shapes with odd numbers of sides and by a fourth of the interior angle for
+# shapes with even numbers of sides
 def rotated(polygon, angleSum, angle, xNum, yNum):
-    increment = angle / 2
+    numSides = len(polygon)
+    if numSides % 2 == 0 and numSides > 4:
+        increment = angle / 4
+    else:
+        increment = angle / 2
     current = 0
     generated = []
     while current < (angleSum - angle):

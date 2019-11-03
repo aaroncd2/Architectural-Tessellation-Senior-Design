@@ -18,7 +18,5 @@ rs.generateRecommendations(square, 5, 5)
 triangle = MultiPoint([(2,1),(4.5,16/3),(7,1)])
 rs.generateRecommendations(triangle, 4, 6)
 
-"""
-pentagon = MultiPoint([(2,6),(0,4),(.5,1),(3.5,1),(4,4)])
-rs.generateRecommendations(pentagon, 5, 5)
-"""
+hexagon = MultiPoint([(-.5, math.sqrt(3)/2),(.5, math.sqrt(3)/2), (1,0), (.5, -math.sqrt(3)/2), (-.5, -math.sqrt(3)/2), (-1,0)])
+rs.generateRecommendations(hexagon, 4, 4)
