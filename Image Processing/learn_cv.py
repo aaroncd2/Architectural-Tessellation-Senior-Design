@@ -1,5 +1,5 @@
 import numpy as np
-import cv2 as cv
+from cv2 import cv2 as cv
 from matplotlib import pyplot as plt
 
 sketch = cv.imread('rectangles.jpg')

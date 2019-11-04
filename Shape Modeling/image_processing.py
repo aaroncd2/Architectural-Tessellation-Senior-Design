@@ -14,7 +14,6 @@ def processImage(image):
 
     coords = list()
     numVertices = len(contours[0])
-    print("Number of Vertices: ", len(contours[0]))
     if (numVertices == 4):
         for i in range (0, len(contours[0])):
             # x coordinate
@@ -29,13 +28,12 @@ def processImage(image):
                 # y coordinate
                 coords.append(contours[0][i][0][1])
 
-    print("Number of Vertices in Final ", len(coords) / 2)
-    for i in coords:
-        print(i)
+    # print("Number of Vertices in Final ", len(coords) / 2)
+    # for i in coords:
+    #     print(i)
 
-    cv.imshow('Output Sketch', sketch)
-    cv.waitKey(0)
+    # cv.imshow('Output Sketch', sketch)
+    # cv.waitKey(0)
     cv.destroyAllWindows()
     return coords
 
-processImage('square.jpg')
