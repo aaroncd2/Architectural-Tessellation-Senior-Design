@@ -3,6 +3,7 @@
 Created on Tue Oct 29 15:47:02 2019
 
 @author: Aaron Dodge
+file for testing the recommendation system
 """
 
 from shapely.geometry import * # for geometric objects
@@ -17,5 +18,5 @@ rs.generateRecommendations(square, 5, 5)
 triangle = MultiPoint([(2,1),(4.5,16/3),(7,1)])
 rs.generateRecommendations(triangle, 4, 6)
 
-pentagon = MultiPoint([(550,450),(455,519),(491,631),(609,631),(645,519)])
-rs.generateRecommendations(pentagon, 5, 5)
+hexagon = MultiPoint([(-.5, math.sqrt(3)/2),(.5, math.sqrt(3)/2), (1,0), (.5, -math.sqrt(3)/2), (-.5, -math.sqrt(3)/2), (-1,0)])
+rs.generateRecommendations(hexagon, 4, 4)
