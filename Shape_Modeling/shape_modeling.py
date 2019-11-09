@@ -2,7 +2,6 @@ from shapely.geometry import Polygon
 from shapely import affinity
 from shapely.geometry import Point
 import matplotlib.pyplot as plt
-from image_processing import processImage
 
 def shape_model(coords):
     ax = plt.axes()
