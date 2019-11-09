@@ -1,19 +1,6 @@
-import sys, os
- 
-dirpath = os.getcwd()
-print("current directory is : " + dirpath)
-foldername = os.path.basename(dirpath)
-print("directory: " + foldername)
-print("image processing dir: " + dirpath + '/Image Processing')
-print("shape modeling dir: " + dirpath + '/Shape Modeling')
+from Image_Processing import image_processing as ip
+from Shape_Modeling import shape_modeling as sm
 
-sys.path.insert(0, dirpath + '/Image Processing')
-sys.path.insert(0, dirpath + '/Image Processing/Images')
-sys.path.insert(0, dirpath + '/Shape Modeling')
-
-import image_processing as ip
-# import shape_modeling as sm
-
-# print(ip.processImage("square.jpg"))
-ip.printHello()
-# sm.shape_print()
+imageDirectory = "Image_Processing/Images/"
+coords = ip.processImage(imageDirectory + "square.jpg")
+sm.shape_model(coords)

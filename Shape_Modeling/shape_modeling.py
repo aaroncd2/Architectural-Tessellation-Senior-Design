@@ -4,10 +4,7 @@ from shapely.geometry import Point
 import matplotlib.pyplot as plt
 from image_processing import processImage
 
-def shape_model():
-    
-    coords = processImage('ellipse.jpg')
-
+def shape_model(coords):
     ax = plt.axes()
     ax.set_facecolor("white")
     plt.grid(True)
@@ -32,11 +29,3 @@ def shape_model():
     x,y = poly3.exterior.xy
     plt.plot(x,y)
     plt.show()
-
-processImage("square.jpg")
-
-    
-def shape_print():
-    print("from modeling")
-    
-shape_model()
