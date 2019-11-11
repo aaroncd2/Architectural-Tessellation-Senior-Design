@@ -76,22 +76,24 @@ def tileRegularPolygon(polygon, xNum, yNum):
         yCount = yCount + 1
         xCount = 1
     displayPolygons(polygons)
+    return polygons
 
 # Exports array of multipoints into a column of X coordinates and Y coordinates
 # in a CSV file called output.csv
 def exportTiling(polygons):
-    xs = []
-    ys = []
+    points = {}
+    num = 1
     for poly in polygons:
+        xs = []
+        ys = []
         for p in poly:
             xs.append(p.x)
             ys.append(p.y)
-    points = {'X': xs,
-              'Y': ys 
-            }
+        points['x' + str(num)] = xs
+        points['y' + str(num)] = ys
+        num += 1
     df = pd.DataFrame(points)
-    df.to_csv(r'output\output.csv')
-    print(df)
+    df.to_csv(r'output\output.csv', index=False)
 """   
 square = MultiPoint([(0,0),(0,1),(1,1),(1,0)])
 print("4x4 tiling of a square")

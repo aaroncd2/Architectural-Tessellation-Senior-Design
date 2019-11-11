@@ -13,7 +13,7 @@ import recommendation_system as rs
 
 square = MultiPoint([(0,0),(0,1),(1,1),(1,0)])
 print("4x4 tiling of a square")
-te.tileRegularPolygon(square, 4, 4)
+te.exportTiling(te.tileRegularPolygon(square, 4, 4))
 
 """
 square2 = affinity.rotate(square, 45)
