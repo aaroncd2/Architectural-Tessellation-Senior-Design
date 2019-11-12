@@ -2,7 +2,6 @@
 """
 Created on Wed Oct 23 13:06:12 2019
 
-@author: Aaron Dodge
 This class functions as the primary tessellation engine for the application.
 It offers functions for displaying both single polygon and multiple polygons.
 Additionally, It can create regular tilings of a single polygon
@@ -68,8 +67,8 @@ def tileRegularPolygon(polygon, xNum, yNum):
         while xCount <= xNum: 
             xNext = xCount * xIncrement
             yNext = yCount * yIncrement
-            for p in polygon:
-                temp.append((p.x + xNext, p.y + yNext))
+            for p in polygon.exterior.coords:
+                temp.append((p[0] + xNext, p[1] + yNext))
             polygons.append(MultiPoint(temp))
             xCount = xCount + 1
             temp = []
@@ -93,55 +92,4 @@ def exportTiling(polygons):
         points['y' + str(num)] = ys
         num += 1
     df = pd.DataFrame(points)
-    df.to_csv(r'output\output.csv', index=False)
-"""   
-square = MultiPoint([(0,0),(0,1),(1,1),(1,0)])
-print("4x4 tiling of a square")
-tileRegularPolygon(square, 4, 4)
-"""
-
-"""
-INCOMPLETE: NEED TO CONSULT WITH NEIL/JOSHUA ABOUT MATH
-def tileIrregularPolygon(polygon, xNum, yNum): 
-    # calculate the directed distance between the center and each vertex of the polygon
-    center = polygon.centroid
-    xDistances = []
-    yDistances = []
-    for p in polygon:
-        xDistances.append(p.x - center.x)
-        yDistances.append(p.y - center.y)
-        
-    bounds = polygon.bounds # returns a tuple of (xmin, ymin, xmax, ymax)
-    xLine = LineString([(bounds[0],center.y),(bounds[2],center.y)])
-    yLine = LineString([(center.x,bounds[1]),(center.x, bounds[3])])
-    print(center.x)
-    print(center.y)
-    print(xLine)
-    print(xLine.length)
-    print(yLine)
-    print(yLine.length)
-    print(polygon.geoms.intersects(xLine))
-    print(polygon.geoms.intersects(xLine))
-    displayPolygon(polygon)
-        
-    increment = polygon[1].distance(center)
-    
-    polygons = []
-    temp = []
-    xCount = 1
-    yCount = 1
-    while yCount <= yNum:
-        while xCount <= xNum:
-            xCenter = xCount * (2*increment)
-            yCenter = yCount * (2*increment)
-            i = 0
-            while i < len(polygon):
-                temp.append((xCenter + xDistances[i], yCenter + yDistances[i]))
-                i = i + 1
-            polygons.append(MultiPoint(temp))
-            xCount = xCount + 1
-            temp = []
-        yCount = yCount + 1
-        xCount = 1
-    displayPolygons(polygons)
-"""
+    df.to_csv(r'Output\output.csv', index=False)

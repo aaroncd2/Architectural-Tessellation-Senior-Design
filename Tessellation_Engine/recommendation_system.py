@@ -2,7 +2,6 @@
 """
 Created on Tue Oct 29 15:24:36 2019
 
-@author: Aaron Dodge
 Class for generating alternate tessellations
 Currently only supports rotating regular polygons
 """
@@ -39,10 +38,11 @@ def rotated(polygon, angleSum, angle, xNum, yNum):
             generated.append((p.x,p.y))
         polygon = affinity.rotate(polygon, increment)
         current = current + increment
-        
+
+# compares the provided point with the points in the already generated array.
+# if there is an exact match or a match that is +/- 0.1 the point is considered redundant.
+# if the function returns True, no tiling is created using these points    
 def isRedundant(point, generated):
-    #print(point)
-    #print(generated)
     for p in generated:
         if p == point:
             return True
