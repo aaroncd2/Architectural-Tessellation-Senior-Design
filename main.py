@@ -1,6 +1,7 @@
 from Image_Processing import image_processing as ip
 from Shape_Modeling import shape_modeling as sm
 from Tessellation_Engine import tessellation_engine as te
+from Tessellation_Engine import recommendation_system as rs
 import sys
 
 imageDirectory = "Image_Processing/Images/"

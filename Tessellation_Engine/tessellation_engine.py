@@ -92,4 +92,4 @@ def exportTiling(polygons):
         points['y' + str(num)] = ys
         num += 1
     df = pd.DataFrame(points)
-    df.to_csv(r'Output\output.csv', index=False)
+    df.to_csv(r'Output/output.csv', index=False)
