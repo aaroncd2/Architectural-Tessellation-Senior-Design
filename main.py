@@ -7,6 +7,6 @@ import sys
 imageDirectory = "Image_Processing/Images/"
 coords = ip.processImage(imageDirectory + sys.argv[1])
 base_unit = sm.shape_model(coords)
-base_tiling = te.tileRegularPolygon(base_unit, 5, 5)
+base_tiling = te.tileRegularPolygon(base_unit, 5, 5, 1)
 rs.generateRecommendations(base_unit, 5, 5)
 te.exportTiling(base_tiling)

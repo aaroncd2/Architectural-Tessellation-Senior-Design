@@ -20,3 +20,9 @@ rs.generateRecommendations(triangle, 4, 6)
 
 hexagon = Polygon([(-.5, math.sqrt(3)/2),(.5, math.sqrt(3)/2), (1,0), (.5, -math.sqrt(3)/2), (-.5, -math.sqrt(3)/2), (-1,0)])
 rs.generateRecommendations(hexagon, 4, 4)
+
+star = Polygon([(4,4),(0,4),(3.5,1),(2,6),(.5,1)])
+rs.generateRecommendations(star,5,5)
+
+rhombus = Polygon([(0,0),(5,0),(8,4),(3,4)])
+rs.generateRecommendations(rhombus, 5, 5)

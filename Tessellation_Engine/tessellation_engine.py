@@ -8,14 +8,15 @@ Additionally, It can create regular tilings of a single polygon
 """
 
 from shapely.geometry import * # for geometric objects
-from shapely.affinity import * # for transformations
+from shapely import affinity # for transformations
 import matplotlib.pyplot as plt # for display
 import math # for trig functions
 import pandas as pd # for export
+import numpy as np # for math
 
 # simple function for displaying a single polygon with matplotlib.
 # Used to display a base unit
-# INPUT: A single shapely MultiPoint object
+# INPUT: A single shapely Polygon object
 # OUTPUT: Displays matplotlib plot of shapes
 # RETURNS: None
 def displayPolygon(polygon):
@@ -33,7 +34,7 @@ def displayPolygon(polygon):
     
 # simple function for displaying array of shapes with matplotlib.
 # Used to display a tiling
-# INPUT: An array of shapely MultiPoints
+# INPUT: An array of shapely Polygons
 # OUTPUT: Displays matplotlib plot of shapes
 # RETURNS: None
 def displayPolygons(polygons):
@@ -51,10 +52,11 @@ def displayPolygons(polygons):
     print()
 
 # generates a tiling for regular polygons
-# INPUT: A shapely MultiPointObject, number of tiles in x direction, number of tiles in y direction
+# INPUT: A shapely Polygon, number of tiles in x direction, number of tiles in y direction,
+#       an integer mode. 1 = standard, 2 = vertical flip, 3 = horizontal flip
 # OUTPUT: NONE
-# RETURNS: NONE
-def tileRegularPolygon(polygon, xNum, yNum):
+# RETURNS: Array of Polygon objects
+def tileRegularPolygon(polygon, xNum, yNum, mode):
     bounds = polygon.bounds # returns a tuple of (xmin, ymin, xmax, ymax)
     xIncrement = abs(bounds[2] - bounds[0])
     yIncrement = abs(bounds[3] - bounds[1])
@@ -64,6 +66,10 @@ def tileRegularPolygon(polygon, xNum, yNum):
     xCount = 1
     yCount = 1
     while yCount <= yNum:
+        if(mode == 2):
+            polygon = affinity.rotate(polygon, 180)
+        if(mode == 3):
+            polygon = Polygon(flipPolygonHorizontally(polygon))
         while xCount <= xNum: 
             xNext = xCount * xIncrement
             yNext = yCount * yIncrement
@@ -76,6 +82,10 @@ def tileRegularPolygon(polygon, xNum, yNum):
         xCount = 1
     displayPolygons(polygons)
     return polygons
+
+def flipPolygonHorizontally(poly):
+    pts = np.array(poly.exterior.coords)
+    return pts.dot([[-1,0],[0,-1]])
 
 # Exports array of multipoints into a column of X coordinates and Y coordinates
 # in a CSV file called output.csv

@@ -20,10 +20,11 @@ def generateRecommendations(polygon, xNum, yNum):
     point2 = Point(p2[0], p2[1])
     length = point1.distance(point2) # side length
     numSides = len(polygon.exterior.coords) - 1 # total number of sides
-    print(numSides)
     angleSum = (numSides - 2) * 180 # sum of interior angles
     angle = angleSum / numSides # degree of single interior angle
     rotated(polygon, angleSum, angle, xNum, yNum)
+    te.tileRegularPolygon(polygon, xNum, yNum, 2)
+    #te.tileRegularPolygon(polygon, xNum, yNum, 3)
      
 # generates alternate tilings by rotating base unit by half of interior angle
 # for shapes with odd numbers of sides and by a fourth of the interior angle for
@@ -34,13 +35,12 @@ def rotated(polygon, angleSum, angle, xNum, yNum):
         increment = angle / 4
     else:
         increment = angle / 2
-    print(increment)
     current = 0
     generated = []
     while current < (angleSum - angle):
         start = polygon.exterior.coords[0]
         if not isRedundant(start, generated):
-            te.tileRegularPolygon(polygon, xNum, yNum)
+            te.tileRegularPolygon(polygon, xNum, yNum, 1)
         for p in polygon.exterior.coords:
             generated.append((p[0],p[1]))
         polygon = affinity.rotate(polygon, increment)
