@@ -9,6 +9,7 @@ Currently only supports rotating regular polygons
 from shapely.geometry import * # for geometric objects
 import math # for trig functions
 from Tessellation_Engine import tessellation_engine as te # for displaying shapes
+#import tessellation_engine as te
 from shapely import affinity # for transformation
 
 # determines details about polygon then calls various generation functions
@@ -49,10 +50,11 @@ def rotated(polygon, angleSum, angle, xNum, yNum):
 # if there is an exact match or a match that is +/- 0.1 the point is considered redundant.
 # if the function returns True, no tiling is created using these points    
 def isRedundant(point, generated):
+    offset = 20
     for p in generated:
         if p == point:
             return True
-        elif abs(p[0] - point[0]) <= 10 and abs(p[1] - point[1]) <= 10:
+        elif abs(p[0] - point[0]) <= offset and abs(p[1] - point[1]) <= offset:
             return True
     return False
             
