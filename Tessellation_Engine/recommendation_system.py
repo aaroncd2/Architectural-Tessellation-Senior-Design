@@ -24,7 +24,7 @@ def generateRecommendations(polygon, xNum, yNum):
     angle = angleSum / numSides # degree of single interior angle
     rotated(polygon, angleSum, angle, xNum, yNum)
     te.tileRegularPolygon(polygon, xNum, yNum, 2)
-    #te.tileRegularPolygon(polygon, xNum, yNum, 3)
+    te.tileRegularPolygon(polygon, xNum, yNum, 3)
      
 # generates alternate tilings by rotating base unit by half of interior angle
 # for shapes with odd numbers of sides and by a fourth of the interior angle for
@@ -50,7 +50,7 @@ def rotated(polygon, angleSum, angle, xNum, yNum):
 # if there is an exact match or a match that is +/- 0.1 the point is considered redundant.
 # if the function returns True, no tiling is created using these points    
 def isRedundant(point, generated):
-    offset = 20
+    offset = 15
     for p in generated:
         if p == point:
             return True

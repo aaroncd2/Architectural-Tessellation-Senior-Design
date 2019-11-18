@@ -83,12 +83,15 @@ def tileRegularPolygon(polygon, xNum, yNum, mode):
     displayPolygons(polygons)
     return polygons
 
+# Function for mirroring a polygon horizontally across its center
+# INPUT: Shapely Polygon object
 def flipPolygonHorizontally(poly):
     pts = np.array(poly.exterior.coords)
-    return pts.dot([[-1,0],[0,-1]])
+    return pts.dot([[-1,0],[0,1]])
 
 # Exports array of multipoints into a column of X coordinates and Y coordinates
 # in a CSV file called output.csv
+# INPUT: Array of Shapely Polygon objects
 def exportTiling(polygons):
     points = {}
     num = 1
