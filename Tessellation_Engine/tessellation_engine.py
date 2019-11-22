@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt # for display
 import math # for trig functions
 import pandas as pd # for export
 import numpy as np # for math
-
+import main as main
 # simple function for displaying a single polygon with matplotlib.
 # Used to display a base unit
 # INPUT: A single shapely Polygon object
@@ -30,14 +30,15 @@ def displayPolygon(polygon):
     x.append(polygon[0].x)
     y.append(polygon[0].y)
     plt.plot(x,y)
-    plt.show()
+    #plt.show()
     
 # simple function for displaying array of shapes with matplotlib.
 # Used to display a tiling
 # INPUT: An array of shapely Polygons
 # OUTPUT: Displays matplotlib plot of shapes
 # RETURNS: None
-def displayPolygons(polygons):
+def displayPolygons(polygons, mainPlot, mainCanvas):
+    mainPlot.clear()
     for poly in polygons:
         x = []
         y = []
@@ -47,16 +48,16 @@ def displayPolygons(polygons):
             y.append(p.y)
         x.append(first.x)
         y.append(first.y)
-        plt.plot(x,y)
-    plt.show()
+        mainPlot.plot(x,y)
     print()
+    mainCanvas.draw()
 
 # generates a tiling for regular polygons
 # INPUT: A shapely Polygon, number of tiles in x direction, number of tiles in y direction,
 #       an integer mode. 1 = standard, 2 = vertical flip, 3 = horizontal flip
 # OUTPUT: NONE
 # RETURNS: Array of Polygon objects
-def tileRegularPolygon(polygon, xNum, yNum, mode):
+def tileRegularPolygon(polygon, xNum, yNum, mode, mainPlot, mainCanvas):
     bounds = polygon.bounds # returns a tuple of (xmin, ymin, xmax, ymax)
     xIncrement = abs(bounds[2] - bounds[0])
     yIncrement = abs(bounds[3] - bounds[1])
@@ -80,8 +81,7 @@ def tileRegularPolygon(polygon, xNum, yNum, mode):
             temp = []
         yCount = yCount + 1
         xCount = 1
-    displayPolygons(polygons)
-    return polygons
+    displayPolygons(polygons, mainPlot, mainCanvas)
 
 # Function for mirroring a polygon horizontally across its center
 # INPUT: Shapely Polygon object

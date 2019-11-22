@@ -26,6 +26,7 @@ def shape_model(coords):
 
     poly3= affinity.scale(poly2_simple, xfact= .5, yfact= .5)
     x,y = poly3.exterior.xy
-    plt.plot(x,y)
-    plt.show()
+    #plt.plot(x,y)
+    #plt.show()
+    # pass x,y so it can be added to main UI in a figure
     return poly3
