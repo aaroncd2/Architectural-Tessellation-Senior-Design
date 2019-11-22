@@ -13,7 +13,7 @@ from Tessellation_Engine import tessellation_engine as te # for displaying shape
 from shapely import affinity # for transformation
 
 # determines details about polygon then calls various generation functions
-def generateRecommendations(polygon, xNum, yNum):
+def generateRecommendations(polygon, xNum, yNum, mainPlot, mainCanvas, recNum):
     p1 = polygon.exterior.coords[0]
     p2 = polygon.exterior.coords[1]
     point1 = Point(p1[0], p1[1])
@@ -22,14 +22,17 @@ def generateRecommendations(polygon, xNum, yNum):
     numSides = len(polygon.exterior.coords) - 1 # total number of sides
     angleSum = (numSides - 2) * 180 # sum of interior angles
     angle = angleSum / numSides # degree of single interior angle
-    rotated(polygon, angleSum, angle, xNum, yNum)
-    te.tileRegularPolygon(polygon, xNum, yNum, 2)
-    te.tileRegularPolygon(polygon, xNum, yNum, 3)
+    if recNum == 1: 
+        rotated(polygon, angleSum, angle, xNum, yNum, mainPlot, mainCanvas)
+    elif recNum == 2:
+        te.tileRegularPolygon(polygon, xNum, yNum, 2, mainPlot, mainCanvas)
+    else:
+        te.tileRegularPolygon(polygon, xNum, yNum, 3, mainPlot, mainCanvas)
      
 # generates alternate tilings by rotating base unit by half of interior angle
 # for shapes with odd numbers of sides and by a fourth of the interior angle for
 # shapes with even numbers of sides
-def rotated(polygon, angleSum, angle, xNum, yNum):
+def rotated(polygon, angleSum, angle, xNum, yNum, mainPlot, mainCanvas):
     numSides = len(polygon.exterior.coords) - 1
     if numSides % 2 == 0 and numSides > 4:
         increment = angle / 4
@@ -40,7 +43,7 @@ def rotated(polygon, angleSum, angle, xNum, yNum):
     while current < (angleSum - angle):
         start = polygon.exterior.coords[0]
         if not isRedundant(start, generated):
-            te.tileRegularPolygon(polygon, xNum, yNum, 1)
+            te.tileRegularPolygon(polygon, xNum, yNum, 1, mainPlot, mainCanvas)
         for p in polygon.exterior.coords:
             generated.append((p[0],p[1]))
         polygon = affinity.rotate(polygon, increment)

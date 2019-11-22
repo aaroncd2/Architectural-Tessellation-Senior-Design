@@ -29,6 +29,9 @@ def shape_model(coords):
 
     poly3= affinity.scale(poly2_simple, xfact= .5, yfact= .5)
     x,y = poly3.exterior.xy
+    #plt.plot(x,y)
+    #plt.show()
+    # pass x,y so it can be added to main UI in a figure
     # plt.plot(x,y)
 
     coords = list(poly3.exterior.coords)
@@ -73,4 +76,5 @@ def regular_poly(n):
     else:
         print ("not valid side number")
     return Polygon(points)
+
 

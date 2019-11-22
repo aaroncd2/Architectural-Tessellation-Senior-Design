@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt # for display
 import math # for trig functions
 import pandas as pd # for export
 import numpy as np # for math
-
+import main as main
 # simple function for displaying a single polygon with matplotlib.
 # Used to display a base unit
 # INPUT: A single shapely Polygon object
@@ -30,33 +30,33 @@ def displayPolygon(polygon):
     x.append(polygon[0].x)
     y.append(polygon[0].y)
     plt.plot(x,y)
-    plt.show()
+    #plt.show()
     
 # simple function for displaying array of shapes with matplotlib.
 # Used to display a tiling
 # INPUT: An array of shapely Polygons
 # OUTPUT: Displays matplotlib plot of shapes
 # RETURNS: None
-def displayPolygons(polygons):
+def displayPolygons(polygons, mainPlot, mainCanvas):
+    mainPlot.clear()
     for poly in polygons:
         x = []
         y = []
-        first = poly[0]
-        for p in poly:
-            x.append(p.x)
-            y.append(p.y)
-        x.append(first.x)
-        y.append(first.y)
-        plt.plot(x,y)
-    plt.show()
-    print()
+        first = poly.exterior.coords[0]
+        for p in poly.exterior.coords:
+            x.append(p[0])
+            y.append(p[1])
+        x.append(first[0])
+        y.append(first[1])
+        mainPlot.plot(x,y)
+    mainCanvas.draw()
 
 # generates a tiling for regular polygons
 # INPUT: A shapely Polygon, number of tiles in x direction, number of tiles in y direction,
 #       an integer mode. 1 = standard, 2 = vertical flip, 3 = horizontal flip
 # OUTPUT: NONE
 # RETURNS: Array of Polygon objects
-def tileRegularPolygon(polygon, xNum, yNum, mode):
+def tileRegularPolygon(polygon, xNum, yNum, mode, mainPlot, mainCanvas):
     bounds = polygon.bounds # returns a tuple of (xmin, ymin, xmax, ymax)
     xIncrement = abs(bounds[2] - bounds[0])
     yIncrement = abs(bounds[3] - bounds[1])
@@ -67,7 +67,7 @@ def tileRegularPolygon(polygon, xNum, yNum, mode):
     yCount = 1
     while yCount <= yNum:
         if(mode == 2):
-            polygon = affinity.rotate(polygon, 180)
+            polygon = Polygon(flipPolygonVertically(polygon))
         if(mode == 3):
             polygon = Polygon(flipPolygonHorizontally(polygon))
         while xCount <= xNum: 
@@ -75,12 +75,12 @@ def tileRegularPolygon(polygon, xNum, yNum, mode):
             yNext = yCount * yIncrement
             for p in polygon.exterior.coords:
                 temp.append((p[0] + xNext, p[1] + yNext))
-            polygons.append(MultiPoint(temp))
+            polygons.append(Polygon(temp))
             xCount = xCount + 1
             temp = []
         yCount = yCount + 1
         xCount = 1
-    displayPolygons(polygons)
+    displayPolygons(polygons, mainPlot, mainCanvas)
     return polygons
 
 # Function for mirroring a polygon horizontally across its center
@@ -88,6 +88,10 @@ def tileRegularPolygon(polygon, xNum, yNum, mode):
 def flipPolygonHorizontally(poly):
     pts = np.array(poly.exterior.coords)
     return pts.dot([[-1,0],[0,1]])
+
+def flipPolygonVertically(poly):
+    pts = np.array(poly.exterior.coords)
+    return pts.dot([[1,0],[0,-1]])
 
 # Exports array of multipoints into a column of X coordinates and Y coordinates
 # in a CSV file called output.csv
