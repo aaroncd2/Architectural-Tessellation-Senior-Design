@@ -15,7 +15,7 @@ class Main:
     def __init__(self):
         self.reccbuttonExists = False
         self.reccbuttonPressed = False
-        self.recNum = 0;
+        self.recNum = 0
         self.imageFile = None
         self.shapeCoords = None
         self.base_unit = None
