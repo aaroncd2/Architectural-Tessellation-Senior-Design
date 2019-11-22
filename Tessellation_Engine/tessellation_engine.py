@@ -42,14 +42,13 @@ def displayPolygons(polygons, mainPlot, mainCanvas):
     for poly in polygons:
         x = []
         y = []
-        first = poly[0]
-        for p in poly:
-            x.append(p.x)
-            y.append(p.y)
-        x.append(first.x)
-        y.append(first.y)
+        first = poly.exterior.coords[0]
+        for p in poly.exterior.coords:
+            x.append(p[0])
+            y.append(p[1])
+        x.append(first[0])
+        y.append(first[1])
         mainPlot.plot(x,y)
-    print()
     mainCanvas.draw()
 
 # generates a tiling for regular polygons
@@ -76,12 +75,13 @@ def tileRegularPolygon(polygon, xNum, yNum, mode, mainPlot, mainCanvas):
             yNext = yCount * yIncrement
             for p in polygon.exterior.coords:
                 temp.append((p[0] + xNext, p[1] + yNext))
-            polygons.append(MultiPoint(temp))
+            polygons.append(Polygon(temp))
             xCount = xCount + 1
             temp = []
         yCount = yCount + 1
         xCount = 1
     displayPolygons(polygons, mainPlot, mainCanvas)
+    return polygons
 
 # Function for mirroring a polygon horizontally across its center
 # INPUT: Shapely Polygon object

@@ -20,6 +20,7 @@ class Main:
         self.shapeCoords = None
         self.base_unit = None
         self.base_tiling = None
+        self.polygons = None
         self.root = tk.Tk()
         self.root.wm_title("DATO")
         self.fig = Figure(figsize=(5, 4), dpi=100)
@@ -68,11 +69,18 @@ class Main:
         
     #makes a base tiling (button handler)
     def _make_base_tiling(self):        
-        te.tileRegularPolygon(self.base_unit, 5, 5, 1, self.subplot, self.canvas) 
+        self.polygons = te.tileRegularPolygon(self.base_unit, 5, 5, 1, self.subplot, self.canvas) 
         if self.reccbuttonExists == False:
             self.tilingbutton = tk.Button(master=self.root, text="Reccomendation", command=self._generateRecc)
             self.tilingbutton.pack(side=tk.RIGHT)
+            self.verticalbutton = tk.Button(master=self.root, text="Flip Vertical", command=self._flipVertical)
+            self.verticalbutton.pack(side=tk.RIGHT)
+            self.horizontalbutton = tk.Button(master=self.root, text="Flip Horizontal", command=self._flipHorizontal)
+            self.horizontalbutton.pack(side=tk.RIGHT)
+            self.exportbutton = tk.Button(master=self.root, text="Export", command=self._export)
+            self.exportbutton.pack(side=tk.RIGHT)
             self.reccbuttonExists = True
+
     #generates tiling reccomendations (button handler)
     def _generateRecc(self):
         if self.recNum > 2:
@@ -80,11 +88,17 @@ class Main:
         else:
             self.recNum = self.recNum + 1
         rs.generateRecommendations(self.base_unit, 5, 5, self.subplot, self.canvas, self.recNum)
-        
+
+    #
+    def _flipVertical(self):
+        self.polygons = te.tileRegularPolygon(self.base_unit, 5, 5, 2, self.subplot, self.canvas)
+
+    def _flipHorizontal(self):
+        self.polygons = te.tileRegularPolygon(self.base_unit, 5, 5, 3, self.subplot, self.canvas)    
+
     #export to excel
-    def export(self):
-        base_tiling = self.base_tiling
-        te.exportTiling(base_tiling)
+    def _export(self):
+        te.exportTiling(self.polygons)
         
     #quit button handler
     def _quit(self):
