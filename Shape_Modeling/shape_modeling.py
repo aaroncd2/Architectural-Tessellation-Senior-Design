@@ -49,8 +49,6 @@ def shape_model(coords):
     if sides <= 8 and ((inner_angle + 5) > avg_angle > (inner_angle - 5)):
         poly3 = regular_poly(sides)
     x,y = poly3.exterior.xy
-    plt.plot(x,y)
-    plt.show()
     return poly3
 
 #Finds angle between 3 points
