@@ -102,9 +102,9 @@ def exportTiling(polygons):
     for poly in polygons:
         xs = []
         ys = []
-        for p in poly:
-            xs.append(p.x)
-            ys.append(p.y)
+        for p in poly.exterior.coords:
+            xs.append(p[0])
+            ys.append(p[1])
         points['x' + str(num)] = xs
         points['y' + str(num)] = ys
         num += 1
