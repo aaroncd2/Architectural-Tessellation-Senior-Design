@@ -68,7 +68,7 @@ def tileRegularPolygon(polygon, xNum, yNum, mode, mainPlot, mainCanvas):
     yCount = 1
     while yCount <= yNum:
         if(mode == 2):
-            polygon = affinity.rotate(polygon, 180)
+            polygon = Polygon(flipPolygonVertically(polygon))
         if(mode == 3):
             polygon = Polygon(flipPolygonHorizontally(polygon))
         while xCount <= xNum: 
@@ -88,6 +88,10 @@ def tileRegularPolygon(polygon, xNum, yNum, mode, mainPlot, mainCanvas):
 def flipPolygonHorizontally(poly):
     pts = np.array(poly.exterior.coords)
     return pts.dot([[-1,0],[0,1]])
+
+def flipPolygonVertically(poly):
+    pts = np.array(poly.exterior.coords)
+    return pts.dot([[1,0],[0,-1]])
 
 # Exports array of multipoints into a column of X coordinates and Y coordinates
 # in a CSV file called output.csv
