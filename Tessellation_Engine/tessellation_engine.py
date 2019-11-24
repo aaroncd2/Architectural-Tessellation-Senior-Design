@@ -7,7 +7,7 @@ It offers functions for displaying both single polygon and multiple polygons.
 Additionally, It can create regular tilings of a single polygon
 """
 
-from shapely.geometry import * # for geometric objects
+from shapely.geometry import Polygon # for geometric objects
 from shapely import affinity # for transformations
 import matplotlib.pyplot as plt # for display
 import math # for trig functions
@@ -48,7 +48,7 @@ def displayPolygons(polygons, mainPlot, mainCanvas):
             y.append(p[1])
         x.append(first[0])
         y.append(first[1])
-        mainPlot.plot(x,y)
+        mainPlot.plot(x,y, c='blue')
     mainCanvas.draw()
 
 # generates a tiling for regular polygons
@@ -89,9 +89,15 @@ def flipPolygonHorizontally(poly):
     pts = np.array(poly.exterior.coords)
     return pts.dot([[-1,0],[0,1]])
 
+# Function for rotating a polygon 180 degrees "mirroring" across its center
+# INPUT: Shapely Polygon object
 def flipPolygonVertically(poly):
-    pts = np.array(poly.exterior.coords)
-    return pts.dot([[1,0],[0,-1]])
+    return affinity.rotate(poly, 180)
+
+# Function for roating a polygon a set number of degrees
+# INPUT: Shapely Polygon object, number of degrees
+def rotatePolygon(poly, deg):
+    return affinity.rotate(poly, deg)
 
 # Exports array of multipoints into a column of X coordinates and Y coordinates
 # in a CSV file called output.csv
