@@ -62,7 +62,7 @@ class Main:
         self.toolbar = NavigationToolbar2Tk(self.canvas, self.root)
         self.toolbar.update()
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-        self.tilingbutton = tk.Button(master=self.root, text="base tiling", command=self._make_base_tiling)
+        self.tilingbutton = tk.Button(master=self.root, text="Base Tiling", command=self._make_base_tiling)
         self.tilingbutton.pack(side=tk.RIGHT)
         self.quitbutton = tk.Button(master=self.root, text="Quit", command=self._quit)
         self.quitbutton.pack(side=tk.LEFT)
@@ -71,14 +71,16 @@ class Main:
     def _make_base_tiling(self):        
         self.polygons = te.tileRegularPolygon(self.base_unit, 5, 5, 1, self.subplot, self.canvas) 
         if self.reccbuttonExists == False:
-            self.tilingbutton = tk.Button(master=self.root, text="Reccomendation", command=self._generateRecc)
-            self.tilingbutton.pack(side=tk.RIGHT)
+            #self.tilingbutton = tk.Button(master=self.root, text="Reccomendation", command=self._generateRecc)
+            #self.tilingbutton.pack(side=tk.RIGHT)
             self.verticalbutton = tk.Button(master=self.root, text="Flip Vertical", command=self._flipVertical)
             self.verticalbutton.pack(side=tk.RIGHT)
             self.horizontalbutton = tk.Button(master=self.root, text="Flip Horizontal", command=self._flipHorizontal)
             self.horizontalbutton.pack(side=tk.RIGHT)
+            self.rotationscale = tk.Scale(orient='horizontal', from_=0, to=360, label='Rotate', command=self._rotateTiling)
+            self.rotationscale.pack(side=tk.RIGHT)
             self.exportbutton = tk.Button(master=self.root, text="Export", command=self._export)
-            self.exportbutton.pack(side=tk.RIGHT)
+            self.exportbutton.pack(side=tk.LEFT)
             self.reccbuttonExists = True
 
     #generates tiling reccomendations (button handler)
@@ -89,12 +91,20 @@ class Main:
             self.recNum = self.recNum + 1
         rs.generateRecommendations(self.base_unit, 5, 5, self.subplot, self.canvas, self.recNum)
 
-    #
+    # flips alternating rows of polygons vertically
     def _flipVertical(self):
         self.polygons = te.tileRegularPolygon(self.base_unit, 5, 5, 2, self.subplot, self.canvas)
+        self.rotationscale.set(0)
 
+    # flips alternating rows of polygons horizontally 
     def _flipHorizontal(self):
+        self.rotationscale.set(0)
         self.polygons = te.tileRegularPolygon(self.base_unit, 5, 5, 3, self.subplot, self.canvas)    
+
+    # rotates each polygon by the value in the rotation slider
+    def _rotateTiling(self, scale):
+        polygon = te.rotatePolygon(self.base_unit, self.rotationscale.get())
+        self.polygons = te.tileRegularPolygon(polygon, 5, 5, 1, self.subplot, self.canvas)
 
     #export to excel
     def _export(self):
