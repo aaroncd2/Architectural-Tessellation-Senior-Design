@@ -2,9 +2,6 @@ import numpy as np
 from cv2 import cv2 as cv
 from matplotlib import pyplot as plt
 
-
-
-
 def getCanny(image, sigma_val=0.33):
     #get median of single channel pixel image
     num_image_median = np.median(image);
@@ -12,11 +9,8 @@ def getCanny(image, sigma_val=0.33):
     lower_param = int(max(0,(1.0-sigma_val)* num_image_median))
     upper_param = int(max(255,(1.0-sigma_val)* num_image_median))
     canny_edged_img = cv.Canny(image,lower_param,upper_param)
-    
     #return canny image
     return canny_edged_img
-
-
 
 def processImage(image):
     sketch = cv.imread(image)
