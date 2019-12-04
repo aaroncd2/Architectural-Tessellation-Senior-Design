@@ -21,6 +21,7 @@ class Main:
         self.base_unit = None
         self.base_tiling = None
         self.polygons = None
+        self.tesselbtns_exist = False
         self.root = tk.Tk()
         self.root.wm_title("DATO")
         self.fig = Figure(figsize=(5, 4), dpi=100)
@@ -31,6 +32,23 @@ class Main:
         self.quitbutton = tk.Button(master=self.root, text="Quit", command=self._quit)
         self.quitbutton.pack(side=tk.LEFT)
         tk.mainloop()
+    
+    def _new_image(self):
+        self._browse_button()
+        self.basebutton.pack_forget()
+        if self.tesselbtns_exist:
+            self.exportbutton.pack_forget()
+            self.verticalbutton.pack_forget()
+            self.horizontalbutton.pack_forget()
+            self.rotationscale.pack_forget()
+            self.tesselbtns_exist = False
+        self.subplot.clear()
+        self.shapeCoords = ip.processImage(self.root.filename)
+        self.base_unit = sm.shape_model(self.shapeCoords)
+        x,y = self.base_unit.exterior.xy
+        self.subplot.plot(x,y)
+        self.canvas.draw()
+    
     
     #browse for pictures
     def _browse_button(self):
@@ -66,22 +84,25 @@ class Main:
         self.tilingbutton.pack(side=tk.RIGHT)
         self.quitbutton = tk.Button(master=self.root, text="Quit", command=self._quit)
         self.quitbutton.pack(side=tk.LEFT)
+        self.newimgbtn = tk.Button(master=self.root, text="New Base Unit", command=self._new_image)
+        self.newimgbtn.pack(side=tk.LEFT)
         
     #makes a base tiling (button handler)
     def _make_base_tiling(self):        
         self.polygons = te.tileRegularPolygon(self.base_unit, 5, 5, 1, self.subplot, self.canvas) 
-        if self.reccbuttonExists == False:
-            #self.tilingbutton = tk.Button(master=self.root, text="Reccomendation", command=self._generateRecc)
-            #self.tilingbutton.pack(side=tk.RIGHT)
-            self.verticalbutton = tk.Button(master=self.root, text="Flip Vertical", command=self._flipVertical)
-            self.verticalbutton.pack(side=tk.RIGHT)
-            self.horizontalbutton = tk.Button(master=self.root, text="Flip Horizontal", command=self._flipHorizontal)
-            self.horizontalbutton.pack(side=tk.RIGHT)
-            self.rotationscale = tk.Scale(orient='horizontal', from_=0, to=360, label='Rotate', command=self._rotateTiling)
-            self.rotationscale.pack(side=tk.RIGHT)
-            self.exportbutton = tk.Button(master=self.root, text="Export", command=self._export)
-            self.exportbutton.pack(side=tk.LEFT)
-            self.reccbuttonExists = True
+        
+        #self.tilingbutton = tk.Button(master=self.root, text="Reccomendation", command=self._generateRecc)
+        #self.tilingbutton.pack(side=tk.RIGHT)
+        self.verticalbutton = tk.Button(master=self.root, text="Flip Vertical", command=self._flipVertical)
+        self.verticalbutton.pack(side=tk.RIGHT)
+        self.horizontalbutton = tk.Button(master=self.root, text="Flip Horizontal", command=self._flipHorizontal)
+        self.horizontalbutton.pack(side=tk.RIGHT)
+        self.rotationscale = tk.Scale(orient='horizontal', from_=0, to=360, label='Rotate', command=self._rotateTiling)
+        self.rotationscale.pack(side=tk.RIGHT)
+        self.exportbutton = tk.Button(master=self.root, text="Export", command=self._export)
+        self.exportbutton.pack(side=tk.LEFT)
+        self.reccbuttonExists = True
+        self.tesselbtns_exist = True
 
     #generates tiling reccomendations (button handler)
     def _generateRecc(self):
