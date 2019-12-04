@@ -15,6 +15,7 @@ class Main:
     def __init__(self):
         self.reccbuttonExists = False
         self.reccbuttonPressed = False
+        self.buttonsExist = False
         self.recNum = 0
         self.imageFile = None
         self.shapeCoords = None
@@ -34,6 +35,7 @@ class Main:
         tk.mainloop()
     
     def _new_image(self):
+        self.buttonsExist = False
         self._browse_button()
         self.basebutton.pack_forget()
         if self.tesselbtns_exist:
@@ -93,16 +95,18 @@ class Main:
         
         #self.tilingbutton = tk.Button(master=self.root, text="Reccomendation", command=self._generateRecc)
         #self.tilingbutton.pack(side=tk.RIGHT)
-        self.verticalbutton = tk.Button(master=self.root, text="Flip Vertical", command=self._flipVertical)
-        self.verticalbutton.pack(side=tk.RIGHT)
-        self.horizontalbutton = tk.Button(master=self.root, text="Flip Horizontal", command=self._flipHorizontal)
-        self.horizontalbutton.pack(side=tk.RIGHT)
-        self.rotationscale = tk.Scale(orient='horizontal', from_=0, to=360, label='Rotate', command=self._rotateTiling)
-        self.rotationscale.pack(side=tk.RIGHT)
-        self.exportbutton = tk.Button(master=self.root, text="Export", command=self._export)
-        self.exportbutton.pack(side=tk.LEFT)
-        self.reccbuttonExists = True
-        self.tesselbtns_exist = True
+        if self.buttonsExist == False:
+            self.verticalbutton = tk.Button(master=self.root, text="Flip Vertical", command=self._flipVertical)
+            self.verticalbutton.pack(side=tk.RIGHT)
+            self.horizontalbutton = tk.Button(master=self.root, text="Flip Horizontal", command=self._flipHorizontal)
+            self.horizontalbutton.pack(side=tk.RIGHT)
+            self.rotationscale = tk.Scale(orient='horizontal', from_=0, to=360, label='Rotate', command=self._rotateTiling)
+            self.rotationscale.pack(side=tk.RIGHT)
+            self.exportbutton = tk.Button(master=self.root, text="Export", command=self._export)
+            self.exportbutton.pack(side=tk.LEFT)
+            self.reccbuttonExists = True
+            self.tesselbtns_exist = True
+            self.buttonsExist = True
 
     #generates tiling reccomendations (button handler)
     def _generateRecc(self):

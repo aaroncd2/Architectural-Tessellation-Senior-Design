@@ -23,7 +23,7 @@ def processImage(image):
     imgray = cv.cvtColor(sketch, cv.COLOR_BGR2GRAY)
     imgray = cv.bilateralFilter(imgray, 11, 17, 17)
     cannyImg = getCanny(imgray)
-    # cv.imshow("Edges",cannyImg)
+    #cv.imshow("Edges",cannyImg)
     ret, thresh = cv.threshold(cannyImg, 127, 255, 0)
     contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
     coords = list()
