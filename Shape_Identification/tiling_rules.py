@@ -1,11 +1,18 @@
 from shapely.geometry import Polygon
 from shapely.geometry import Point
 from shapely.geometry import MultiPoint
-from shapely.geometry import MultiLineString
-import numpy as np
 
 def identify_shape(shape):
-    print(is_regular(shape))
+    if (not is_regular(shape)):
+        print("irregular")
+        number_sides = num_sides(shape)
+        if (num_sides == 3):
+            process_triangle(shape)
+        elif (num_sides == 4):
+            process_quadrilateral(shape)
+    else:
+        print("regular")
+        # process to tessellation engine
 
 def num_sides(shape):
     return len(shape.exterior.coords) - 1
@@ -21,3 +28,9 @@ def is_regular(shape):
         if (round(current_edge_length, 2) != round(starting_edge_length, 2)):
             return False
     return True
+
+def process_triangle(shape):
+    pass
+
+def process_quadrilateral(four_sides):
+    pass
