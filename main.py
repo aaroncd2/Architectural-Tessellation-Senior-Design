@@ -10,6 +10,10 @@ from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
 import numpy as np
 import sys
+
+# imports for tiling rules
+from Shape_Identification import tiling_rules as tr
+
 class Main:
     #starts program, creates figure and subplot
     def __init__(self):
@@ -73,6 +77,10 @@ class Main:
         self.basebutton.pack_forget()
         self._process_image()
         self.base_unit = sm.shape_model(self.shapeCoords)
+
+        # shape identification process starts here
+        tr.identify_shape(self.base_unit)
+
         x,y = self.base_unit.exterior.xy        
         self.subplot = self.fig.add_subplot(111)
         self.subplot.plot(x,y)
