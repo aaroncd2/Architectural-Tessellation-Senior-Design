@@ -13,13 +13,17 @@ from kivy.uix.button import Button
 from kivy.properties import ListProperty
 from kivy.uix.popup import Popup
 from kivy.uix.filechooser import FileChooserListView
-import numpy as np
+from kivy.graphics import Ellipse, Line
+from kivy.uix.boxlayout import BoxLayout
+from shapely.geometry import Polygon
+from shapely import affinity
+from shapely.geometry import Point
+import numpy
 import sys
 
 #not sure yet best way to store these coords 
 #for now they are global vars
-coords = None
-base_unit = None
+coords = [(1,1), (20,20)]
 
 #root widget class using the box layout
 #adds button on init to open file dialog class
@@ -41,7 +45,6 @@ class RootWidget(BoxLayout):
                       content=MyFileChooser(),
                       size_hint=(None, None), size=(400,400))
         popup.open()
-        print('hello')
         
         
 #gile chooser class
@@ -54,21 +57,103 @@ class MyFileChooser(FileChooserListView):
         fp = args[1][0]
         print(fp)
         #use file path to process as image in imageprocessing.py
-        coords = ip.processImage(fp)
-        base_unit = sm.shape_model(coords)
+        global coords
+        coo = ip.processImage(fp)
+        coords = sm.shape_model(coo)
         print(coords)
-        print(base_unit)
+        print(coo)
+        custlay = CustomLayout()
+        popup.parent.add_widget(custlay)
         popup.dismiss()
         
-#canvas widget
-#Note: lines not being drawn from generated coords
-class CanvasWidget(Widget):
+        
+class CustomLayout(BoxLayout):
+
     def __init__(self, **kwargs):
-        super(CanvasWidget, self).__init__(**kwargs)
-        with self.canvas:
-            # add your instruction for main canvas here
-            print('we here')
-            Line(points=(coords))
+        super(CustomLayout, self).__init__(**kwargs)
+
+        self.canvas_edge = {}
+        self.canvas_nodes = {}
+        self.nodesize = [20, 20]
+
+        self.grabbed = {}
+
+        #declare a canvas
+        with self.canvas.after:
+            pass
+
+        self.define_nodes()
+        i = 0
+        for points in coords:
+            self.canvas.add(self.canvas_nodes[i])
+            i = i + 1
+        self.define_edge()
+        self.canvas.add(self.canvas_edge)
+
+
+    def define_nodes(self):
+        """define all the node canvas elements as a list"""
+        print('yes')
+        print(coords)
+        poly = Polygon(coords)
+        poly = affinity.translate(poly, xoff= 300, yoff= 300)
+        poly = affinity.scale(poly, xfact= 10, yfact= 10)
+        coords2 = list(poly.exterior.coords)
+
+        i = 0
+        for points in coords2:
+            x,y = points
+            self.canvas_nodes[i] = Ellipse(
+                size = self.nodesize,
+                pos =  [x,y]
+                )
+            i = i + 1
+
+    def define_edge(self):
+        """define an edge canvas elements"""
+        i = 0
+        xy = []
+        for points in coords:
+            xy.append(self.canvas_nodes[i].pos[0] + self.nodesize[0] / 2)
+            xy.append(self.canvas_nodes[i].pos[1] + self.nodesize[1] / 2)
+            i = i + 1
+        self.canvas_edge = Line(
+            points =  xy,
+            joint = 'round',
+            cap = 'round',
+            width = 3,
+            close = True
+            )
+
+    def on_touch_down(self, touch):
+
+        for key, value in self.canvas_nodes.items():
+            if (value.pos[0] - self.nodesize[0]) <= touch.pos[0] <= (value.pos[0] + self.nodesize[0]):
+                if (value.pos[1] - self.nodesize[1]) <= touch.pos[1] <= (value.pos[1] + self.nodesize[1]):
+                    touch.grab(self)
+                    self.grabbed = self.canvas_nodes[key]
+                    return True
+
+    def on_touch_move(self, touch):
+
+        if touch.grab_current is self:
+            self.grabbed.pos = [touch.pos[0] - self.nodesize[0] / 2, touch.pos[1] - self.nodesize[1] / 2]
+            self.canvas.clear()
+            i = 0
+            for points in coords:
+                self.canvas.add(self.canvas_nodes[i])
+                i = i + 1
+            self.define_edge()
+            self.canvas.add(self.canvas_edge)
+        else:
+            pass
+
+    def on_touch_up(self, touch):
+        if touch.grab_current is self:
+            touch.ungrab(self)
+        else:
+            pass
+
 
 #main app class to build the root widget on program start
 class DatoApp(App):

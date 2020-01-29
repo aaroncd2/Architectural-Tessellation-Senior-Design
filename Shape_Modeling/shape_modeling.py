@@ -73,7 +73,7 @@ def shape_model(coords):
     x,y = poly3.exterior.xy
     plt.plot(x,y)
     # plt.show()
-    return poly3
+    return poly3.exterior.coords
 
 #Finds angle between 3 points
 def angle(a, b, c):
