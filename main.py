@@ -4,19 +4,16 @@ from Tessellation_Engine import tessellation_engine as te
 from Tessellation_Engine import recommendation_system as rs
 import kivy 
 from kivy.app import App
-from kivy.uix.boxlayout import BoxLayout
 from kivy.lang import Builder
-from kivy.graphics import Color, Rectangle, Line
+from kivy.graphics import Color, Rectangle, Line, Ellipse
 from kivy.uix.widget import Widget
 from kivy.uix.button import Button
 from kivy.properties import ListProperty
 from kivy.uix.popup import Popup
 from kivy.uix.filechooser import FileChooserListView
-from kivy.graphics import Ellipse, Line
 from kivy.uix.boxlayout import BoxLayout
-from shapely.geometry import Polygon
+from shapely.geometry import Polygon, Point
 from shapely import affinity
-from shapely.geometry import Point
 import numpy
 import sys
 from kivy.core.window import Window
