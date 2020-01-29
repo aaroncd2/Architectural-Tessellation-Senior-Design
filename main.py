@@ -1,4 +1,3 @@
-
 from Image_Processing import image_processing as ip
 from Shape_Modeling import shape_modeling as sm
 from Tessellation_Engine import tessellation_engine as te
@@ -20,10 +19,12 @@ from shapely import affinity
 from shapely.geometry import Point
 import numpy
 import sys
+from kivy.core.window import Window
+Window.fullscreen = 'auto'
+size = Window.size
 
 #not sure yet best way to store these coords 
 #for now they are global vars
-coords = [(1,1), (20,20)]
 
 #root widget class using the box layout
 #adds button on init to open file dialog class
@@ -42,8 +43,7 @@ class RootWidget(BoxLayout):
         global popup
         #open file dialog popup
         popup = Popup(title='Select File',
-                      content=MyFileChooser(),
-                      size_hint=(None, None), size=(400,400))
+                      content=MyFileChooser())
         popup.open()
         
         
@@ -93,10 +93,10 @@ class CustomLayout(BoxLayout):
 
     def define_nodes(self):
         """define all the node canvas elements as a list"""
-        print('yes')
-        print(coords)
         poly = Polygon(coords)
-        poly = affinity.translate(poly, xoff= 300, yoff= 300)
+        print(size)
+        poly = affinity.translate(poly, xoff= size[0]/2, yoff= size[1]/2)
+        # poly = affinity.scale(poly, xfact= 1/poly.bounds[2], yfact= 1/poly.bounds[3])
         poly = affinity.scale(poly, xfact= 10, yfact= 10)
         coords2 = list(poly.exterior.coords)
 
