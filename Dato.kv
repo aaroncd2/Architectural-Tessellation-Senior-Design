@@ -5,33 +5,33 @@
 <Filechooser>: 
       
     label: label 
-  
+	
     # Providing the orentation 
     orientation: 'vertical'
   
     # Creating the File list / icon view 
-      
     BoxLayout: 
-  
+		
         # Creating list view one side 
-        FileChooserListView: 
+        FileChooserListView:
+			id: filechooser
+			rootpath: 'C://users/pmoose/Architectural-Tessellation-Senior-Design/Image_Processing/Images'
             canvas.before: 
                 Color: 
                     rgb: .4, .5, .5
                 Rectangle: 
                     pos: self.pos 
                     size: self.size 
-            on_selection: root.select(*args) 
+            on_selection: root.selected(filechooser.selection,*args) 
+			
   
-        # Creating Icon view other side 
-        FileChooserIconView: 
-            canvas.before: 
-                Color: 
-                    rgb: .5, .4, .5
-                Rectangle: 
-                    pos: self.pos 
-                    size: self.size 
-            on_selection: root.select(*args) 
+		Image:
+			id: image
+			source: ""
+		Button:
+			text: "Go"
+			on_release: root.selected(True,filechooser.selection)
+ 
   
     # Adding label 
     Label: 

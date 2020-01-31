@@ -17,8 +17,8 @@ from shapely import affinity
 import numpy
 import sys
 from kivy.core.window import Window
-Window.fullscreen = 'auto'
-size = Window.size
+#Window.fullscreen = 'auto'
+#size = Window.size
 
 #not sure yet best way to store these coords 
 #for now they are global vars
@@ -36,50 +36,61 @@ class RootWidget(BoxLayout):
     def file_diag(self,instance):
         #remove button
         self.remove_widget(self.cb)
-        print('hello')
         global popup
         #open file dialog popup
         popup = Popup(title='Select File',
-                      content=MyFileChooser())
+                      content=FileChooser())
         popup.open()
         
         
 #gile chooser class
-class MyFileChooser(FileChooserListView):
-    #on picking of a file...
-    def on_submit(*args):
-        print(args[1][0])
-        global fp
-        #store file path
-        fp = args[1][0]
-        print(fp)
-        #use file path to process as image in imageprocessing.py
-        global coords
-        coo = ip.processImage(fp)
-        coords = sm.shape_model(coo)
-        print(coords)
-        print(coo)
-        custlay = CustomLayout()
-        popup.parent.add_widget(custlay)
-        popup.dismiss()
+class FileChooser(FileChooserListView):
+    def selected(self,filename,*args):
+        try:
+            print(filename==True)
+            print(filename==False)
+            print(args)
+            if (filename == True):
+                print("here")
+                print(args[0][0])
+                global fp
+                #store file path
+                fp = args[0][0]
+                print(fp)
+                #use file path to process as image in imageprocessing.py
+                global coords
+                coo = ip.processImage(fp)
+                coords = sm.shape_model(coo)
+                print(coords)
+                print("Coo =")
+                print(coo)
+                custlay = CustomLayout()
+                popup.parent.add_widget(custlay)
+                popup.dismiss()
+                print("dismiss called")
+            else:
+                self.ids.image.source = filename[0]
+        except:
+            pass
         
         
 class CustomLayout(BoxLayout):
 
     def __init__(self, **kwargs):
         super(CustomLayout, self).__init__(**kwargs)
-
+        print("Im here")
         self.canvas_edge = {}
         self.canvas_nodes = {}
         self.nodesize = [20, 20]
-
+        print("he now")
         self.grabbed = {}
 
         #declare a canvas
         with self.canvas.after:
             pass
-
+        print("here now")
         self.define_nodes()
+        print("define nodes")
         i = 0
         for points in coords:
             self.canvas.add(self.canvas_nodes[i])
@@ -90,10 +101,12 @@ class CustomLayout(BoxLayout):
 
     def define_nodes(self):
         """define all the node canvas elements as a list"""
+        print("Hello")
+        #print(coords)
         poly = Polygon(coords)
         print(size)
         poly = affinity.translate(poly, xoff= size[0]/2, yoff= size[1]/2)
-        # poly = affinity.scale(poly, xfact= 1/poly.bounds[2], yfact= 1/poly.bounds[3])
+        #poly = affinity.scale(poly, xfact= 1/poly.bounds[2], yfact= 1/poly.bounds[3])
         poly = affinity.scale(poly, xfact= 10, yfact= 10)
         coords2 = list(poly.exterior.coords)
 
