@@ -1,16 +1,29 @@
 import tiling_rules as tr
 from shapely.geometry import Polygon
 
-# generic testing method
-def test(test_name, shape, actual, expected):
-    print("-----", test_name, "-----")
-    if expected == actual:
-        print(shape, ": TEST PASSED\n")
-    else:
-        print(shape, ": TEST FAILED\n")
-
-# testing regular and irregular polygons
+# shapely shape objects
 square = Polygon([(0,0), (1,0), (1,1), (0,1), (0,0)])
 rectangle = Polygon([(0,0), (2,0), (2,5), (0,5), (0,0)])
-test("REGULAR POLYGON TEST", "square", tr.is_regular(square), True)
-test("REGULAR POLYGON TEST", "rectangle", tr.is_regular(rectangle), False)
+
+# generic testing method
+def generic_test(shape, actual, expected):
+    if expected == actual:
+        print(shape, ": TEST PASSED")
+    else:
+        print(shape, ": TEST FAILED")
+
+def test_regular_polygons():
+    print("-----REGULAR POLYGON TEST-----")
+    generic_test("square", tr.is_regular(square), True)
+    generic_test("rectangle", tr.is_regular(rectangle), False)
+    print()
+
+def test_parallelograms():
+    print("-----PARALLELOGRAM TEST-----")
+    generic_test("square", tr.is_parallelogram(square), True)
+    generic_test("rectangle", tr.is_parallelogram(rectangle), True)
+    print()
+
+# test calls
+test_regular_polygons()
+test_parallelograms()

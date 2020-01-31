@@ -1,6 +1,5 @@
 from shapely.geometry import Polygon
 from shapely.geometry import Point
-from shapely.geometry import MultiPoint
 
 def identify_shape(shape):
     if (not is_regular(shape)):
@@ -32,5 +31,13 @@ def is_regular(shape):
 def process_triangle(shape):
     pass
 
-def process_quadrilateral(four_sides):
+def process_quadrilateral(shape):
     pass
+    
+def is_parallelogram(shape):
+    coords = shape.exterior.coords
+    side1_length = ((coords[1][1] - coords[0][1])**2 + (coords[1][0] - coords[0][0])**2)**0.5
+    side2_length = ((coords[2][1] - coords[1][1])**2 + (coords[2][0] - coords[1][0])**2)**0.5
+    side3_length = ((coords[3][1] - coords[2][1])**2 + (coords[3][0] - coords[2][0])**2)**0.5
+    side4_length = ((coords[4][1] - coords[3][1])**2 + (coords[4][0] - coords[3][0])**2)**0.5
+    return num_sides(shape) == 4 and side1_length == side3_length and side2_length == side4_length
