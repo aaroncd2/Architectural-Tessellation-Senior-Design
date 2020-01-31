@@ -18,7 +18,7 @@ import numpy
 import sys
 from kivy.core.window import Window
 #Window.fullscreen = 'auto'
-#size = Window.size
+size = Window.size
 
 #not sure yet best way to store these coords 
 #for now they are global vars
@@ -107,7 +107,7 @@ class CustomLayout(BoxLayout):
         print(size)
         poly = affinity.translate(poly, xoff= size[0]/2, yoff= size[1]/2)
         #poly = affinity.scale(poly, xfact= 1/poly.bounds[2], yfact= 1/poly.bounds[3])
-        poly = affinity.scale(poly, xfact= 10, yfact= 10)
+        # poly = affinity.scale(poly, xfact= 10, yfact= 10)
         coords2 = list(poly.exterior.coords)
 
         i = 0
