@@ -175,20 +175,19 @@ class CustomLayout(BoxLayout):
             newply = Polygon(poly)
             print(self.parent.children[0].polygon)
             self.parent.children[0].polygon = newply
-            print(self.parent.children[0].polygon)
-            self.parent.children[0].tile_regular_polygon(self.parent.children[0].shapely_to_kivy(self.parent.children[0].polygon))
+            print(self.parent.children[0].polygon)  
+            #self.parent.children[0].polygon = self.parent.children[0].shapely_to_kivy(self.parent.children[0].polygon)
+            self.parent.children[0].tile_regular_polygon()
             
         else:
             pass
 
 ### START TESSELLATION ENGINE ###
-            
 class CanvasWidget(RelativeLayout):
     def __init__(self, **kwargs):
         super(CanvasWidget, self).__init__(**kwargs)
         self.lines = InstructionGroup()
-        #with self.canvas.before:
-        
+
 class TessellationWidget(GridLayout):
     def __init__(self, **kwargs):
         super(TessellationWidget, self).__init__(**kwargs)
@@ -201,7 +200,10 @@ class TessellationWidget(GridLayout):
         imageRow = BoxLayout(orientation='horizontal', padding=0, spacing=0)
         imageRow.add_widget(self.canvas_widget)
         self.add_widget(imageRow)
+
         self.rotateRow = BoxLayout(orientation='horizontal', size_hint=(1,None), height=30)
+        
+
         # Add slider and label to widget
         self.s = Slider(min=0, max=360, value=0, value_track = True)
         self.rotation_value = 0
@@ -210,39 +212,48 @@ class TessellationWidget(GridLayout):
         self.rotateRow.add_widget(self.s)
         self.s.bind(value=self.rotate_polygon)
         self.add_widget(self.rotateRow)
+
         self.controlRow = BoxLayout(orientation='horizontal', size_hint=(1,None), height=50)
+
         # Add flip horizontal button
         self.horizontal_button = Button(text = 'Flip Horizontal', background_color = (1,1,1,1))
         self.controlRow.add_widget(self.horizontal_button)
         self.horizontal_button.bind(on_press=self.flip_horizontal)
+
         # Add flip vertical button
         self.vertical_button = Button(text = 'Flip Vertical', background_color = (1,1,1,1))
         self.controlRow.add_widget(self.vertical_button)
         self.vertical_button.bind(on_press=self.flip_vertical)
+
         # Add alternate row button
         self.alternate_row_button = Button(text = 'Alternate Rows', background_color = (1,1,1,1))
         self.controlRow.add_widget(self.alternate_row_button)
         self.alternate_row_button.bind(on_press=self.alternate_rows)
+
         # Add alternate column button
         self.alternate_col_button = Button(text = 'Alternate Columns', background_color = (1,1,1,1))
         self.controlRow.add_widget(self.alternate_col_button)
         self.alternate_col_button.bind(on_press=self.alternate_cols)
+
         # Add export button
         self.export_button = Button(text = 'Export', background_color = (1,1,1,1))
         self.controlRow.add_widget(self.export_button)
         self.export_button.bind(on_press=self.export_tiling)
+
         # Add reset button
         self.reset_button = Button(text = 'Reset', background_color = (1,1,1,1))
         self.controlRow.add_widget(self.reset_button)
         self.reset_button.bind(on_press=self.reset)
+
         # Add control row
         self.add_widget(self.controlRow)
+
         # Display initial tiling
         #points = [(0,0),(100,0),(100,100),(0,100),(0,0)] #Square
+        points = coords
         self.type = 'regular'
         self.xNum = 5
         self.yNum = 5
-        points = coords
         #points = [(5,5),(105,5),(125,50),(25,50)] #Rhombus
         #points = [(0,25), (225,0), (375,25), (225,50), (0,25)] # Rhombus 2
         #self.type = 'parallelogram'
@@ -252,19 +263,25 @@ class TessellationWidget(GridLayout):
         self.polygon = Polygon(points)
         self.base_unit = self.polygon
         polygon = self.shapely_to_kivy(self.polygon)
-        #self.tile_regular_polygon(polygon)
-        self.tile_parallelogram()
-        
+        if self.type == 'parallelogram':
+            self.tile_parallelogram()
+        else:
+            self.tile_regular_polygon()
+
+
     # Tiles polygons in an xNum by yNum grid utilizing bounding boxes
-    def tile_regular_polygon(self, polygon):
+    def tile_regular_polygon(self):
+        polygon = self.shapely_to_kivy(self.polygon)
         bounds = self.polygon.bounds
         xInc = abs(bounds[2] - bounds[0])
         yInc = abs(bounds[3] - bounds[1])
+
         polygons = []
         temp = []
         xCount = 1
         yCount = 1
         self.canvas_widget.canvas.add(Color(1., 0, 0))
+
         while yCount <= self.yNum:
             while xCount <= self.xNum:
                 xNext = xCount * xInc
@@ -281,10 +298,10 @@ class TessellationWidget(GridLayout):
                 temp = []
             yCount = yCount + 1
             xCount = 1
-            
+
         self.polygons = polygons
         self.draw_polygons()
-        
+
     # Takes a Shapely Polygon object and converts it to an array format for display
     # on a Kivy canvas 
     def shapely_to_kivy(self, polygon):
@@ -308,24 +325,23 @@ class TessellationWidget(GridLayout):
         for (x,y) in zip(xs,ys):
             shapely_points.append((x,y))
         return shapely_points
-        
+
     # Rotates each polygon by the degrees specified by the slider
     def rotate_polygon(self, instance, degrees):
-        self.polygon = affinity.rotate(self.base_unit, degrees)
-        polygon = self.shapely_to_kivy(self.polygon)
         if self.type == 'parallelogram':
-            self.tile_parallelogram()
+            polygons = []
+            for poly in self.polygons:
+                polygon = Polygon(self.kivy_to_shapely(poly))
+                polygon = affinity.rotate(polygon, degrees)
+                polygons.append(self.shapely_to_kivy(polygon))
+            self.polygons = polygons
+            self.draw_polygons()
+            #self.tile_parallelogram()
         else:
-            self.tile_regular_polygon(polygon)
-        #polygons = []
-        #for poly in self.polygons:
-        #    polygon = Polygon(self.kivy_to_shapely(poly))
-        #    polygon = affinity.rotate(polygon, degrees)
-        #    polygons.append(self.shapely_to_kivy(polygon))
-        # self.polygons = polygons
-        #self.draw_polygons()
+            self.polygon = affinity.rotate(self.polygon, degrees)
+            self.tile_regular_polygon()
         self.label.text = 'Rotation: ' + str(round(self.s.value, 2)) + ' degrees'
-        
+
     # flips a polygon horizontally across its center
     def flip_horizontal(self, instance):
         xCenter = self.polygon.centroid.x
@@ -338,8 +354,8 @@ class TessellationWidget(GridLayout):
         if self.type == 'parallelogram':
             self.tile_parallelogram()
         else:
-            self.tile_regular_polygon(polygon)
-            
+            self.tile_regular_polygon()
+
     # flips a polygon vertically across its center
     def flip_vertical(self, instance):
         yCenter = self.polygon.centroid.y
@@ -352,8 +368,8 @@ class TessellationWidget(GridLayout):
         if self.type == 'parallelogram':
             self.tile_parallelogram()
         else:
-            self.tile_regular_polygon(polygon)
-            
+            self.tile_regular_polygon()
+
     # resets the screen
     def reset(self, instance):
         self.polygon = self.base_unit
@@ -361,21 +377,21 @@ class TessellationWidget(GridLayout):
         if self.type == 'parallelogram':
             self.tile_parallelogram()
         else:
-            self.tile_regular_polygon(polygon)
+            self.tile_regular_polygon()
         self.s.value = 0
-        
+
     # Flips alternating rows across their center vertically
     def alternate_rows(self, instance):
         bounds = self.polygon.bounds
         xInc = abs(bounds[2] - bounds[0])
         yInc = abs(bounds[3] - bounds[1])
-        
+
         polygons = []
         temp = []
         xCount = 1
         yCount = 1
         self.canvas_widget.canvas.add(Color(1., 0, 0))
-        
+
         while yCount <= self.yNum:
             yCenter = self.polygon.centroid.y
             flipped = []
@@ -399,22 +415,22 @@ class TessellationWidget(GridLayout):
                 temp = []
             yCount = yCount + 1
             xCount = 1
-            
+
         self.polygons = polygons
         self.draw_polygons()
-        
+
     # flips alternating columns across their center horizontally
     def alternate_cols(self, instance):
         bounds = self.polygon.bounds
         xInc = abs(bounds[2] - bounds[0])
         yInc = abs(bounds[3] - bounds[1])
-        
+
         polygons = []
         temp = []
         xCount = 1
         yCount = 1
         self.canvas_widget.canvas.add(Color(1., 0, 0))
-        
+
         while yCount <= self.yNum:
             while xCount <= self.xNum:
                 xCenter = self.polygon.centroid.x
@@ -439,10 +455,10 @@ class TessellationWidget(GridLayout):
                 temp = []
             yCount = yCount + 1
             xCount = 1
-            
+
         self.polygons = polygons
         self.draw_polygons()
-        
+
     def export_tiling(self, instance):
         points = {}
         num = 1
@@ -461,7 +477,7 @@ class TessellationWidget(GridLayout):
             num += 1
         df = pd.DataFrame(points)
         df.to_csv(r'output.csv', index=False)
-        
+
     # Draws an array of polygons to the canvas
     def draw_polygons(self):
         self.canvas_widget.lines.clear()
@@ -469,7 +485,7 @@ class TessellationWidget(GridLayout):
         for polygon in self.polygons:
             self.canvas_widget.lines.add(Line(points = polygon, width=2.0))
         self.canvas_widget.canvas.add(self.canvas_widget.lines)
-        
+
     # tiles any parallelogram
     def tile_parallelogram(self):
         start = self.polygon.exterior.coords[0]
@@ -478,7 +494,7 @@ class TessellationWidget(GridLayout):
             xDist = p[0] - start[0]
             yDist = p[1] - start[1]
             distances.append((xDist,yDist))
-            
+
         xCount = 1
         yCount = 1
         self.polygons = []
@@ -495,7 +511,6 @@ class TessellationWidget(GridLayout):
             xCount = 1
             yCount = yCount + 1
         self.draw_polygons()
-
 ## END TESSEL ENG ##
 
 #main app class to build the root widget on program start
