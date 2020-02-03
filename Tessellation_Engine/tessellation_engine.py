@@ -1,118 +1,287 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Oct 23 13:06:12 2019
-
-This class functions as the primary tessellation engine for the application.
-It offers functions for displaying both single polygon and multiple polygons.
-Additionally, It can create regular tilings of a single polygon
-"""
-
+from kivy.app import App
+from kivy.uix.button import Button
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.boxlayout import BoxLayout 
+from kivy.uix.slider import Slider
+from kivy.uix.label import Label
+from kivy.uix.widget import Widget
+from kivy.graphics import *
 from shapely.geometry import Polygon # for geometric objects
 from shapely import affinity # for transformations
 import matplotlib.pyplot as plt # for display
 import math # for trig functions
 import pandas as pd # for export
 import numpy as np # for math
-import main as main
-# simple function for displaying a single polygon with matplotlib.
-# Used to display a base unit
-# INPUT: A single shapely Polygon object
-# OUTPUT: Displays matplotlib plot of shapes
-# RETURNS: None
-def displayPolygon(polygon):
-    x = []
-    y = []
-    # add all coordinates
-    for p in polygon:
-        x.append(p.x)
-        y.append(p.y)
-    # add first coordinate again to complete shape for display
-    x.append(polygon[0].x)
-    y.append(polygon[0].y)
-    plt.plot(x,y)
-    #plt.show()
-    
-# simple function for displaying array of shapes with matplotlib.
-# Used to display a tiling
-# INPUT: An array of shapely Polygons
-# OUTPUT: Displays matplotlib plot of shapes
-# RETURNS: None
-def displayPolygons(polygons, mainPlot, mainCanvas):
-    mainPlot.clear()
-    for poly in polygons:
-        x = []
-        y = []
-        first = poly.exterior.coords[0]
-        for p in poly.exterior.coords:
-            x.append(p[0])
-            y.append(p[1])
-        x.append(first[0])
-        y.append(first[1])
-        mainPlot.plot(x,y, c='blue')
-    mainCanvas.draw()
 
-# generates a tiling for regular polygons
-# INPUT: A shapely Polygon, number of tiles in x direction, number of tiles in y direction,
-#       an integer mode. 1 = standard, 2 = vertical flip, 3 = horizontal flip
-# OUTPUT: NONE
-# RETURNS: Array of Polygon objects
-def tileRegularPolygon(polygon, xNum, yNum, mode, mainPlot, mainCanvas):
-    bounds = polygon.bounds # returns a tuple of (xmin, ymin, xmax, ymax)
-    xIncrement = abs(bounds[2] - bounds[0])
-    yIncrement = abs(bounds[3] - bounds[1])
+class CanvasWidget(Widget):
+    def __init__(self, **kwargs):
+        super(CanvasWidget, self).__init__(**kwargs)
+        self.lines = InstructionGroup()
 
-    polygons = []
-    temp = []
-    xCount = 1
-    yCount = 1
-    while yCount <= yNum:
-        if(mode == 2):
-            polygon = Polygon(flipPolygonVertically(polygon))
-        if(mode == 3):
-            polygon = Polygon(flipPolygonHorizontally(polygon))
-        while xCount <= xNum: 
-            xNext = xCount * xIncrement
-            yNext = yCount * yIncrement
-            for p in polygon.exterior.coords:
-                temp.append((p[0] + xNext, p[1] + yNext))
-            polygons.append(Polygon(temp))
-            xCount = xCount + 1
-            temp = []
-        yCount = yCount + 1
+class TessellationWidget(GridLayout):
+    def __init__(self, **kwargs):
+        super(TessellationWidget, self).__init__(**kwargs)
+        self.cols = 1
+        self.rows = 3
+        self.polygons = []
+        
+        # create row for canvas
+        self.canvas_widget = CanvasWidget()
+        imageRow = BoxLayout(orientation='horizontal')
+        imageRow.add_widget(self.canvas_widget)
+        self.add_widget(imageRow)
+
+        self.rotateRow = BoxLayout(orientation='horizontal', size_hint=(1,None), height=50)
+        
+
+        # Add slider and label to widget
+        self.s = Slider(min=0, max=360, value=0, value_track = True)
+        self.rotation_value = 0
+        self.label = Label(text ='Rotation: ' + str(self.rotation_value) + ' degrees')
+        self.rotateRow.add_widget(self.label) 
+        self.rotateRow.add_widget(self.s)
+        self.s.bind(value=self.rotate_polygon)
+        self.add_widget(self.rotateRow)
+
+        self.controlRow = BoxLayout(orientation='horizontal', size_hint=(1,None), height=50)
+
+        # Add flip horizontal button
+        self.horizontal_button = Button(text = 'Flip Horizontal', background_color = (1,1,1,1))
+        self.controlRow.add_widget(self.horizontal_button)
+        self.horizontal_button.bind(on_press=self.flip_horizontal)
+
+        # Add flip vertical button
+        self.vertical_button = Button(text = 'Flip Vertical', background_color = (1,1,1,1))
+        self.controlRow.add_widget(self.vertical_button)
+        self.vertical_button.bind(on_press=self.flip_vertical)
+
+        # Add alternate row button
+        self.alternate_row_button = Button(text = 'Alternate Rows', background_color = (1,1,1,1))
+        self.controlRow.add_widget(self.alternate_row_button)
+        self.alternate_row_button.bind(on_press=self.alternate_rows)
+
+        # Add alternate column button
+        self.alternate_col_button = Button(text = 'Alternate Columns', background_color = (1,1,1,1))
+        self.controlRow.add_widget(self.alternate_col_button)
+        self.alternate_col_button.bind(on_press=self.alternate_cols)
+
+        # Add export button
+        self.export_button = Button(text = 'Export', background_color = (1,1,1,1))
+        self.controlRow.add_widget(self.export_button)
+        self.export_button.bind(on_press=self.export_tiling)
+
+        # Add reset button
+        self.reset_button = Button(text = 'Reset', background_color = (1,1,1,1))
+        self.controlRow.add_widget(self.reset_button)
+        self.reset_button.bind(on_press=self.reset)
+
+        # Add control row
+        self.add_widget(self.controlRow)
+
+        # Display initial tiling
+        points = [(5,5),(100,5),(100,100),(5,100),(5,5)] #Square
+        self.xNum = 5
+        self.yNum = 5
+        #points = [(0,0),(50,0),(80,40),(30,40)] #Rhombus
+        #points = [(0,0),(100,0),(100,50),(0,50)] #Rectangle
+        #points = [(100,100),(0,100),(76.25,50),(50,150),(12.5,25)] #Star
+        self.polygon = Polygon(points)
+        self.base_unit = self.polygon
+        polygon = self.shapely_to_kivy(self.polygon)
+        self.tile_regular_polygon(polygon)
+
+
+    # Tiles polygons in an xNum by yNum grid utilizing bounding boxes
+    def tile_regular_polygon(self, polygon):
+        bounds = self.polygon.bounds
+        xInc = abs(bounds[2] - bounds[0])
+        yInc = abs(bounds[3] - bounds[1])
+
+        polygons = []
+        temp = []
         xCount = 1
-    displayPolygons(polygons, mainPlot, mainCanvas)
-    return polygons
+        yCount = 1
+        self.canvas_widget.canvas.add(Color(1., 0, 0))
 
-# Function for mirroring a polygon horizontally across its center
-# INPUT: Shapely Polygon object
-def flipPolygonHorizontally(poly):
-    pts = np.array(poly.exterior.coords)
-    return pts.dot([[-1,0],[0,1]])
+        while yCount <= self.yNum:
+            while xCount <= self.xNum:
+                xNext = xCount * xInc
+                yNext = yCount * yInc
+                count = 0
+                for p in polygon:
+                    if count % 2 == 0:
+                        temp.append(p + xNext)
+                    else:
+                        temp.append(p + yNext)
+                    count = count + 1
+                xCount = xCount + 1
+                polygons.append(temp)
+                temp = []
+            yCount = yCount + 1
+            xCount = 1
 
-# Function for rotating a polygon 180 degrees "mirroring" across its center
-# INPUT: Shapely Polygon object
-def flipPolygonVertically(poly):
-    return affinity.rotate(poly, 180)
+        self.canvas_widget.lines.clear()
+        self.canvas_widget.lines.add(Color(1., 0, 0))
+        self.polygons = polygons
+        for polygon in polygons:
+            self.canvas_widget.lines.add(Line(points = polygon, width=2.0))
+        self.canvas_widget.canvas.add(self.canvas_widget.lines)
 
-# Function for roating a polygon a set number of degrees
-# INPUT: Shapely Polygon object, number of degrees
-def rotatePolygon(poly, deg):
-    return affinity.rotate(poly, deg)
+    # Takes a Shapely Polygon object and converts it to an array format for display
+    # on a Kivy canvas 
+    def shapely_to_kivy(self, polygon):
+        kivy_points = []
+        for p in polygon.exterior.coords:
+            kivy_points.append(p[0])
+            kivy_points.append(p[1])
+        return kivy_points
 
-# Exports array of multipoints into a column of X coordinates and Y coordinates
-# in a CSV file called output.csv
-# INPUT: Array of Shapely Polygon objects
-def exportTiling(polygons):
-    points = {}
-    num = 1
-    for poly in polygons:
-        xs = []
-        ys = []
-        for p in poly.exterior.coords:
-            xs.append(p[0])
-            ys.append(p[1])
-        points['x' + str(num)] = xs
-        points['y' + str(num)] = ys
-        num += 1
-    df = pd.DataFrame(points)
-    df.to_csv(r'Output/output.csv', index=False)
+    # Rotates each polygon by the degrees specified by the slider
+    def rotate_polygon(self, instance, degrees):
+        self.polygon = affinity.rotate(self.base_unit, degrees)
+        polygon = self.shapely_to_kivy(self.polygon)
+        self.tile_regular_polygon(polygon)
+        self.label.text = 'Rotation: ' + str(round(self.s.value, 2)) + ' degrees'
+
+    # flips a polygon horizontally across its center
+    def flip_horizontal(self, instance):
+        xCenter = self.polygon.centroid.x
+        flipped = []
+        for p in self.polygon.exterior.coords:
+            point = ((2 * xCenter) - p[0], p[1])
+            flipped.append(point)
+        self.polygon = Polygon(flipped)
+        polygon = self.shapely_to_kivy(self.polygon)
+        self.tile_regular_polygon(polygon)
+
+    # flips a polygon vertically across its center
+    def flip_vertical(self, instance):
+        yCenter = self.polygon.centroid.y
+        flipped = []
+        for p in self.polygon.exterior.coords:
+            point = (p[0], (2 * yCenter) - p[1])
+            flipped.append(point)
+        self.polygon = Polygon(flipped)
+        polygon = self.shapely_to_kivy(self.polygon)
+        self.tile_regular_polygon(polygon)
+
+    # resets the screen
+    def reset(self, instance):
+        self.polygon = self.base_unit
+        polygon = self.shapely_to_kivy(self.polygon)
+        self.tile_regular_polygon(polygon)
+        self.s.value = 0
+
+    # Flips alternating rows across their center vertically
+    def alternate_rows(self, instance):
+        bounds = self.polygon.bounds
+        xInc = abs(bounds[2] - bounds[0])
+        yInc = abs(bounds[3] - bounds[1])
+
+        polygons = []
+        temp = []
+        xCount = 1
+        yCount = 1
+        self.canvas_widget.canvas.add(Color(1., 0, 0))
+
+        while yCount <= self.yNum:
+            yCenter = self.polygon.centroid.y
+            flipped = []
+            for p in self.polygon.exterior.coords:
+                point = (p[0], (2 * yCenter) - p[1])
+                flipped.append(point)
+            self.polygon = Polygon(flipped)
+            polygon = self.shapely_to_kivy(self.polygon)
+            while xCount <= self.xNum:
+                xNext = xCount * xInc
+                yNext = yCount * yInc
+                count = 0
+                for p in polygon:
+                    if count % 2 == 0:
+                        temp.append(p + xNext)
+                    else:
+                        temp.append(p + yNext)
+                    count = count + 1
+                xCount = xCount + 1
+                polygons.append(temp)
+                temp = []
+            yCount = yCount + 1
+            xCount = 1
+
+        self.canvas_widget.lines.clear()
+        self.canvas_widget.lines.add(Color(1., 0, 0))
+        self.polygons = polygons
+        for polygon in polygons:
+            self.canvas_widget.lines.add(Line(points = polygon, width=2.0))
+        self.canvas_widget.canvas.add(self.canvas_widget.lines)
+
+    # flips alternating columns across their center horizontally
+    def alternate_cols(self, instance):
+        bounds = self.polygon.bounds
+        xInc = abs(bounds[2] - bounds[0])
+        yInc = abs(bounds[3] - bounds[1])
+
+        polygons = []
+        temp = []
+        xCount = 1
+        yCount = 1
+        self.canvas_widget.canvas.add(Color(1., 0, 0))
+
+        while yCount <= self.yNum:
+            while xCount <= self.xNum:
+                xCenter = self.polygon.centroid.x
+                flipped = []
+                for p in self.polygon.exterior.coords:
+                    point = ((2 * xCenter) - p[0], p[1])
+                    flipped.append(point)
+                self.polygon = Polygon(flipped)
+                polygon = self.shapely_to_kivy(self.polygon)
+                
+                xNext = xCount * xInc
+                yNext = yCount * yInc
+                count = 0
+                for p in polygon:
+                    if count % 2 == 0:
+                        temp.append(p + xNext)
+                    else:
+                        temp.append(p + yNext)
+                    count = count + 1
+                xCount = xCount + 1
+                polygons.append(temp)
+                temp = []
+            yCount = yCount + 1
+            xCount = 1
+
+        self.canvas_widget.lines.clear()
+        self.canvas_widget.lines.add(Color(1., 0, 0))
+        self.polygons = polygons
+        for polygon in polygons:
+            self.canvas_widget.lines.add(Line(points = polygon, width=2.0))
+        self.canvas_widget.canvas.add(self.canvas_widget.lines)
+
+    def export_tiling(self, instance):
+        points = {}
+        num = 1
+        for poly in self.polygons:
+            xs = []
+            ys = []
+            count = 0
+            for p in poly:
+                if count % 2 == 0:
+                    xs.append(p)
+                else:
+                    ys.append(p)
+                count = count + 1
+            points['x' + str(num)] = xs
+            points['y' + str(num)] = ys
+            num += 1
+        df = pd.DataFrame(points)
+        df.to_csv(r'output.csv', index=False)
+
+class MyTestApp(App):
+    def build(self):
+        return TessellationWidget()
+
+
+if __name__ == '__main__':
+    MyTestApp().run()
