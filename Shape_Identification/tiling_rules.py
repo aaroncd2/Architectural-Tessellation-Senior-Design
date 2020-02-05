@@ -2,16 +2,15 @@ from shapely.geometry import Polygon
 from shapely.geometry import Point
 
 def identify_shape(shape):
-    if (not is_regular(shape)):
-        print("irregular")
+    if (is_regular(shape)):
+        # process to tessellation engine
+        return shape
+    else:
         number_sides = num_sides(shape)
         if (num_sides == 3):
-            process_triangle(shape)
+            return process_triangle(shape)
         elif (num_sides == 4):
-            process_quadrilateral(shape)
-    else:
-        print("regular")
-        # process to tessellation engine
+            return process_quadrilateral(shape)
 
 def num_sides(shape):
     return len(shape.exterior.coords) - 1
@@ -29,7 +28,7 @@ def is_regular(shape):
     return True
 
 def process_triangle(shape):
-    # duplicate triangle and fit side together to make a quad
+    # duplicates triangle and fit sides together to make a parallelogram
     coords = list(shape.exterior.coords)
     x_length = coords[2][0] - coords[1][0]
     y_length = coords[2][1] - coords[1][1]
