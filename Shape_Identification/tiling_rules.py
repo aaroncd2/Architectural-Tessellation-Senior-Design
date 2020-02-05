@@ -29,11 +29,16 @@ def is_regular(shape):
     return True
 
 def process_triangle(shape):
-    pass
+    # duplicate triangle and fit side together to make a quad
+    coords = list(shape.exterior.coords)
+    x_length = coords[2][0] - coords[1][0]
+    y_length = coords[2][1] - coords[1][1]
+    triangle_final_coord = coords[len(coords) - 1]
+    connection_coords = tuple((triangle_final_coord[0] + x_length, triangle_final_coord[1] + y_length))
+    coords.append(connection_coords)
+    coords.append(coords[2])
+    return Polygon(coords)
 
-def process_quadrilateral(shape):
-    pass
-    
 def is_parallelogram(shape):
     coords = shape.exterior.coords
     side1_length = ((coords[1][1] - coords[0][1])**2 + (coords[1][0] - coords[0][0])**2)**0.5
@@ -41,3 +46,19 @@ def is_parallelogram(shape):
     side3_length = ((coords[3][1] - coords[2][1])**2 + (coords[3][0] - coords[2][0])**2)**0.5
     side4_length = ((coords[4][1] - coords[3][1])**2 + (coords[4][0] - coords[3][0])**2)**0.5
     return num_sides(shape) == 4 and side1_length == side3_length and side2_length == side4_length
+
+def process_quadrilateral(shape):
+    coords = shape.exterior.coords
+    side1_length = ((coords[1][1] - coords[0][1])**2 + (coords[1][0] - coords[0][0])**2)**0.5
+    side2_length = ((coords[2][1] - coords[1][1])**2 + (coords[2][0] - coords[1][0])**2)**0.5
+    side3_length = ((coords[3][1] - coords[2][1])**2 + (coords[3][0] - coords[2][0])**2)**0.5
+    side4_length = ((coords[4][1] - coords[3][1])**2 + (coords[4][0] - coords[3][0])**2)**0.5
+    if num_sides(shape) == 4 and side1_length == side3_length and side2_length == side4_length:
+        # shape is a parallelogram
+        pass
+    else:
+        pass
+        # duplicate quad and fit longer sides together to make a hexagon
+    
+def process_hexagon(shape):
+    pass 
