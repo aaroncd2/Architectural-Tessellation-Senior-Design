@@ -84,7 +84,7 @@ class FileChooser(FileChooserListView):
             else:
                 self.ids.image.source = filename[0]
                 
-
+#layout class
 class BoxGrid(BoxLayout):
     def __init__(self, **kwargs):
         super(BoxGrid, self).__init__(**kwargs)
@@ -92,7 +92,7 @@ class BoxGrid(BoxLayout):
         tessel = TessellationWidget()
         self.add_widget(custlay)
         self.add_widget(tessel)
-        
+#layout for the main canvas
 class CustomLayout(BoxLayout):
 
     def __init__(self, **kwargs):
