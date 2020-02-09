@@ -1,3 +1,9 @@
+'''
+tiling_rules.py
+    Contains various rules and tests to determine
+    different properties of polygons before they are passed
+    into the tessellation engine
+'''
 from shapely.geometry import Polygon
 from shapely.geometry import Point
 
@@ -29,9 +35,9 @@ def is_regular(shape):
 
 def is_convex(shape):
     coords = list(shape.exterior.coords)
-    positive_z = __compute_z_cross_product(coords[0], coords[1], coords[2]) > 0
-    for i in range(1, len(coords) - 1):
-        if __compute_z_cross_product(coords[0], coords[1], coords[2]) > 0 != positive_z
+    positive_z = __compute_z_cross_product(coords[0], coords[1], coords[2]) >= 0
+    for i in range(1, len(coords) - 2):
+        if (__compute_z_cross_product(coords[i], coords[i + 1], coords[i + 2]) >= 0) != positive_z:
             return False
     return True
 
@@ -41,7 +47,6 @@ def __compute_z_cross_product(first_coord, second_coord, third_coord):
     dx2 = third_coord[0] - second_coord[0]
     dy2 = third_coord[1] - second_coord[1]
     return dx1 * dy2 - dy1 * dx2
-
 
 def process_triangle(shape):
     # duplicates triangle and fit sides together to make a parallelogram
