@@ -36,8 +36,9 @@ index = -1
 def configCoords():
         global coords
         poly = Polygon(coords)
-        poly = affinity.translate(poly, xoff= 300, yoff= 300)
-        poly = affinity.scale(poly, xfact= 10, yfact= 10)
+        poly = affinity.translate(poly, xoff= size[0]/2, yoff= size[1]/2)
+        #poly = affinity.translate(poly, xoff= 300, yoff= 300)
+       # poly = affinity.scale(poly, xfact= 10, yfact= 10)
         coords = list(poly.exterior.coords)
         coords.pop(-1)
 
@@ -80,7 +81,7 @@ class FileChooser(FileChooserListView):
         if (data != None):
             return data
         else:
-            return None
+            return ""
         print(data)
         print(self.rootpath)
     def selected(self,filename,*args):
@@ -211,17 +212,6 @@ class CustomLayout(BoxLayout):
          
     def define_nodes(self):
         global coords
-    
-        """define all the node canvas elements as a list"""
-        print("Hello")
-        #print(coords)
-        poly = Polygon(coords)
-        print(size)
-        poly = affinity.translate(poly, xoff= size[0]/2, yoff= size[1]/2)
-        poly = affinity.scale(poly, xfact= 1/poly.bounds[2], yfact= 1/poly.bounds[3])
-        poly = affinity.scale(poly, xfact= 10, yfact= 10)
-        coords2 = list(poly.exterior.coords)
-
         i = 0
         print(len(coords), 'define')
         for points in coords:
