@@ -30,6 +30,28 @@ from kivy.core.window import Window
 Window.fullscreen = 'auto'
 size = Window.size
 
+
+pressed = False
+index = -1
+def configCoords():
+        global coords
+        poly = Polygon(coords)
+        poly = affinity.translate(poly, xoff= 300, yoff= 300)
+        poly = affinity.scale(poly, xfact= 10, yfact= 10)
+        coords = list(poly.exterior.coords)
+        coords.pop(-1)
+
+def angle(a, c, b):
+    ang = math.degrees(math.atan2(c[1]-b[1], c[0]-b[0]) - math.atan2(a[1]-b[1], a[0]-b[0]))
+    if abs(ang) > 170 and abs(ang) < 190:
+        return True
+    else:
+        return False
+
+def midpoint(points):
+    mid = [(points[0]+points[2])/2 - 10, (points[1] + points[3])/2 - 10]
+    return mid
+
 #adds button on init to open file dialog class
 class RootWidget(BoxLayout):
     def __init__(self, **kwargs):
@@ -94,32 +116,102 @@ class BoxGrid(BoxLayout):
         self.add_widget(tessel)
         
 class CustomLayout(BoxLayout):
-
     def __init__(self, **kwargs):
-        print("Size is")
-        print(Window.size)
         super(CustomLayout, self).__init__(**kwargs)
+        Window.bind(on_key_down=self.key_action) #Binds Keyboard for key detection
+        configCoords()
+        
         self.canvas_edge = {}
         self.canvas_nodes = {}
         self.nodesize = [20, 20]
+
         self.grabbed = {}
 
         #declare a canvas
         with self.canvas.after:
             pass
-        print("here now")
+
         self.define_nodes()
-        print("define nodes")
         i = 0
         for points in coords:
             self.canvas.add(self.canvas_nodes[i])
             i = i + 1
-        self.define_edge()
-        self.canvas.add(self.canvas_edge)
         
+        self.define_edge()
+
+        i = 0
+        for i in range(len(coords)):
+            self.canvas.add(self.canvas_edge[i])
+            i = i + 1
+        
+    def key_action(self, *args):
+        global pressed
+        global index
+        global coords
+        delete = list(args)
+
+        if delete[2] == 42 and pressed:
+            pressed = False
+
+            print(len(self.canvas_nodes))
+            print(len(self.canvas_edge))
+
+            self.canvas.children.remove(self.highlight)
+            self.canvas.children.remove(self.canvas_edge[index])
+            self.canvas.children.remove(self.canvas_nodes[index])
+            self.canvas.children.remove(self.canvas_nodes[(index+1)%len(self.canvas_nodes)])
+            print(len(self.canvas_nodes))
+            print(len(self.canvas_edge))
 
 
+            mid = midpoint(self.canvas_edge[index].points)
+
+            self.midp = Ellipse(
+                size = self.nodesize,
+                pos = self.canvas_nodes[index].pos
+                )
+            print(coords)
+            print(self.canvas_nodes[index].pos, index)
+            print(mid, 'mid')
+
+            self.midp3 = Ellipse(
+                size = self.nodesize,
+                pos = self.canvas_nodes[(index+1)%len(self.canvas_nodes)].pos
+                )
+            print(self.canvas_nodes[(index+1)%len(self.canvas_nodes)].pos,(index+1)%len(self.canvas_nodes))
+            coords.insert((index+1)%len(self.canvas_nodes), tuple(mid))
+            coords.remove(self.canvas_nodes[index].pos)
+            coords.remove(self.canvas_nodes[(index+1)%len(self.canvas_nodes)].pos)
+            print(coords)
+            self.canvas.add(Color(0,1,0,.3))
+            self.midp2 = Ellipse(
+                            size = self.nodesize,
+                            pos = mid
+                            )
+
+            self.canvas.add(self.midp)
+            self.canvas.add(self.midp2)
+            self.canvas.add(self.midp3)
+
+            self.canvas.clear()
+
+            self.define_nodes()
+            i = 0
+            for i in range(len(coords)):
+                self.canvas.add(self.canvas_nodes[i])
+                i = i + 1
+            self.define_edge()
+
+            i = 0
+            for i in range(len(coords)):
+                self.canvas.add(self.canvas_edge[i])
+                i = i + 1
+
+      
+         
     def define_nodes(self):
+        global coords
+    
         """define all the node canvas elements as a list"""
         print("Hello")
         #print(coords)
@@ -131,14 +223,15 @@ class CustomLayout(BoxLayout):
         coords2 = list(poly.exterior.coords)
 
         i = 0
-        for points in coords2:
+        print(len(coords), 'define')
+        for points in coords:
             x,y = points
             self.canvas_nodes[i] = Ellipse(
                 size = self.nodesize,
-                pos =  [x,y]
+                pos =  [x,y],
                 )
             i = i + 1
-
+            
     def define_edge(self):
         """define an edge canvas elements"""
         i = 0
@@ -147,16 +240,63 @@ class CustomLayout(BoxLayout):
             xy.append(self.canvas_nodes[i].pos[0] + self.nodesize[0] / 2)
             xy.append(self.canvas_nodes[i].pos[1] + self.nodesize[1] / 2)
             i = i + 1
-        self.canvas_edge = Line(
-            points =  xy,
-            joint = 'round',
-            cap = 'round',
-            width = 3,
-            close = True
-            )
+
+        test = []
+        i = 0
+        while i < (len(xy)):
+            if i + 2 == len(xy):
+                test.append((xy[-2], xy[-1],xy[0], xy[1]))
+            else:
+                test.append(tuple(xy[i:i+4]))
+            i = i + 2
+
+        i = 0
+        for point in test:
+            self.canvas_edge[i] =  Line(
+                points =  test[i],
+                joint = 'round',
+                cap = 'round',
+                width = 3,
+                close = False
+                )
+            i = i + 1
 
     def on_touch_down(self, touch):
-
+        global pressed
+        global index
+        global coords
+        # i = 0
+        # temp = []
+        # for i in range(len(coords)):
+        #     temp.append(self.canvas_nodes[1].pos)
+        # coords = temp 
+       
+        i = 0
+        for lines in self.canvas_edge:
+            x,y = self.canvas_edge[i].points[0], self.canvas_edge[i].points[1]
+            a = [x,y]
+            x,y = self.canvas_edge[i].points[2], self.canvas_edge[i].points[3]
+            b = [x,y]
+            c = list(touch.pos)
+            if angle(a,b,c) and not pressed:
+                points = [a,b]
+                self.canvas.add(Color(1,0,0, .5))
+                self.highlight = Line(
+                    Color = (1,0,0),
+                    points = points, 
+                    width = 5
+                    )
+                self.canvas.add(self.highlight)
+                pressed = True
+                index = i
+                print(index, 'edge')
+                break
+            else:
+                if pressed:
+                    pressed = False
+                    self.canvas.children.remove(self.highlight)
+            i = i + 1
+            
         for key, value in self.canvas_nodes.items():
             if (value.pos[0] - self.nodesize[0]) <= touch.pos[0] <= (value.pos[0] + self.nodesize[0]):
                 if (value.pos[1] - self.nodesize[1]) <= touch.pos[1] <= (value.pos[1] + self.nodesize[1]):
@@ -165,20 +305,25 @@ class CustomLayout(BoxLayout):
                     return True
 
     def on_touch_move(self, touch):
-
+        global pressed
+        pressed = False
         if touch.grab_current is self:
             self.grabbed.pos = [touch.pos[0] - self.nodesize[0] / 2, touch.pos[1] - self.nodesize[1] / 2]
             self.canvas.clear()
             i = 0
-            for points in coords:
+            for i in range(len(coords)):
                 self.canvas.add(self.canvas_nodes[i])
                 i = i + 1
             self.define_edge()
-            self.canvas.add(self.canvas_edge)
+
+            i = 0
+            for i in range(len(coords)):
+                self.canvas.add(self.canvas_edge[i])
+                i = i + 1
         else:
             pass
 
-    def on_touch_up(self, touch):
+    def on_touch_up(self, touch):     
         if touch.grab_current is self:
             touch.ungrab(self)
             poly = []
@@ -195,7 +340,6 @@ class CustomLayout(BoxLayout):
             print(self.parent.children[0].polygon)  
             #self.parent.children[0].polygon = self.parent.children[0].shapely_to_kivy(self.parent.children[0].polygon)
             self.parent.children[0].tile_regular_polygon()
-            
         else:
             pass
 
