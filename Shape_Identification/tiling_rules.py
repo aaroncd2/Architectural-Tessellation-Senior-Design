@@ -72,9 +72,11 @@ def process_quadrilateral(shape):
     side4_length = ((coords[4][1] - coords[3][1])**2 + (coords[4][0] - coords[3][0])**2)**0.5
     if is_parallelogram(shape):
         return "parallelogram"
-    elif:
-        pass
-        # duplicate quad and fit longer sides together to make a hexagon
+    elif is_convex(shape):
+        # flip around and make hexagon
+        return "convex quad"
+    else:
+        process_hexagon(shape)
     
 def process_hexagon(shape):
     pass 
