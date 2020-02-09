@@ -48,8 +48,8 @@ def __compute_z_cross_product(first_coord, second_coord, third_coord):
     dy2 = third_coord[1] - second_coord[1]
     return dx1 * dy2 - dy1 * dx2
 
+# duplicates triangle and fit sides together to make a parallelogram
 def process_triangle(shape):
-    # duplicates triangle and fit sides together to make a parallelogram
     coords = list(shape.exterior.coords)
     x_length = coords[2][0] - coords[1][0]
     y_length = coords[2][1] - coords[1][1]
@@ -69,14 +69,10 @@ def is_parallelogram(shape):
 
 def process_quadrilateral(shape):
     coords = shape.exterior.coords
-    side1_length = ((coords[1][1] - coords[0][1])**2 + (coords[1][0] - coords[0][0])**2)**0.5
-    side2_length = ((coords[2][1] - coords[1][1])**2 + (coords[2][0] - coords[1][0])**2)**0.5
-    side3_length = ((coords[3][1] - coords[2][1])**2 + (coords[3][0] - coords[2][0])**2)**0.5
     side4_length = ((coords[4][1] - coords[3][1])**2 + (coords[4][0] - coords[3][0])**2)**0.5
-    if num_sides(shape) == 4 and side1_length == side3_length and side2_length == side4_length:
-        # shape is a parallelogram
-        pass
-    else:
+    if is_parallelogram(shape):
+        return "parallelogram"
+    elif:
         pass
         # duplicate quad and fit longer sides together to make a hexagon
     
