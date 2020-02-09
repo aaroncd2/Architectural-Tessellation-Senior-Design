@@ -27,6 +27,22 @@ def is_regular(shape):
             return False
     return True
 
+def is_convex(shape):
+    coords = list(shape.exterior.coords)
+    positive_z = __compute_z_cross_product(coords[0], coords[1], coords[2]) > 0
+    for i in range(1, len(coords) - 1):
+        if __compute_z_cross_product(coords[0], coords[1], coords[2]) > 0 != positive_z
+            return False
+    return True
+
+def __compute_z_cross_product(first_coord, second_coord, third_coord):
+    dx1 = second_coord[0] - first_coord[0]
+    dy1 = second_coord[1] - first_coord[1]
+    dx2 = third_coord[0] - second_coord[0]
+    dy2 = third_coord[1] - second_coord[1]
+    return dx1 * dy2 - dy1 * dx2
+
+
 def process_triangle(shape):
     # duplicates triangle and fit sides together to make a parallelogram
     coords = list(shape.exterior.coords)

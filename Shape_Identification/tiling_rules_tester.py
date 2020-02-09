@@ -34,6 +34,9 @@ def test_parallelograms():
     generic_test("rectangle", tr.is_parallelogram(rectangle), True)
     print()
 
+def test_convex():
+
+
 plot_polygon(tr.process_triangle(triangle_3))
 test_regular_polygons()
 test_parallelograms()
