@@ -63,6 +63,7 @@ class FileChooser(FileChooserListView):
                 global coords
                 coo = ip.processImage(fp)
                 coords = sm.shape_model(coo)
+                print(coords)
                 b_grid = BoxGrid()
                 popup.parent.add_widget(b_grid)
                 popup.dismiss()
@@ -171,7 +172,7 @@ class CustomLayout(BoxLayout):
                 poly.append(self.canvas_nodes[i].pos)
                 i = i + 1
             print(poly)
-            
+            #poly = affinity.translate(poly, xoff= size[0]/2, yoff= size[1]/2)
             newply = Polygon(poly)
             print(self.parent.children[0].polygon)
             self.parent.children[0].polygon = newply
@@ -251,6 +252,7 @@ class TessellationWidget(GridLayout):
         # Display initial tiling
         #points = [(0,0),(100,0),(100,100),(0,100),(0,0)] #Square
         points = coords
+        print(coords)
         self.type = 'regular'
         self.xNum = 5
         self.yNum = 5
