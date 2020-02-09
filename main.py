@@ -23,16 +23,13 @@ from kivy.graphics.instructions import InstructionGroup
 from kivy.uix.slider import Slider
 from kivy.uix.gridlayout import GridLayout
 import numpy
+import os
 import sys
 from kivy.core.window import Window
 
 Window.fullscreen = 'auto'
 size = Window.size
 
-#not sure yet best way to store these coords 
-#for now they are global vars
-
-#root widget class using the box layout
 #adds button on init to open file dialog class
 class RootWidget(BoxLayout):
     def __init__(self, **kwargs):
@@ -49,16 +46,33 @@ class RootWidget(BoxLayout):
         #open file dialog popup
         popup = Popup(title='Select File',
                       content=FileChooser())
+         
         popup.open()
         
         
 #gile chooser class
 class FileChooser(FileChooserListView):
+    def getpath(self):
+        with open('pathfile.txt', 'r') as f:
+            data = f.read()
+        if (data != None):
+            return data
+        else:
+            return None
+        print(data)
+        print(self.rootpath)
     def selected(self,filename,*args):
             if (filename == True):
+                
                 global fp
                 #store file path
                 fp = args[0][0]
+                with open('pathfile.txt', 'w') as f:
+                    data = fp
+                    head, tail = os.path.split(data)
+                    f.write(head)
+                    
+                print(fp)
                 #use file path to process as image in imageprocessing.py
                 global coords
                 coo = ip.processImage(fp)
@@ -69,6 +83,7 @@ class FileChooser(FileChooserListView):
                 popup.dismiss()
             else:
                 self.ids.image.source = filename[0]
+                
 
 class BoxGrid(BoxLayout):
     def __init__(self, **kwargs):
