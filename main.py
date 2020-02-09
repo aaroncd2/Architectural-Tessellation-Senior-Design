@@ -126,8 +126,8 @@ class CustomLayout(BoxLayout):
         poly = Polygon(coords)
         print(size)
         poly = affinity.translate(poly, xoff= size[0]/2, yoff= size[1]/2)
-        #poly = affinity.scale(poly, xfact= 1/poly.bounds[2], yfact= 1/poly.bounds[3])
-        # poly = affinity.scale(poly, xfact= 10, yfact= 10)
+        poly = affinity.scale(poly, xfact= 1/poly.bounds[2], yfact= 1/poly.bounds[3])
+        poly = affinity.scale(poly, xfact= 10, yfact= 10)
         coords2 = list(poly.exterior.coords)
 
         i = 0
@@ -189,6 +189,7 @@ class CustomLayout(BoxLayout):
             print(poly)
             #poly = affinity.translate(poly, xoff= size[0]/2, yoff= size[1]/2)
             newply = Polygon(poly)
+            newply = affinity.translate(newply, xoff= -size[0]/2, yoff= -size[1]/2)
             print(self.parent.children[0].polygon)
             self.parent.children[0].polygon = newply
             print(self.parent.children[0].polygon)  
