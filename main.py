@@ -58,7 +58,7 @@ class FileChooser(FileChooserListView):
         if (data != None):
             return data
         else:
-            return None
+            return ""
         print(data)
         print(self.rootpath)
     def selected(self,filename,*args):
