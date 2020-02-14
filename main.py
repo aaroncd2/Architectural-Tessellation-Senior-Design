@@ -152,6 +152,15 @@ class CustomLayout(BoxLayout):
         # poly = affinity.scale(poly, xfact= 10, yfact= 10)
         self.c_coords = list(poly.exterior.coords)
         self.c_coords.pop(-1)
+        
+        
+        temp2 = []
+        for x in self.c_coords:
+            temp = []
+            for y in x:
+                temp.append(int(y))
+            temp2.append(tuple(temp))
+        self.c_coords = temp2
     
     def key_action(self, *args):
        
@@ -215,6 +224,21 @@ class CustomLayout(BoxLayout):
             for i in range(len(self.c_coords)):
                 self.canvas.add(self.canvas_edge[i])
                 i = i + 1
+
+            poly = []
+            i = 0
+            for xy in self.canvas_nodes:
+                poly.append(self.canvas_nodes[i].pos)
+                i = i + 1
+            
+            # poly = affinity.translate(poly, xoff= size[0]/2, yoff= size[1]/2)
+            newply = Polygon(poly)
+            newply = affinity.translate(newply, xoff= -size[0]/2, yoff= -size[1]/2)
+            print(self.parent.children[0].polygon)
+            self.parent.children[0].polygon = newply
+            print(self.parent.children[0].polygon)  
+            #self.parent.children[0].polygon = self.parent.children[0].shapely_to_kivy(self.parent.children[0].polygon)
+            self.parent.children[0].tile_regular_polygon()
 
       
          
@@ -337,6 +361,8 @@ class CustomLayout(BoxLayout):
 
         else:
             pass
+            
+
 
 #main app class to build the root widget on program start
 class DatoApp(App):
