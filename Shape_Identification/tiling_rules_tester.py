@@ -22,29 +22,21 @@ def plot_polygon(shape):
 
 def test_regular_polygons():
     print("-----REGULAR POLYGON TEST-----")
-    generic_test("square", tr.is_regular(square), True)
-    generic_test("rectangle", tr.is_regular(rectangle), False)
-    generic_test("arrow", tr.is_regular(arrow), False)
-    generic_test("box_c", tr.is_regular(box_c), False)
-    print()
-
-def test_parallelograms():
-    print("-----PARALLELOGRAM TEST-----")
-    generic_test("square", tr.is_parallelogram(square), True)
-    generic_test("rectangle", tr.is_parallelogram(rectangle), True)
-    generic_test("arrow", tr.is_parallelogram(arrow), False)
-    generic_test("box_c", tr.is_parallelogram(box_c), False)
+    generic_test("square", tr.__is_regular(square), True)
+    generic_test("rectangle", tr.__is_regular(rectangle), False)
+    generic_test("arrow", tr.__is_regular(arrow), False)
+    generic_test("box_c", tr.__is_regular(box_c), False)
     print()
 
 def test_convex():
     print("-----CONVEX TEST-----")
-    generic_test("square", tr.is_convex(square), True)
-    generic_test("rectangle", tr.is_convex(rectangle), True)
-    generic_test("triangle_1", tr.is_convex(triangle_1), True)
-    generic_test("triangle_2", tr.is_convex(triangle_2), True)
-    generic_test("triangle_3", tr.is_convex(triangle_3), True)
-    generic_test("arrow", tr.is_convex(arrow), False)
-    generic_test("box_c", tr.is_convex(box_c), False)
+    generic_test("square", tr.__is_convex(square), True)
+    generic_test("rectangle", tr.__is_convex(rectangle), True)
+    generic_test("triangle_1", tr.__is_convex(triangle_1), True)
+    generic_test("triangle_2", tr.__is_convex(triangle_2), True)
+    generic_test("triangle_3", tr.__is_convex(triangle_3), True)
+    generic_test("arrow", tr.__is_convex(arrow), False)
+    generic_test("box_c", tr.__is_convex(box_c), False)
     print()
 
 # shapely shape objects
@@ -62,7 +54,6 @@ all_tests_passed = True
 # calls to each series of tests
 plot_polygon(box_c)
 test_regular_polygons()
-test_parallelograms()
 test_convex()
 
 # logic for printing out overall test results

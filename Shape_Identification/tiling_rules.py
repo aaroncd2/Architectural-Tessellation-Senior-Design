@@ -42,12 +42,12 @@ def process_quadrilateral(shape):
         return shape, "parallelogram", False
     elif __is_convex(shape):
         # flip around and make hexagon
+        
         pass
     else:
         # is a concave quadrilateral
         pass
 
-'''private helper functions'''
 def __num_sides(shape):
     return len(shape.exterior.coords) - 1
 
