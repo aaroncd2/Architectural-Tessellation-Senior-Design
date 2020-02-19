@@ -7,6 +7,7 @@ tiling_rules.py
 from shapely.geometry import Polygon
 from shapely.geometry import Point
 
+'''public functions'''
 # central function that takes in
 # a shape and identifies / manipulate it
 def identify_shape(shape):
@@ -29,7 +30,7 @@ def process_triangle(shape):
     connection_coords = tuple((triangle_final_coord[0] + x_length, triangle_final_coord[1] + y_length))
     coords.append(connection_coords)
     coords.append(coords[2])
-    return Polygon(coords), "parallelogram", True
+    return Polygon(coords), "parallelogram", True, shape
 
 # checks cases with parallelogram
 def process_quadrilateral(shape):
@@ -39,15 +40,20 @@ def process_quadrilateral(shape):
     side3_length = ((coords[3][1] - coords[2][1])**2 + (coords[3][0] - coords[2][0])**2)**0.5
     side4_length = ((coords[4][1] - coords[3][1])**2 + (coords[4][0] - coords[3][0])**2)**0.5
     if side1_length == side3_length and side2_length == side4_length:
-        return shape, "parallelogram", False
-    elif __is_convex(shape):
-        # flip around and make hexagon
-        
+        return shape, "parallelogram", False, shape
+    # test concavity 
+    is_convex, convex_index =  __is_convex(shape)
+    if is_convex:
+        # flip around and make a hexagon
         pass
     else:
-        # is a concave quadrilateral
+        print(convex_index)
+        return shape, "parallelogram", False, shape
+        # adapt into a parallelogram
         pass
 
+
+'''private helper functions'''
 def __num_sides(shape):
     return len(shape.exterior.coords) - 1
 
@@ -66,14 +72,17 @@ def __is_regular(shape):
 def __is_convex(shape):
     coords = list(shape.exterior.coords)
     positive_z = __compute_z_cross_product(coords[0], coords[1], coords[2]) >= 0
+    convex_coord_index = 0
+    is_convex = True
     for i in range(1, len(coords) - 2):
         if (__compute_z_cross_product(coords[i], coords[i + 1], coords[i + 2]) >= 0) != positive_z:
-            return False
-    return True
+            return False, i + 1
+    return True, -1
 
 def __compute_z_cross_product(first_coord, second_coord, third_coord):
     dx1 = second_coord[0] - first_coord[0]
     dy1 = second_coord[1] - first_coord[1]
     dx2 = third_coord[0] - second_coord[0]
     dy2 = third_coord[1] - second_coord[1]
+    print(dx1 * dy2 - dy1 * dx2, ":", second_coord, "       ")
     return dx1 * dy2 - dy1 * dx2

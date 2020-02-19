@@ -52,9 +52,10 @@ box_c = Polygon([(10, 10), (5, 10), (5, 2), (10, 2), (10, 4), (7, 4), (7, 7), (1
 all_tests_passed = True
 
 # calls to each series of tests
-plot_polygon(box_c)
-test_regular_polygons()
-test_convex()
+plot_polygon(arrow)
+shape, polygon_type, is_transformed, exterior = tr.process_quadrilateral(arrow)
+# test_regular_polygons()
+# test_convex()
 
 # logic for printing out overall test results
 if all_tests_passed:
