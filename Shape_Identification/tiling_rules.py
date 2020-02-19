@@ -52,7 +52,6 @@ def process_quadrilateral(shape):
         # adapt into a parallelogram
         pass
 
-
 '''private helper functions'''
 def __num_sides(shape):
     return len(shape.exterior.coords) - 1
@@ -71,14 +70,27 @@ def __is_regular(shape):
 
 def __is_convex(shape):
     coords = list(shape.exterior.coords)
-    positive_z = __compute_z_cross_product(coords[0], coords[1], coords[2]) >= 0
-    convex_coord_index = 0
-    is_convex = True
-    for i in range(1, len(coords) - 2):
-        if (__compute_z_cross_product(coords[i], coords[i + 1], coords[i + 2]) >= 0) != positive_z:
-            return False, i + 1
-    return True, -1
-
+    positive_z_coords = list()
+    negative_z_coords = list()
+    # starting z component coord calculation
+    if (__compute_z_cross_product(coords[len(coords) - 2], coords[0], coords[1]) >= 0:
+        positive_z_coords.append(i)
+    else:   
+        negative_z_coords.append(i)
+    # rest of the z component coord calculation
+    for i in range(1, len(coords) - 1):
+        if (__compute_z_cross_product(coords[i - 1], coords[i], coords[i + 1]) >= 0:
+            positive_z_coords.append(i)
+        else:   
+            negative_z_coords.append(i)
+    if len(positive_z_coords) > 0 && len(negative_z_coords) > 0:
+        if len(positive_z_coords) > len(negative_z_coords) > 0:
+            return False, positive_z_coords
+        else:
+            return False, negative_z_coords
+    else:
+        return True, list()
+            
 def __compute_z_cross_product(first_coord, second_coord, third_coord):
     dx1 = second_coord[0] - first_coord[0]
     dy1 = second_coord[1] - first_coord[1]
