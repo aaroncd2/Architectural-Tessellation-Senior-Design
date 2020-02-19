@@ -57,7 +57,8 @@ class FileChooser(FileChooserListView):
     def getpath(self):
         with open('pathfile.txt', 'r') as f:
             data = f.read()
-        if (data != None):
+            print(data)
+        if (data != ""):
             return data
         else:
             return ""
@@ -197,6 +198,7 @@ class CustomLayout(BoxLayout):
             newply = affinity.translate(newply, xoff= -size[0]/2, yoff= -size[1]/2)
             print(self.parent.children[0].polygon)
             self.parent.children[0].polygon = newply
+            self.parent.children[0].base_unit = newply
             print(self.parent.children[0].polygon)  
             #self.parent.children[0].polygon = self.parent.children[0].shapely_to_kivy(self.parent.children[0].polygon)
             self.parent.children[0].tile_regular_polygon()

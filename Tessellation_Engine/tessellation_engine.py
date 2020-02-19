@@ -1,4 +1,5 @@
 from kivy.app import App
+from kivy.app import App
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout 
@@ -6,6 +7,7 @@ from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.slider import Slider
 from kivy.uix.label import Label
 from kivy.uix.widget import Widget
+from kivy.uix.textinput import TextInput
 from kivy.graphics import *
 
 from shapely.geometry import Polygon # for geometric objects
@@ -34,7 +36,7 @@ class TessellationWidget(GridLayout):
         imageRow.add_widget(self.canvas_widget)
         self.add_widget(imageRow)
 
-        self.controls = BoxLayout(orientation='horizontal', size_hint=(1,None), height=120)
+        self.controls = BoxLayout(orientation='horizontal', size_hint=(1,None), height=160)
         self.buttons = GridLayout(rows=3, cols=2)
         self.sliders = GridLayout(rows=4, cols=2)
         self.recommend_buttons = BoxLayout(orientation='horizontal', size_hint=(1,None), height=33)
@@ -42,8 +44,13 @@ class TessellationWidget(GridLayout):
         # Add slider and label to widget
         self.s = Slider(min=0, max=360, value=0, value_track = True)
         self.rotation_value = 0
-        self.label = Label(text ='Rotation: ' + str(self.rotation_value) + ' degrees')
-        self.sliders.add_widget(self.label) 
+        self.label_box = BoxLayout(orientation='horizontal', size_hint=(1,None), height=40)
+        self.input_box = TextInput(text='0', input_filter='float', multiline=False)
+        self.input_box.bind(on_text_validate=self.on_enter)
+        self.label = Label(text ='Rotation:')
+        self.label_box.add_widget(self.label)
+        self.label_box.add_widget(self.input_box)
+        self.sliders.add_widget(self.label_box) 
         self.sliders.add_widget(self.s)
         self.s.bind(value=self.rotate_polygon)
 
@@ -112,6 +119,7 @@ class TessellationWidget(GridLayout):
         self.rec_right = Button(text='Next Recommendation', background_color = (1,1,1,1))
         self.recommend_buttons.add_widget(self.rec_right)
         #self.add_widget(self.recommend_buttons)
+
     def display_initial_tiling(self):
         # Display initial tiling
         self.xNum = 5
@@ -127,7 +135,12 @@ class TessellationWidget(GridLayout):
         self.polygon = Polygon(points)
         self.base_unit = self.polygon
         polygon = self.shapely_to_kivy(self.polygon)
-        self.tile_regular_polygon()
+        if self.type == 'regular':
+            self.tile_regular_polygon()
+        elif self.type == 'parallelogram':
+            self.tile_parallelogram()
+        elif self.type == 'hexagon':
+            self.tile_hexagon()
 
     def set_coords(self, num):
         self.points = num
@@ -165,6 +178,97 @@ class TessellationWidget(GridLayout):
         self.polygons = polygons
         self.draw_polygons()
 
+    # tiles a parallelogram
+    def tile_parallelogram(self):
+        # calculate increment between shapes
+        bounds = self.polygon.bounds
+        count = 0
+        while count < 4:
+            if self.polygon.exterior.coords[count][0] == bounds[2]:
+                if count == 0:
+                    xInc = max(self.polygon.exterior.coords[1][0], self.polygon.exterior.coords[3][0]) - bounds[0]
+                    xInc2 = min(self.polygon.exterior.coords[1][0], self.polygon.exterior.coords[3][0]) - bounds[0] 
+                elif count == 3:
+                    xInc = max(self.polygon.exterior.coords[0][0], self.polygon.exterior.coords[2][0]) - bounds[0] 
+                    xInc2 = min(self.polygon.exterior.coords[0][0], self.polygon.exterior.coords[2][0]) - bounds[0] 
+                else:
+                    xInc = max(self.polygon.exterior.coords[count + 1][0], self.polygon.exterior.coords[count - 1][0]) - bounds[0]
+                    xInc2 = min(self.polygon.exterior.coords[count + 1][0], self.polygon.exterior.coords[count - 1][0]) - bounds[0]    
+            if self.polygon.exterior.coords[count][1] == bounds[3]:
+                if count == 0:
+                    yInc = max(self.polygon.exterior.coords[1][1], self.polygon.exterior.coords[3][1]) - bounds[1]
+                    yInc2 = min(self.polygon.exterior.coords[1][1], self.polygon.exterior.coords[3][1]) - bounds[1] 
+                elif count == 3:
+                     yInc = max(self.polygon.exterior.coords[0][1], self.polygon.exterior.coords[2][1]) - bounds[1]
+                     yInc2 = min(self.polygon.exterior.coords[0][1], self.polygon.exterior.coords[2][1]) - bounds[1]  
+                else:
+                    yInc = max(self.polygon.exterior.coords[count + 1][1], self.polygon.exterior.coords[count - 1][1]) - bounds[1]
+                    yInc2 = min(self.polygon.exterior.coords[count + 1][1], self.polygon.exterior.coords[count - 1][1]) - bounds[1]
+            count = count + 1
+
+        xInc = xInc * (self.xSpacing / 100)
+        yInc = yInc * (self.ySpacing / 100)
+
+        xCount = 1
+        yCount = 1
+        self.polygons = []
+        while yCount <= self.yNum:
+            #xInc = xInc + xInc2
+            while xCount <= self.xNum:
+                temp = []
+                for p in self.polygon.exterior.coords:
+                    temp.append((p[0] + (xInc * xCount) + (xInc2 * (yCount)), p[1] + (yInc * yCount) + (yInc2 * (xCount))))
+                temp_poly = Polygon(temp)
+                self.polygons.append(self.shapely_to_kivy(temp_poly))
+                temp = None
+                xCount = xCount + 1
+            xCount = 1
+            yCount = yCount + 1
+        self.draw_polygons()
+
+    # tiles a hexagon
+    def tile_hexagon(self):
+        bounds = self.polygon.bounds
+        count = 0
+        while count < 6:
+            if self.polygon.exterior.coords[count][0] == bounds[2]:
+                if count == 0:
+                    xInc = max(self.polygon.exterior.coords[1][0], self.polygon.exterior.coords[5][0]) - bounds[0]
+                elif count == 5:
+                    xInc = max(self.polygon.exterior.coords[0][0], self.polygon.exterior.coords[4][0]) - bounds[0] 
+                else:
+                    xInc = max(self.polygon.exterior.coords[count + 1][0], self.polygon.exterior.coords[count - 1][0]) - bounds[0]    
+            if self.polygon.exterior.coords[count][1] == bounds[3]:
+                if count == 0:
+                    yInc = max(self.polygon.exterior.coords[1][1], self.polygon.exterior.coords[5][1]) - bounds[1]
+                elif count == 5:
+                     yInc = max(self.polygon.exterior.coords[0][1], self.polygon.exterior.coords[4][1]) - bounds[1] 
+                else:
+                    yInc = max(self.polygon.exterior.coords[count + 1][1], self.polygon.exterior.coords[count - 1][1]) - bounds[1]
+            count = count + 1
+
+        xInc = xInc * (self.xSpacing / 100)
+        yInc = yInc * (self.ySpacing / 100)
+        xCount = 1
+        yCount = 1
+        self.polygons = []
+        while yCount <= self.yNum:
+            while xCount <= self.xNum:
+                if xCount % 2 == 0:
+                    temp_inc = (yInc/4) * -1
+                else:
+                    temp_inc = (yInc/4)
+                temp = []
+                for p in self.polygon.exterior.coords:
+                    temp.append(((p[0] + (xInc * xCount)), (p[1] + (yInc * yCount))+temp_inc))
+                temp_poly = Polygon(temp)
+                self.polygons.append(self.shapely_to_kivy(temp_poly))
+                temp = None
+                xCount = xCount + 1
+            xCount = 1
+            yCount = yCount + 1
+        self.draw_polygons()
+
     # Takes a Shapely Polygon object and converts it to an array format for display
     # on a Kivy canvas 
     def shapely_to_kivy(self, polygon):
@@ -191,14 +295,25 @@ class TessellationWidget(GridLayout):
 
     # Rotates each polygon by the degrees specified by the slider
     def rotate_polygon(self, instance, degrees):
-        self.polygon = affinity.rotate(self.polygon, degrees)
+        self.polygon = affinity.rotate(self.base_unit, degrees)
         scale_factor = self.slide_scale.value / 100
         temp = []
         for p in self.polygon.exterior.coords:
             temp.append((p[0] * scale_factor, p[1] * scale_factor))
         self.polygon = Polygon(temp)
-        self.tile_regular_polygon()
-        self.label.text = 'Rotation: ' + str(round(self.s.value, 2)) + ' degrees'
+        if self.type == 'regular':
+            self.tile_regular_polygon()
+        elif self.type == 'parallelogram':
+            self.tile_parallelogram()
+        elif self.type == 'hexagon':
+            self.tile_hexagon()
+        self.label.text = 'Rotation:'
+        self.input_box.text = str(round(self.s.value, 2))
+
+    # Handles textbox input
+    def on_enter(self, value):
+        self.s.value = float(self.input_box.text)
+        self.rotate_polygon(self.input_box, float(self.input_box.text))
 
     # flips a polygon horizontally across its center
     def flip_horizontal(self, instance):
@@ -209,7 +324,12 @@ class TessellationWidget(GridLayout):
             flipped.append(point)
         self.polygon = Polygon(flipped)
         polygon = self.shapely_to_kivy(self.polygon)
-        self.tile_regular_polygon()
+        if self.type == 'regular':
+            self.tile_regular_polygon()
+        elif self.type == 'parallelogram':
+            self.tile_parallelogram()
+        elif self.type == 'hexagon':
+            self.tile_hexagon()
 
     # flips a polygon vertically across its center
     def flip_vertical(self, instance):
@@ -220,7 +340,12 @@ class TessellationWidget(GridLayout):
             flipped.append(point)
         self.polygon = Polygon(flipped)
         polygon = self.shapely_to_kivy(self.polygon)
-        self.tile_regular_polygon()
+        if self.type == 'regular':
+            self.tile_regular_polygon()
+        elif self.type == 'parallelogram':
+            self.tile_parallelogram()
+        elif self.type == 'hexagon':
+            self.tile_hexagon()
 
     # resets the screen
     def reset(self, instance):
@@ -231,7 +356,12 @@ class TessellationWidget(GridLayout):
         self.slide_scale.value = 100
         self.polygon = self.base_unit
         polygon = self.shapely_to_kivy(self.polygon)
-        self.tile_regular_polygon()
+        if self.type == 'regular':
+            self.tile_regular_polygon()
+        elif self.type == 'parallelogram':
+            self.tile_parallelogram()
+        elif self.type == 'hexagon':
+            self.tile_hexagon()
         self.s.value = 0
 
     # Flips alternating rows across their center vertically
@@ -349,12 +479,20 @@ class TessellationWidget(GridLayout):
         self.xSpacing = self.slide_horizontal.value
         if self.type == 'regular':
             self.tile_regular_polygon()
-
+        elif self.type == 'parallelogram':
+            self.tile_parallelogram()
+        elif self.type == 'hexagon':
+            self.tile_hexagon()
+            
     # Adjusts vertical spacing between polygons
     def adjust_vertical_spacing(self, instance, amount):
         self.ySpacing = self.slide_vertical.value
         if self.type == 'regular':
             self.tile_regular_polygon()
+        elif self.type == 'parallelogram':
+            self.tile_parallelogram()
+        elif self.type == 'hexagon':
+            self.tile_hexagon()
 
     def scale_polygons(self, instance, amount):
         scale_factor = self.slide_scale.value / 100
@@ -365,4 +503,7 @@ class TessellationWidget(GridLayout):
         self.polygon = affinity.rotate(self.polygon, self.s.value)
         if self.type == 'regular':
             self.tile_regular_polygon()
-## END TESSEL ENG ##
+        elif self.type == 'parallelogram':
+            self.tile_parallelogram()
+        elif self.type == 'hexagon':
+            self.tile_hexagon()
