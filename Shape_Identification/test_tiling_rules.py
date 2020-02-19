@@ -30,13 +30,13 @@ def test_regular_polygons():
 
 def test_convex():
     print("-----CONVEX TEST-----")
-    generic_test("square", tr.__is_convex(square), True)
-    generic_test("rectangle", tr.__is_convex(rectangle), True)
-    generic_test("triangle_1", tr.__is_convex(triangle_1), True)
-    generic_test("triangle_2", tr.__is_convex(triangle_2), True)
-    generic_test("triangle_3", tr.__is_convex(triangle_3), True)
-    generic_test("arrow", tr.__is_convex(arrow), False)
-    generic_test("box_c", tr.__is_convex(box_c), False)
+    generic_test("square", tr.__is_convex(square)[0], True)
+    generic_test("rectangle", tr.__is_convex(rectangle[0]), True)
+    generic_test("triangle_1", tr.__is_convex(triangle_1)[0], True)
+    generic_test("triangle_2", tr.__is_convex(triangle_2)[0], True)
+    generic_test("triangle_3", tr.__is_convex(triangle_3)[0], True)
+    generic_test("arrow", tr.__is_convex(arrow)[0], False)
+    generic_test("box_c", tr.__is_convex(box_c)[0], False)
     print()
 
 # shapely shape objects
