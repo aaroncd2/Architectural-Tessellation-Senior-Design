@@ -43,7 +43,6 @@ def midpoint(points):
     mid = [(points[0]+points[2])/2 - 10, (points[1] + points[3])/2 - 10]
     return mid
 
-
 #adds button on init to open file dialog class
 class RootWidget(BoxLayout):
     def __init__(self, **kwargs):
@@ -62,8 +61,7 @@ class RootWidget(BoxLayout):
                       content=FileChooser())
          
         popup.open()
-        
-        
+               
 #gile chooser class
 class FileChooser(FileChooserListView):
     def getpath(self):
@@ -112,13 +110,16 @@ class BoxGrid(BoxLayout):
 
 class CustomLayout(BoxLayout):
     def __init__(self, **kwargs):
+
         super(CustomLayout, self).__init__(**kwargs)
+
         Window.bind(on_key_down=self.key_action) #Binds Keyboard for key detection
 
         self.c_coords = f_coords
+        self.orgi_coords = self.c_coords
         self.pressed = False
         self.index = -1
-
+        self.edge = -1 
         
         self.canvas_edge = {}
         self.canvas_nodes = {}
@@ -145,14 +146,13 @@ class CustomLayout(BoxLayout):
         for i in range(len(self.c_coords)):
             self.canvas.add(self.canvas_edge[i])
             i = i + 1
-        
+       
     def configCoords(self):
         poly = Polygon(self.c_coords)
         poly = affinity.translate(poly, xoff= 300, yoff= 500)
         # poly = affinity.scale(poly, xfact= 10, yfact= 10)
         self.c_coords = list(poly.exterior.coords)
         self.c_coords.pop(-1)
-        
         
         temp2 = []
         for x in self.c_coords:
@@ -161,96 +161,75 @@ class CustomLayout(BoxLayout):
                 temp.append(int(y))
             temp2.append(tuple(temp))
         self.c_coords = temp2
-    
+        
     def key_action(self, *args):
        
-        delete = list(args)
+        key_pressed = list(args)
 
-        if delete[2] == 42 and self.pressed:
+        if key_pressed[2] == 42 and self.pressed and len(self.canvas_edge) > 3:
             self.pressed = False
-
-            print(len(self.canvas_nodes))
-            print(len(self.canvas_edge))
-
             self.canvas.children.remove(self.highlight)
-            self.canvas.children.remove(self.canvas_edge[self.index])
-            self.canvas.children.remove(self.canvas_nodes[self.index])
-            self.canvas.children.remove(self.canvas_nodes[(self.index+1)%len(self.canvas_nodes)])
-            print(len(self.canvas_nodes))
-            print(len(self.canvas_edge))
 
+            if self.edge:
+                self.canvas.children.remove(self.canvas_edge[self.index])
+                self.canvas.children.remove(self.canvas_nodes[self.index])
+                self.canvas.children.remove(self.canvas_nodes[(self.index+1)%len(self.canvas_nodes)])
 
-            mid = midpoint(self.canvas_edge[self.index].points)
+                mid = midpoint(self.canvas_edge[self.index].points)
 
-            self.midp = Ellipse(
-                size = self.nodesize,
-                pos = self.canvas_nodes[self.index].pos
-                )
-            print(self.c_coords)
-            print(self.canvas_nodes[self.index].pos, self.index)
-            print(mid, 'mid')
+                self.c_coords.insert((self.index+1)%len(self.canvas_nodes), tuple(mid))
+                self.c_coords.remove(self.canvas_nodes[self.index].pos)
+                self.c_coords.remove(self.canvas_nodes[(self.index+1)%len(self.canvas_nodes)].pos)
+            elif not self.edge:
+                self.canvas.children.remove(self.canvas_nodes[self.index])
+                self.c_coords.remove(self.canvas_nodes[self.index].pos)
 
-            self.midp3 = Ellipse(
-                size = self.nodesize,
-                pos = self.canvas_nodes[(self.index+1)%len(self.canvas_nodes)].pos
-                )
-            print(self.canvas_nodes[(self.index+1)%len(self.canvas_nodes)].pos,(self.index+1)%len(self.canvas_nodes))
-            self.c_coords.insert((self.index+1)%len(self.canvas_nodes), tuple(mid))
-            print(self.c_coords)
-            print(self.canvas_nodes[self.index].pos)
-            self.c_coords.remove(self.canvas_nodes[self.index].pos)
-            self.c_coords.remove(self.canvas_nodes[(self.index+1)%len(self.canvas_nodes)].pos)
-            print(self.c_coords)
-            self.canvas.add(Color(0,1,0,.3))
-            self.midp2 = Ellipse(
-                            size = self.nodesize,
-                            pos = mid
-                            )
+            self.draw()
 
-            self.canvas.add(self.midp)
-            self.canvas.add(self.midp2)
-            self.canvas.add(self.midp3)
+        elif key_pressed[2] == 4 and self.pressed:
+            try:
+                self.canvas.children.remove(self.highlight)
+                mid = midpoint(self.canvas_edge[self.index].points)
 
-            self.canvas.clear()
+                self.c_coords.insert((self.index+1)%len(self.canvas_nodes), tuple(mid))
+                self.draw()
+                
+            except:
+                print(' Point selected')
+            self.pressed = False
+                
+        poly = []
+        i = 0
+        for xy in self.canvas_nodes:
+            poly.append(self.canvas_nodes[i].pos)
+            i = i + 1
 
-            self.define_nodes()
-            i = 0
-            for i in range(len(self.c_coords)):
-                self.canvas.add(self.canvas_nodes[i])
-                i = i + 1
-            self.define_edge()
+        newply = Polygon(poly)
+        newply = affinity.translate(newply, xoff= -size[0]/2, yoff= -size[1]/2)
+        self.parent.children[0].polygon = newply
+        self.parent.children[0].tile_regular_polygon()
 
-            i = 0
-            for i in range(len(self.c_coords)):
-                self.canvas.add(self.canvas_edge[i])
-                i = i + 1
+    def draw(self):
+        self.canvas.clear()
+        self.define_nodes()
+        i = 0
+        for i in range(len(self.c_coords)):
+            self.canvas.add(self.canvas_nodes[i])
+            i = i + 1
+        self.define_edge()
 
-            poly = []
-            i = 0
-            for xy in self.canvas_nodes:
-                poly.append(self.canvas_nodes[i].pos)
-                i = i + 1
-            
-            # poly = affinity.translate(poly, xoff= size[0]/2, yoff= size[1]/2)
-            newply = Polygon(poly)
-            newply = affinity.translate(newply, xoff= -size[0]/2, yoff= -size[1]/2)
-            print(self.parent.children[0].polygon)
-            self.parent.children[0].polygon = newply
-            print(self.parent.children[0].polygon)  
-            #self.parent.children[0].polygon = self.parent.children[0].shapely_to_kivy(self.parent.children[0].polygon)
-            self.parent.children[0].tile_regular_polygon()
-
-      
-         
+        i = 0
+        for i in range(len(self.c_coords)):
+            self.canvas.add(self.canvas_edge[i])
+            i = i + 1        
+    
     def define_nodes(self):
 
         self.canvas_nodes.clear()
         
         """define all the node canvas elements as a list"""
        
-
         i = 0
-        print(len(self.c_coords), 'define')
         for points in self.c_coords:
             x,y = points
             self.canvas_nodes[i] = Ellipse(
@@ -301,35 +280,47 @@ class CustomLayout(BoxLayout):
                 points = [a,b]
                 self.canvas.add(Color(1,0,0, .5))
                 self.highlight = Line(
-                    Color = (1,0,0),
                     points = points, 
                     width = 5
                     )
                 self.canvas.add(self.highlight)
                 self.pressed = True
                 self.index = i
-                print(self.index, 'edge')
+                self.edge = 1
                 break
             else:
                 if self.pressed:
                     self.pressed = False
                     self.canvas.children.remove(self.highlight)
             i = i + 1
-            
+           
         for key, value in self.canvas_nodes.items():
             if (value.pos[0] - self.nodesize[0]) <= touch.pos[0] <= (value.pos[0] + self.nodesize[0]):
-                if (value.pos[1] - self.nodesize[1]) <= touch.pos[1] <= (value.pos[1] + self.nodesize[1]):
+                if (value.pos[1] - self.nodesize[1]) <= touch.pos[1] <= (value.pos[1] + self.nodesize[1]):                    
                     touch.grab(self)
-                    self.grabbed = self.canvas_nodes[key]
+                    self.grabbed = self.canvas_nodes[key]       
+                    self.canvas.add(Color(1,0,0, .5))
+                    self.highlight = Ellipse(
+                        size = self.nodesize,
+                        pos =  self.canvas_nodes[key].pos
+                        )
+                    if not self.pressed:
+                        self.canvas.add(self.highlight)
+                        self.pressed = True
+                        self.index = key
+                        self.edge = 0
+                    elif self.pressed:
+                        self.pressed = False
+                        self.canvas.children.remove(self.highlight)
                     return True
-
+            
     def on_touch_move(self, touch):
         self.pressed = False
         if touch.grab_current is self:
             self.grabbed.pos = [touch.pos[0] - self.nodesize[0] / 2, touch.pos[1] - self.nodesize[1] / 2]
             self.canvas.clear()
             i = 0
-            for i in range(len( self.c_coords)):
+            for i in range(len(self.c_coords)):
                 self.canvas.add(self.canvas_nodes[i])
                 i = i + 1
             self.define_edge()
@@ -340,8 +331,15 @@ class CustomLayout(BoxLayout):
                 i = i + 1
         else:
             pass
+    
+    def on_touch_up(self, touch):    
+        temp = []
+        i = 0
+        for i in range(len(self.c_coords)):
+            temp.append(self.canvas_nodes[i].pos)
+            i = i + 1
+        self.c_coords = temp
 
-    def on_touch_up(self, touch):     
         if touch.grab_current is self:
             touch.ungrab(self)
             poly = []
@@ -349,20 +347,18 @@ class CustomLayout(BoxLayout):
             for xy in self.canvas_nodes:
                 poly.append(self.canvas_nodes[i].pos)
                 i = i + 1
+
             print(poly)
-            #poly = affinity.translate(poly, xoff= size[0]/2, yoff= size[1]/2)
             newply = Polygon(poly)
             newply = affinity.translate(newply, xoff= -size[0]/2, yoff= -size[1]/2)
             print(self.parent.children[0].polygon)
             self.parent.children[0].polygon = newply
             print(self.parent.children[0].polygon)  
-            #self.parent.children[0].polygon = self.parent.children[0].shapely_to_kivy(self.parent.children[0].polygon)
             self.parent.children[0].tile_regular_polygon()
 
         else:
             pass
             
-
 
 #main app class to build the root widget on program start
 class DatoApp(App):
