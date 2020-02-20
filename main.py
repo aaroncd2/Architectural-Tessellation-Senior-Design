@@ -27,6 +27,7 @@ from kivy.uix.gridlayout import GridLayout
 import numpy
 import os
 import sys
+<<<<<<< HEAD
 from kivy.core.window import Window
 
 Window.fullscreen = 'auto'
@@ -139,6 +140,28 @@ class CustomLayout(BoxLayout):
         for points in self.c_coords:
             self.canvas.add(self.canvas_nodes[i])
             i = i + 1
+=======
+
+# imports for tiling rules
+from Shape_Identification import tiling_rules as tr
+
+class Main:
+    #starts program, creates figure and subplot
+    def __init__(self):
+        self.reccbuttonExists = False
+        self.reccbuttonPressed = False
+        self.buttonsExist = False
+        self.recNum = 0
+        self.imageFile = None
+        self.shapeCoords = None
+        self.base_unit = None
+        self.base_tiling = None
+        self.polygons = None
+        self.tesselbtns_exist = False
+        self.root = tk.Tk()
+        self.root.wm_title("DATO")
+        self.fig = Figure(figsize=(5, 4), dpi=100)
+>>>>>>> prototype
         
         self.define_edge()
 
@@ -154,6 +177,7 @@ class CustomLayout(BoxLayout):
         self.c_coords = list(poly.exterior.coords)
         self.c_coords.pop(-1)
         
+<<<<<<< HEAD
         temp2 = []
         for x in self.c_coords:
             temp = []
@@ -161,6 +185,33 @@ class CustomLayout(BoxLayout):
                 temp.append(int(y))
             temp2.append(tuple(temp))
         self.c_coords = temp2
+=======
+    
+    def _make_base_unit(self):
+        self.quitbutton.pack_forget()
+        self.basebutton.pack_forget()
+        self._process_image()
+        self.base_unit = sm.shape_model(self.shapeCoords)
+
+        # shape identification process starts here
+        tr.identify_shape(self.base_unit)
+
+        x,y = self.base_unit.exterior.xy        
+        self.subplot = self.fig.add_subplot(111)
+        self.subplot.plot(x,y)
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self.root)  # A tk.DrawingArea.
+        self.canvas.draw()
+        self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+        self.toolbar = NavigationToolbar2Tk(self.canvas, self.root)
+        self.toolbar.update()
+        self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+        self.tilingbutton = tk.Button(master=self.root, text="Base Tiling", command=self._make_base_tiling)
+        self.tilingbutton.pack(side=tk.RIGHT)
+        self.quitbutton = tk.Button(master=self.root, text="Quit", command=self._quit)
+        self.quitbutton.pack(side=tk.LEFT)
+        self.newimgbtn = tk.Button(master=self.root, text="New Base Unit", command=self._new_image)
+        self.newimgbtn.pack(side=tk.LEFT)
+>>>>>>> prototype
         
     def key_action(self, *args):
        
