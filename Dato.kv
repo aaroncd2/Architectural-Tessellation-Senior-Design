@@ -1,0 +1,54 @@
+
+
+
+
+<Filechooser>: 
+      
+    label: label 
+	
+    # Providing the orentation 
+    orientation: 'vertical'
+  
+    # Creating the File list / icon view 
+    BoxLayout: 
+		
+        # Creating list view one side 
+        FileChooserListView:
+			rootpath: root.getpath()
+			id: filechooser
+            canvas.before: 
+                Color: 
+                    rgb: .4, .5, .5
+                Rectangle: 
+                    pos: self.pos 
+                    size: self.size 
+            on_selection: root.selected(filechooser.selection,*args) 
+			
+  
+		Image:
+			id: image
+			source: ""
+		Button:
+			text: "Go"
+			on_release: root.selected(True,filechooser.selection)
+ 
+  
+    # Adding label 
+    Label: 
+        id: label 
+        size_hint_y: .1
+        canvas.before: 
+            Color: 
+                rgb: .5, .5, .4
+            Rectangle: 
+                pos: self.pos 
+                size: self.size 
+<CustomLayout>
+    BoxLayout:
+	
+<BoxGrid>
+
+			
+		
+		
+		

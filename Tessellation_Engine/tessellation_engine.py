@@ -1,11 +1,14 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Oct 23 13:06:12 2019
-
-This class functions as the primary tessellation engine for the application.
-It offers functions for displaying both single polygon and multiple polygons.
-Additionally, It can create regular tilings of a single polygon
-"""
+from kivy.app import App
+from kivy.app import App
+from kivy.uix.button import Button
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.boxlayout import BoxLayout 
+from kivy.uix.relativelayout import RelativeLayout
+from kivy.uix.slider import Slider
+from kivy.uix.label import Label
+from kivy.uix.widget import Widget
+from kivy.uix.textinput import TextInput
+from kivy.graphics import *
 
 from shapely.geometry import Polygon # for geometric objects
 from shapely import affinity # for transformations
@@ -13,106 +16,494 @@ import matplotlib.pyplot as plt # for display
 import math # for trig functions
 import pandas as pd # for export
 import numpy as np # for math
-import main as main
-# simple function for displaying a single polygon with matplotlib.
-# Used to display a base unit
-# INPUT: A single shapely Polygon object
-# OUTPUT: Displays matplotlib plot of shapes
-# RETURNS: None
-def displayPolygon(polygon):
-    x = []
-    y = []
-    # add all coordinates
-    for p in polygon:
-        x.append(p.x)
-        y.append(p.y)
-    # add first coordinate again to complete shape for display
-    x.append(polygon[0].x)
-    y.append(polygon[0].y)
-    plt.plot(x,y)
-    #plt.show()
-    
-# simple function for displaying array of shapes with matplotlib.
-# Used to display a tiling
-# INPUT: An array of shapely Polygons
-# OUTPUT: Displays matplotlib plot of shapes
-# RETURNS: None
-def displayPolygons(polygons, mainPlot, mainCanvas):
-    mainPlot.clear()
-    for poly in polygons:
-        x = []
-        y = []
-        first = poly.exterior.coords[0]
-        for p in poly.exterior.coords:
-            x.append(p[0])
-            y.append(p[1])
-        x.append(first[0])
-        y.append(first[1])
-        mainPlot.plot(x,y, c='blue')
-    mainCanvas.draw()
 
-# generates a tiling for regular polygons
-# INPUT: A shapely Polygon, number of tiles in x direction, number of tiles in y direction,
-#       an integer mode. 1 = standard, 2 = vertical flip, 3 = horizontal flip
-# OUTPUT: NONE
-# RETURNS: Array of Polygon objects
-def tileRegularPolygon(polygon, xNum, yNum, mode, mainPlot, mainCanvas):
-    bounds = polygon.bounds # returns a tuple of (xmin, ymin, xmax, ymax)
-    xIncrement = abs(bounds[2] - bounds[0])
-    yIncrement = abs(bounds[3] - bounds[1])
+### START TESSELLATION ENGINE ###
+class CanvasWidget(RelativeLayout):
+    def __init__(self, **kwargs):
+        super(CanvasWidget, self).__init__(**kwargs)
+        self.lines = InstructionGroup()
+        
+class TessellationWidget(GridLayout):
+    def __init__(self, **kwargs):
+        super(TessellationWidget, self).__init__(**kwargs)
+        self.cols = 1
+        self.rows = 3
+        self.polygons = []
+        
+        # create row for canvas
+        self.canvas_widget = CanvasWidget()
+        imageRow = BoxLayout(orientation='horizontal', padding=0, spacing=0)
+        imageRow.add_widget(self.canvas_widget)
+        self.add_widget(imageRow)
 
-    polygons = []
-    temp = []
-    xCount = 1
-    yCount = 1
-    while yCount <= yNum:
-        if(mode == 2):
-            polygon = Polygon(flipPolygonVertically(polygon))
-        if(mode == 3):
-            polygon = Polygon(flipPolygonHorizontally(polygon))
-        while xCount <= xNum: 
-            xNext = xCount * xIncrement
-            yNext = yCount * yIncrement
-            for p in polygon.exterior.coords:
-                temp.append((p[0] + xNext, p[1] + yNext))
-            polygons.append(Polygon(temp))
-            xCount = xCount + 1
-            temp = []
-        yCount = yCount + 1
+        self.controls = BoxLayout(orientation='horizontal', size_hint=(1,None), height=160)
+        self.buttons = GridLayout(rows=3, cols=2)
+        self.sliders = GridLayout(rows=4, cols=2)
+        self.recommend_buttons = BoxLayout(orientation='horizontal', size_hint=(1,None), height=33)
+
+        # Add slider and label to widget
+        self.s = Slider(min=0, max=360, value=0, value_track = True)
+        self.rotation_value = 0
+        self.label_box = BoxLayout(orientation='horizontal', size_hint=(1,None), height=40)
+        self.input_box = TextInput(text='0', input_filter='float', multiline=False)
+        self.input_box.bind(on_text_validate=self.on_enter)
+        self.label = Label(text ='Rotation:')
+        self.label_box.add_widget(self.label)
+        self.label_box.add_widget(self.input_box)
+        self.sliders.add_widget(self.label_box) 
+        self.sliders.add_widget(self.s)
+        self.s.bind(value=self.rotate_polygon)
+
+        # Add horizontal translation slider
+        self.h_label = Label(text='Horizontal Spacing')
+        self.sliders.add_widget(self.h_label)
+        self.slide_horizontal = Slider(min=0, max=200, value=100, value_track = True)
+        self.xSpacing = 100
+        self.slide_horizontal.bind(value = self.adjust_horizontal_spacing)
+        self.sliders.add_widget(self.slide_horizontal)
+
+        # Add vertical translation slider
+        self.v_label = Label(text='Vertical Spacing')
+        self.sliders.add_widget(self.v_label)
+        self.slide_vertical = Slider(min=0, max=200, value=100, value_track = True)
+        self.ySpacing = 100
+        self.slide_vertical.bind(value = self.adjust_vertical_spacing)
+        self.sliders.add_widget(self.slide_vertical)
+
+        # Add scale slider
+        self.scale_label = Label(text='Scale')
+        self.sliders.add_widget(self.scale_label)
+        self.slide_scale = Slider(min=0, max=200, value=100, value_track = True)
+        self.slide_scale.bind(value = self.scale_polygons)
+        self.sliders.add_widget(self.slide_scale)
+
+        self.controls.add_widget(self.sliders)
+
+        # Add flip horizontal button
+        self.horizontal_button = Button(text = 'Flip Horizontal', background_color = (1,1,1,1))
+        self.buttons.add_widget(self.horizontal_button)
+        self.horizontal_button.bind(on_press=self.flip_horizontal)
+
+        # Add flip vertical button
+        self.vertical_button = Button(text = 'Flip Vertical', background_color = (1,1,1,1))
+        self.buttons.add_widget(self.vertical_button)
+        self.vertical_button.bind(on_press=self.flip_vertical)
+
+        # Add alternate row button
+        self.alternate_row_button = Button(text = 'Alternate Rows', background_color = (1,1,1,1))
+        self.buttons.add_widget(self.alternate_row_button)
+        self.alternate_row_button.bind(on_press=self.alternate_rows)
+
+        # Add alternate column button
+        self.alternate_col_button = Button(text = 'Alternate Columns', background_color = (1,1,1,1))
+        self.buttons.add_widget(self.alternate_col_button)
+        self.alternate_col_button.bind(on_press=self.alternate_cols)
+
+        # Add export button
+        self.export_button = Button(text = 'Export', background_color = (1,1,1,1))
+        self.buttons.add_widget(self.export_button)
+        self.export_button.bind(on_press=self.export_tiling)
+
+        # Add reset button
+        self.reset_button = Button(text = 'Reset', background_color = (1,1,1,1))
+        self.buttons.add_widget(self.reset_button)
+        self.reset_button.bind(on_press=self.reset)
+
+        # Add control row
+        self.controls.add_widget(self.buttons)
+        self.add_widget(self.controls)
+
+        # Add recommendation buttons
+        self.rec_left = Button(text='Previous Recommendation', background_color = (1,1,1,1))
+        self.recommend_buttons.add_widget(self.rec_left)
+        self.rec_right = Button(text='Next Recommendation', background_color = (1,1,1,1))
+        self.recommend_buttons.add_widget(self.rec_right)
+        #self.add_widget(self.recommend_buttons)
+
+    def display_initial_tiling(self):
+        # Display initial tiling
+        self.xNum = 5
+        self.yNum = 5
+        #points = [(5,5),(105,5),(125,50),(25,50)] #Rhombus
+        #points = [(0,0),(100,0),(100,100),(0,100),(0,0)] #Square
+        points = self.parent.b_coords
+        
+       # points = 
+        print("in da tessel")
+        #print(self.parent.children[0])
+        self.type = 'regular'
+        self.polygon = Polygon(points)
+        self.base_unit = self.polygon
+        polygon = self.shapely_to_kivy(self.polygon)
+        if self.type == 'regular':
+            self.tile_regular_polygon()
+        elif self.type == 'parallelogram':
+            self.tile_parallelogram()
+        elif self.type == 'hexagon':
+            self.tile_hexagon()
+
+    def set_coords(self, num):
+        self.points = num
+
+    # Tiles polygons in an xNum by yNum grid utilizing bounding boxes
+    def tile_regular_polygon(self):
+        polygon = self.shapely_to_kivy(self.polygon)
+        bounds = self.polygon.bounds
+        xInc = abs(bounds[2] - bounds[0]) * (self.xSpacing / 100)
+        yInc = abs(bounds[3] - bounds[1]) * (self.ySpacing / 100)
+
+        polygons = []
+        temp = []
         xCount = 1
-    displayPolygons(polygons, mainPlot, mainCanvas)
-    return polygons
+        yCount = 1
+        self.canvas_widget.canvas.add(Color(1., 0, 0))
 
-# Function for mirroring a polygon horizontally across its center
-# INPUT: Shapely Polygon object
-def flipPolygonHorizontally(poly):
-    pts = np.array(poly.exterior.coords)
-    return pts.dot([[-1,0],[0,1]])
+        while yCount <= self.yNum:
+            while xCount <= self.xNum:
+                xNext = xCount * xInc
+                yNext = yCount * yInc
+                count = 0
+                for p in polygon:
+                    if count % 2 == 0:
+                        temp.append(p + xNext)
+                    else:
+                        temp.append(p + yNext)
+                    count = count + 1
+                xCount = xCount + 1
+                polygons.append(temp)
+                temp = []
+            yCount = yCount + 1
+            xCount = 1
 
-# Function for rotating a polygon 180 degrees "mirroring" across its center
-# INPUT: Shapely Polygon object
-def flipPolygonVertically(poly):
-    return affinity.rotate(poly, 180)
+        self.polygons = polygons
+        self.draw_polygons()
 
-# Function for roating a polygon a set number of degrees
-# INPUT: Shapely Polygon object, number of degrees
-def rotatePolygon(poly, deg):
-    return affinity.rotate(poly, deg)
+    # tiles a parallelogram
+    def tile_parallelogram(self):
+        # calculate increment between shapes
+        bounds = self.polygon.bounds
+        count = 0
+        while count < 4:
+            if self.polygon.exterior.coords[count][0] == bounds[2]:
+                if count == 0:
+                    xInc = max(self.polygon.exterior.coords[1][0], self.polygon.exterior.coords[3][0]) - bounds[0]
+                    xInc2 = min(self.polygon.exterior.coords[1][0], self.polygon.exterior.coords[3][0]) - bounds[0] 
+                elif count == 3:
+                    xInc = max(self.polygon.exterior.coords[0][0], self.polygon.exterior.coords[2][0]) - bounds[0] 
+                    xInc2 = min(self.polygon.exterior.coords[0][0], self.polygon.exterior.coords[2][0]) - bounds[0] 
+                else:
+                    xInc = max(self.polygon.exterior.coords[count + 1][0], self.polygon.exterior.coords[count - 1][0]) - bounds[0]
+                    xInc2 = min(self.polygon.exterior.coords[count + 1][0], self.polygon.exterior.coords[count - 1][0]) - bounds[0]    
+            if self.polygon.exterior.coords[count][1] == bounds[3]:
+                if count == 0:
+                    yInc = max(self.polygon.exterior.coords[1][1], self.polygon.exterior.coords[3][1]) - bounds[1]
+                    yInc2 = min(self.polygon.exterior.coords[1][1], self.polygon.exterior.coords[3][1]) - bounds[1] 
+                elif count == 3:
+                     yInc = max(self.polygon.exterior.coords[0][1], self.polygon.exterior.coords[2][1]) - bounds[1]
+                     yInc2 = min(self.polygon.exterior.coords[0][1], self.polygon.exterior.coords[2][1]) - bounds[1]  
+                else:
+                    yInc = max(self.polygon.exterior.coords[count + 1][1], self.polygon.exterior.coords[count - 1][1]) - bounds[1]
+                    yInc2 = min(self.polygon.exterior.coords[count + 1][1], self.polygon.exterior.coords[count - 1][1]) - bounds[1]
+            count = count + 1
 
-# Exports array of multipoints into a column of X coordinates and Y coordinates
-# in a CSV file called output.csv
-# INPUT: Array of Shapely Polygon objects
-def exportTiling(polygons):
-    points = {}
-    num = 1
-    for poly in polygons:
+        xInc = xInc * (self.xSpacing / 100)
+        yInc = yInc * (self.ySpacing / 100)
+
+        xCount = 1
+        yCount = 1
+        self.polygons = []
+        while yCount <= self.yNum:
+            #xInc = xInc + xInc2
+            while xCount <= self.xNum:
+                temp = []
+                for p in self.polygon.exterior.coords:
+                    temp.append((p[0] + (xInc * xCount) + (xInc2 * (yCount)), p[1] + (yInc * yCount) + (yInc2 * (xCount))))
+                temp_poly = Polygon(temp)
+                self.polygons.append(self.shapely_to_kivy(temp_poly))
+                temp = None
+                xCount = xCount + 1
+            xCount = 1
+            yCount = yCount + 1
+        self.draw_polygons()
+
+    # tiles a hexagon
+    def tile_hexagon(self):
+        bounds = self.polygon.bounds
+        count = 0
+        while count < 6:
+            if self.polygon.exterior.coords[count][0] == bounds[2]:
+                if count == 0:
+                    xInc = max(self.polygon.exterior.coords[1][0], self.polygon.exterior.coords[5][0]) - bounds[0]
+                elif count == 5:
+                    xInc = max(self.polygon.exterior.coords[0][0], self.polygon.exterior.coords[4][0]) - bounds[0] 
+                else:
+                    xInc = max(self.polygon.exterior.coords[count + 1][0], self.polygon.exterior.coords[count - 1][0]) - bounds[0]    
+            if self.polygon.exterior.coords[count][1] == bounds[3]:
+                if count == 0:
+                    yInc = max(self.polygon.exterior.coords[1][1], self.polygon.exterior.coords[5][1]) - bounds[1]
+                elif count == 5:
+                     yInc = max(self.polygon.exterior.coords[0][1], self.polygon.exterior.coords[4][1]) - bounds[1] 
+                else:
+                    yInc = max(self.polygon.exterior.coords[count + 1][1], self.polygon.exterior.coords[count - 1][1]) - bounds[1]
+            count = count + 1
+
+        xInc = xInc * (self.xSpacing / 100)
+        yInc = yInc * (self.ySpacing / 100)
+        xCount = 1
+        yCount = 1
+        self.polygons = []
+        while yCount <= self.yNum:
+            while xCount <= self.xNum:
+                if xCount % 2 == 0:
+                    temp_inc = (yInc/4) * -1
+                else:
+                    temp_inc = (yInc/4)
+                temp = []
+                for p in self.polygon.exterior.coords:
+                    temp.append(((p[0] + (xInc * xCount)), (p[1] + (yInc * yCount))+temp_inc))
+                temp_poly = Polygon(temp)
+                self.polygons.append(self.shapely_to_kivy(temp_poly))
+                temp = None
+                xCount = xCount + 1
+            xCount = 1
+            yCount = yCount + 1
+        self.draw_polygons()
+
+    # Takes a Shapely Polygon object and converts it to an array format for display
+    # on a Kivy canvas 
+    def shapely_to_kivy(self, polygon):
+        kivy_points = []
+        for p in polygon.exterior.coords:
+            kivy_points.append(p[0])
+            kivy_points.append(p[1])
+        return kivy_points
+
+    def kivy_to_shapely(self, polygon):
+        shapely_points = []
         xs = []
         ys = []
-        for p in poly.exterior.coords:
-            xs.append(p[0])
-            ys.append(p[1])
-        points['x' + str(num)] = xs
-        points['y' + str(num)] = ys
-        num += 1
-    df = pd.DataFrame(points)
-    df.to_csv(r'Output/output.csv', index=False)
+        count = 0
+        for p in polygon:
+            if count % 2 == 0:
+                xs.append(p)
+            else:
+                ys.append(p)
+            count = count + 1
+        for (x,y) in zip(xs,ys):
+            shapely_points.append((x,y))
+        return shapely_points
+
+    # Rotates each polygon by the degrees specified by the slider
+    def rotate_polygon(self, instance, degrees):
+        self.polygon = affinity.rotate(self.base_unit, degrees)
+        scale_factor = self.slide_scale.value / 100
+        temp = []
+        for p in self.polygon.exterior.coords:
+            temp.append((p[0] * scale_factor, p[1] * scale_factor))
+        self.polygon = Polygon(temp)
+        if self.type == 'regular':
+            self.tile_regular_polygon()
+        elif self.type == 'parallelogram':
+            self.tile_parallelogram()
+        elif self.type == 'hexagon':
+            self.tile_hexagon()
+        self.label.text = 'Rotation:'
+        self.input_box.text = str(round(self.s.value, 2))
+
+    # Handles textbox input
+    def on_enter(self, value):
+        self.s.value = float(self.input_box.text)
+        self.rotate_polygon(self.input_box, float(self.input_box.text))
+
+    # flips a polygon horizontally across its center
+    def flip_horizontal(self, instance):
+        xCenter = self.polygon.centroid.x
+        flipped = []
+        for p in self.polygon.exterior.coords:
+            point = ((2 * xCenter) - p[0], p[1])
+            flipped.append(point)
+        self.polygon = Polygon(flipped)
+        polygon = self.shapely_to_kivy(self.polygon)
+        if self.type == 'regular':
+            self.tile_regular_polygon()
+        elif self.type == 'parallelogram':
+            self.tile_parallelogram()
+        elif self.type == 'hexagon':
+            self.tile_hexagon()
+
+    # flips a polygon vertically across its center
+    def flip_vertical(self, instance):
+        yCenter = self.polygon.centroid.y
+        flipped = []
+        for p in self.polygon.exterior.coords:
+            point = (p[0], (2 * yCenter) - p[1])
+            flipped.append(point)
+        self.polygon = Polygon(flipped)
+        polygon = self.shapely_to_kivy(self.polygon)
+        if self.type == 'regular':
+            self.tile_regular_polygon()
+        elif self.type == 'parallelogram':
+            self.tile_parallelogram()
+        elif self.type == 'hexagon':
+            self.tile_hexagon()
+
+    # resets the screen
+    def reset(self, instance):
+        self.slide_horizontal.value = 100
+        self.xSpacing = 100
+        self.slide_vertical.value = 100
+        self.ySpacing = 100
+        self.slide_scale.value = 100
+        self.polygon = self.base_unit
+        polygon = self.shapely_to_kivy(self.polygon)
+        if self.type == 'regular':
+            self.tile_regular_polygon()
+        elif self.type == 'parallelogram':
+            self.tile_parallelogram()
+        elif self.type == 'hexagon':
+            self.tile_hexagon()
+        self.s.value = 0
+
+    # Flips alternating rows across their center vertically
+    def alternate_rows(self, instance):
+        self.slide_horizontal.value = 100
+        self.slide_vertical.value = 100
+        bounds = self.polygon.bounds
+        xInc = abs(bounds[2] - bounds[0])
+        yInc = abs(bounds[3] - bounds[1])
+
+        polygons = []
+        temp = []
+        xCount = 1
+        yCount = 1
+        self.canvas_widget.canvas.add(Color(1., 0, 0))
+
+        while yCount <= self.yNum:
+            yCenter = self.polygon.centroid.y
+            flipped = []
+            for p in self.polygon.exterior.coords:
+                point = (p[0], (2 * yCenter) - p[1])
+                flipped.append(point)
+            self.polygon = Polygon(flipped)
+            polygon = self.shapely_to_kivy(self.polygon)
+            while xCount <= self.xNum:
+                xNext = xCount * xInc
+                yNext = yCount * yInc
+                count = 0
+                for p in polygon:
+                    if count % 2 == 0:
+                        temp.append(p + xNext)
+                    else:
+                        temp.append(p + yNext)
+                    count = count + 1
+                xCount = xCount + 1
+                polygons.append(temp)
+                temp = []
+            yCount = yCount + 1
+            xCount = 1
+
+        self.polygons = polygons
+        self.draw_polygons()
+
+    # flips alternating columns across their center horizontally
+    def alternate_cols(self, instance):
+        self.slide_horizontal.value = 100
+        self.slide_vertical.value = 100
+        bounds = self.polygon.bounds
+        xInc = abs(bounds[2] - bounds[0])
+        yInc = abs(bounds[3] - bounds[1])
+
+        polygons = []
+        temp = []
+        xCount = 1
+        yCount = 1
+        self.canvas_widget.canvas.add(Color(1., 0, 0))
+
+        while yCount <= self.yNum:
+            while xCount <= self.xNum:
+                xCenter = self.polygon.centroid.x
+                flipped = []
+                for p in self.polygon.exterior.coords:
+                    point = ((2 * xCenter) - p[0], p[1])
+                    flipped.append(point)
+                self.polygon = Polygon(flipped)
+                polygon = self.shapely_to_kivy(self.polygon)
+                
+                xNext = xCount * xInc
+                yNext = yCount * yInc
+                count = 0
+                for p in polygon:
+                    if count % 2 == 0:
+                        temp.append(p + xNext)
+                    else:
+                        temp.append(p + yNext)
+                    count = count + 1
+                xCount = xCount + 1
+                polygons.append(temp)
+                temp = []
+            yCount = yCount + 1
+            xCount = 1
+
+        self.polygons = polygons
+        self.draw_polygons()
+
+    def export_tiling(self, instance):
+        points = {}
+        num = 1
+        for poly in self.polygons:
+            xs = []
+            ys = []
+            count = 0
+            for p in poly:
+                if count % 2 == 0:
+                    xs.append(p)
+                else:
+                    ys.append(p)
+                count = count + 1
+            points['x' + str(num)] = xs
+            points['y' + str(num)] = ys
+            num += 1
+        df = pd.DataFrame(points)
+        df.to_csv(r'output.csv', index=None)
+
+    # Draws an array of polygons to the canvas
+    def draw_polygons(self):
+        self.canvas_widget.lines.clear()
+        self.canvas_widget.lines.add(Color(1., 0, 0))
+        for polygon in self.polygons:
+            self.canvas_widget.lines.add(Line(points = polygon, width=2.0))
+        self.canvas_widget.canvas.add(self.canvas_widget.lines)
+
+    # Adjusts horizontal spacing between polygons
+    def adjust_horizontal_spacing(self, instance, amount):
+        self.xSpacing = self.slide_horizontal.value
+        if self.type == 'regular':
+            self.tile_regular_polygon()
+        elif self.type == 'parallelogram':
+            self.tile_parallelogram()
+        elif self.type == 'hexagon':
+            self.tile_hexagon()
+            
+    # Adjusts vertical spacing between polygons
+    def adjust_vertical_spacing(self, instance, amount):
+        self.ySpacing = self.slide_vertical.value
+        if self.type == 'regular':
+            self.tile_regular_polygon()
+        elif self.type == 'parallelogram':
+            self.tile_parallelogram()
+        elif self.type == 'hexagon':
+            self.tile_hexagon()
+
+    def scale_polygons(self, instance, amount):
+        scale_factor = self.slide_scale.value / 100
+        temp = []
+        for p in self.base_unit.exterior.coords:
+            temp.append((p[0] * scale_factor, p[1] * scale_factor))
+        self.polygon = Polygon(temp)
+        self.polygon = affinity.rotate(self.polygon, self.s.value)
+        if self.type == 'regular':
+            self.tile_regular_polygon()
+        elif self.type == 'parallelogram':
+            self.tile_parallelogram()
+        elif self.type == 'hexagon':
+            self.tile_hexagon()
