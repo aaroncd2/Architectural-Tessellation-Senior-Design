@@ -42,12 +42,12 @@ def process_quadrilateral(shape):
     if side1_length == side3_length and side2_length == side4_length:
         return shape, "parallelogram", False, shape
     # test concavity 
-    is_convex, convex_index =  __is_convex(shape)
+    is_convex, convex_indexes =  __is_convex(shape)
     if is_convex:
         # flip around and make a hexagon
         pass
     else:
-        print(convex_index)
+        convex_index = convex_indexes[0]
         return shape, "parallelogram", False, shape
         # adapt into a parallelogram
         pass
@@ -73,17 +73,17 @@ def __is_convex(shape):
     positive_z_coords = list()
     negative_z_coords = list()
     # starting z component coord calculation
-    if (__compute_z_cross_product(coords[len(coords) - 2], coords[0], coords[1]) >= 0:
-        positive_z_coords.append(i)
+    if __compute_z_cross_product(coords[len(coords) - 2], coords[0], coords[1]) >= 0:
+        positive_z_coords.append(coords[0])
     else:   
-        negative_z_coords.append(i)
+        negative_z_coords.append(coords[0])
     # rest of the z component coord calculation
     for i in range(1, len(coords) - 1):
-        if (__compute_z_cross_product(coords[i - 1], coords[i], coords[i + 1]) >= 0:
+        if __compute_z_cross_product(coords[i - 1], coords[i], coords[i + 1]) >= 0:
             positive_z_coords.append(i)
         else:   
             negative_z_coords.append(i)
-    if len(positive_z_coords) > 0 && len(negative_z_coords) > 0:
+    if len(positive_z_coords) > 0 and len(negative_z_coords) > 0:
         if len(positive_z_coords) > len(negative_z_coords) > 0:
             return False, positive_z_coords
         else:
