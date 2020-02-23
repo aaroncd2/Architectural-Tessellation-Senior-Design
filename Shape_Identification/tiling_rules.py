@@ -48,24 +48,30 @@ def process_quadrilateral(shape):
         # trapezoid case is also in here
         pass
     else:
+        # the given shape is a concave quad, adapt into a parallelogram
         print(convex_indexes)
         convex_index = convex_indexes[0]
         print('convex_index: ', convex_index)
-        # TODO: think of edge cases
-        # TODO: loop convex index to vertex 1
-        adjacent_coord_one = coords[0]
-        opposite_coord_two = coords[2]
-        opposite_coord = coords[3]
+        # place convex index at vertex 1
+        if convex_index == 0:
+            temp_coord = coords[len(coords) - 1]
+            del coords[len(coords) - 1]
+            coords.insert(0, temp_coord)
+        elif convex_index > 1:
+            while (convex_index > 1):
+                del coords[0]
+                coords.append(coords[0])
+                convex_index -= 1
+        # calculate offsets to append for a new adapted parallelogram
         first_line_x_offset = coords[2][0] - coords[3][0]
         first_line_y_offset = coords[2][1] - coords[3][1]
         second_line_x_offset = coords[3][0] - coords[0][0]
         second_line_y_offset = coords[3][1] - coords[0][1]
         coords.append(tuple((coords[0][0] + first_line_x_offset,  coords[0][1] + first_line_y_offset)))
         coords.append(tuple((coords[5][0] + second_line_x_offset,  coords[5][1] + second_line_y_offset)))
-        exterior_coords = coords
+        exterior_coords = list(coords)
+        del exterior_coords[1] 
         return Polygon(coords), "parallelogram", True, Polygon(exterior_coords)
-        # adapt into a parallelogram
-        pass
 
 '''private helper functions'''
 def __num_sides(shape):

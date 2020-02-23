@@ -45,19 +45,18 @@ triangle_2 = Polygon([(0, 4), (0, 1), (2, -2), (0, 4)])
 triangle_3 = Polygon([(4, 4), (6, 1), (2, -2), (4, 4)])
 square = Polygon([(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)])
 rectangle = Polygon([(0, 0), (2, 0), (2, 5), (0, 5), (0, 0)])
-arrow = Polygon([(4, 5), (2.5, 3.7), (0, 4), (3, 3), (4, 5)])
+arrows = [Polygon([(4, 5), (2.5, 3.7), (0, 4), (3, 3), (4, 5)]), Polygon([(0, 0), (4, 4), (8, 0), (4, 1), (0, 0)])]
 box_c = Polygon([(10, 10), (5, 10), (5, 2), (10, 2), (10, 4), (7, 4), (7, 7), (10, 7), (10, 10)])
 
 # boolean that represents whether all the tests have passed or not
 all_tests_passed = True
 
 # calls to each series of tests
-plot_polygon(arrow)
-new_shape, polygon_type, is_transformed, exterior = tr.process_quadrilateral(arrow)
-print(new_shape, polygon_type, is_transformed, exterior)
-plot_polygon(new_shape)
-# test_regular_polygons()
-# test_convex()
+for arrow in arrows:
+    plot_polygon(arrow)
+    new_arrow, polygon_type, is_transformed, exterior = tr.process_quadrilateral(arrow)
+    plot_polygon(new_arrow)
+    plot_polygon(exterior)
 
 # logic for printing out overall test results
 if all_tests_passed:
