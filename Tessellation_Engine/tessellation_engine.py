@@ -10,6 +10,10 @@ from kivy.uix.widget import Widget
 from kivy.uix.textinput import TextInput
 from kivy.graphics import *
 
+import sys
+sys.path.insert(1, '../Shape_Identification/tiling_rules.py')
+from Shape_Identification import tiling_rules as tr
+
 from shapely.geometry import Polygon # for geometric objects
 from shapely import affinity # for transformations
 import matplotlib.pyplot as plt # for display
@@ -37,9 +41,8 @@ class TessellationWidget(GridLayout):
         self.add_widget(imageRow)
 
         self.controls = BoxLayout(orientation='horizontal', size_hint=(1,None), height=160)
-        self.buttons = GridLayout(rows=3, cols=2)
+        self.buttons = GridLayout(rows=4, cols=2)
         self.sliders = GridLayout(rows=4, cols=2)
-        self.recommend_buttons = BoxLayout(orientation='horizontal', size_hint=(1,None), height=33)
 
         # Add slider and label to widget
         self.s = Slider(min=0, max=360, value=0, value_track = True)
@@ -114,26 +117,21 @@ class TessellationWidget(GridLayout):
         self.add_widget(self.controls)
 
         # Add recommendation buttons
-        self.rec_left = Button(text='Previous Recommendation', background_color = (1,1,1,1))
-        self.recommend_buttons.add_widget(self.rec_left)
-        self.rec_right = Button(text='Next Recommendation', background_color = (1,1,1,1))
-        self.recommend_buttons.add_widget(self.rec_right)
-        #self.add_widget(self.recommend_buttons)
+        self.new_rec = Button(text='New Recommendation', background_color = (1,1,1,1))
+        self.buttons.add_widget(self.new_rec)
+        self.new_rec.bind(on_press=self.next_recommendation)
+        self.rec_type = Label(text='Type: Freeform')
+        self.buttons.add_widget(self.rec_type)
 
+    # Display initial tiling
     def display_initial_tiling(self):
-        # Display initial tiling
         self.xNum = 5
         self.yNum = 5
-        #points = [(5,5),(105,5),(125,50),(25,50)] #Rhombus
-        #points = [(0,0),(100,0),(100,100),(0,100),(0,0)] #Square
         points = self.parent.b_coords
-        
-       # points = 
-        print("in da tessel")
-        #print(self.parent.children[0])
-        self.type = 'regular'
         self.polygon = Polygon(points)
         self.base_unit = self.polygon
+        self.shape_info = tr.identify_shape(self.base_unit)
+        self.type = 'regular'
         polygon = self.shapely_to_kivy(self.polygon)
         if self.type == 'regular':
             self.tile_regular_polygon()
@@ -507,3 +505,7 @@ class TessellationWidget(GridLayout):
             self.tile_parallelogram()
         elif self.type == 'hexagon':
             self.tile_hexagon()
+
+    # displays the next recommendation to the screen
+    def next_recommendation(self, instance):
+        print(str(self.shape_info))
