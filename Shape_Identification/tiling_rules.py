@@ -20,6 +20,8 @@ def identify_shape(shape):
             return process_triangle(shape)
         elif (__num_sides == 4):
             return process_quadrilateral(shape)
+        else:
+
 
 # duplicates triangle and fit sides together to make a parallelogram
 def process_triangle(shape):
@@ -45,13 +47,10 @@ def process_quadrilateral(shape):
     is_convex, convex_indexes =  __is_convex(shape)
     if is_convex:
         # flip around and make a hexagon
-        # trapezoid case is also in here
-        pass
+        return shape, "convex_quad", False, shape
     else:
         # the given shape is a concave quad, adapt into a parallelogram
-        print(convex_indexes)
         convex_index = convex_indexes[0]
-        print('convex_index: ', convex_index)
         # place convex index at vertex 1
         if convex_index == 0:
             temp_coord = coords[len(coords) - 1]
