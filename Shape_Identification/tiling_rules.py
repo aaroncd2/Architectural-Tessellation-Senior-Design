@@ -34,7 +34,7 @@ def process_triangle(shape):
 
 # checks cases with parallelogram
 def process_quadrilateral(shape):
-    coords = shape.exterior.coords
+    coords = list(shape.exterior.coords)
     side1_length = ((coords[1][1] - coords[0][1])**2 + (coords[1][0] - coords[0][0])**2)**0.5
     side2_length = ((coords[2][1] - coords[1][1])**2 + (coords[2][0] - coords[1][0])**2)**0.5
     side3_length = ((coords[3][1] - coords[2][1])**2 + (coords[3][0] - coords[2][0])**2)**0.5
@@ -45,10 +45,25 @@ def process_quadrilateral(shape):
     is_convex, convex_indexes =  __is_convex(shape)
     if is_convex:
         # flip around and make a hexagon
+        # trapezoid case is also in here
         pass
     else:
+        print(convex_indexes)
         convex_index = convex_indexes[0]
-        return shape, "parallelogram", False, shape
+        print('convex_index: ', convex_index)
+        # TODO: think of edge cases
+        # TODO: loop convex index to vertex 1
+        adjacent_coord_one = coords[0]
+        opposite_coord_two = coords[2]
+        opposite_coord = coords[3]
+        first_line_x_offset = coords[2][0] - coords[3][0]
+        first_line_y_offset = coords[2][1] - coords[3][1]
+        second_line_x_offset = coords[3][0] - coords[0][0]
+        second_line_y_offset = coords[3][1] - coords[0][1]
+        coords.append(tuple((coords[0][0] + first_line_x_offset,  coords[0][1] + first_line_y_offset)))
+        coords.append(tuple((coords[5][0] + second_line_x_offset,  coords[5][1] + second_line_y_offset)))
+        exterior_coords = coords
+        return Polygon(coords), "parallelogram", True, Polygon(exterior_coords)
         # adapt into a parallelogram
         pass
 
@@ -74,9 +89,9 @@ def __is_convex(shape):
     negative_z_coords = list()
     # starting z component coord calculation
     if __compute_z_cross_product(coords[len(coords) - 2], coords[0], coords[1]) >= 0:
-        positive_z_coords.append(coords[0])
+        positive_z_coords.append(0)
     else:   
-        negative_z_coords.append(coords[0])
+        negative_z_coords.append(0)
     # rest of the z component coord calculation
     for i in range(1, len(coords) - 1):
         if __compute_z_cross_product(coords[i - 1], coords[i], coords[i + 1]) >= 0:
@@ -84,11 +99,13 @@ def __is_convex(shape):
         else:   
             negative_z_coords.append(i)
     if len(positive_z_coords) > 0 and len(negative_z_coords) > 0:
-        if len(positive_z_coords) > len(negative_z_coords) > 0:
-            return False, positive_z_coords
-        else:
+        # the shape is concave
+        if len(positive_z_coords) > len(negative_z_coords):
             return False, negative_z_coords
+        else:
+            return False, positive_z_coords
     else:
+        # the shape is convex
         return True, list()
             
 def __compute_z_cross_product(first_coord, second_coord, third_coord):
@@ -96,5 +113,4 @@ def __compute_z_cross_product(first_coord, second_coord, third_coord):
     dy1 = second_coord[1] - first_coord[1]
     dx2 = third_coord[0] - second_coord[0]
     dy2 = third_coord[1] - second_coord[1]
-    print(dx1 * dy2 - dy1 * dx2, ":", second_coord, "       ")
     return dx1 * dy2 - dy1 * dx2

@@ -31,7 +31,7 @@ def test_regular_polygons():
 def test_convex():
     print("-----CONVEX TEST-----")
     generic_test("square", tr.__is_convex(square)[0], True)
-    generic_test("rectangle", tr.__is_convex(rectangle[0]), True)
+    generic_test("rectangle", tr.__is_convex(rectangle)[0], True)
     generic_test("triangle_1", tr.__is_convex(triangle_1)[0], True)
     generic_test("triangle_2", tr.__is_convex(triangle_2)[0], True)
     generic_test("triangle_3", tr.__is_convex(triangle_3)[0], True)
@@ -53,7 +53,9 @@ all_tests_passed = True
 
 # calls to each series of tests
 plot_polygon(arrow)
-shape, polygon_type, is_transformed, exterior = tr.process_quadrilateral(arrow)
+new_shape, polygon_type, is_transformed, exterior = tr.process_quadrilateral(arrow)
+print(new_shape, polygon_type, is_transformed, exterior)
+plot_polygon(new_shape)
 # test_regular_polygons()
 # test_convex()
 
