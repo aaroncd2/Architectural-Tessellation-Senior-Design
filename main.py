@@ -113,7 +113,7 @@ class ReccomendationButtons(BoxLayout):
         print(self.numreccs)
         self.reccrows= GridLayout(rows=self.numreccs , cols=1)
         self.reccrows.size_hint = None, None
-        self.reccrows.size = 175, 900
+        self.reccrows.size = 175, Window.size[1]
         for k in range(0, self.numreccs):
             temp =ReccomendationButton(text = "reccomendations")
             print(temp)
