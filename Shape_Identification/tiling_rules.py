@@ -33,7 +33,7 @@ def process_triangle(shape):
     connection_coords = tuple((triangle_final_coord[0] + x_length, triangle_final_coord[1] + y_length))
     coords.append(connection_coords)
     coords.append(coords[2])
-    return (Polygon(coords), "parallelogram", True, shape)
+    return (Polygon(coords), "parallelogram", True, Polygon(coords))
 
 # checks cases with parallelogram
 def process_quadrilateral(shape):
@@ -54,9 +54,8 @@ def process_quadrilateral(shape):
         convex_index = convex_indexes[0]
         # place convex index at vertex 1
         if convex_index == 0:
-            temp_coord = coords[len(coords) - 1]
+            coords.insert(0, coords[3])
             del coords[len(coords) - 1]
-            coords.insert(0, temp_coord)
         elif convex_index > 1:
             while (convex_index > 1):
                 del coords[0]
@@ -68,7 +67,7 @@ def process_quadrilateral(shape):
         second_line_x_offset = coords[3][0] - coords[0][0]
         second_line_y_offset = coords[3][1] - coords[0][1]
         coords.append(tuple((coords[0][0] + first_line_x_offset,  coords[0][1] + first_line_y_offset)))
-        coords.append(tuple((coords[5][0] + second_line_x_offset,  coords[5][1] + second_line_y_offset)))
+        # coords.append(tuple((coords[5][0] + second_line_x_offset,  coords[5][1] + second_line_y_offset)))
         exterior_coords = list(coords)
         del exterior_coords[1] 
         return Polygon(coords), "parallelogram", True, Polygon(exterior_coords)
