@@ -27,7 +27,6 @@ from kivy.uix.gridlayout import GridLayout
 import numpy
 import os
 import sys
-<<<<<<< HEAD
 from kivy.core.window import Window
 
 Window.fullscreen = 'auto'
@@ -96,7 +95,32 @@ class FileChooser(FileChooserListView):
                 popup.dismiss()
             else:
                 self.ids.image.source = filename[0]
-                
+
+class ReccomendationButton(Button):
+    def __init__(self, **kwargs):
+        super(Button, self).__init__(**kwargs)
+        #self.size = 175, 145
+        #self.size_hint = None, None
+        
+class ReccomendationButtons(BoxLayout):
+    def __init__(self, **kwargs):
+        super(BoxLayout, self).__init__(**kwargs)
+        self.numreccs = 3 #hardcoded for now
+        
+        self.size_hint= None, None 
+        
+        print(self.numreccs)
+        self.reccrows= GridLayout(rows=self.numreccs , cols=1)
+        self.reccrows.size_hint = None, None
+        self.reccrows.size = 175, 900
+        for k in range(0, self.numreccs):
+            temp =ReccomendationButton(text)
+            print(temp)
+            self.reccrows.add_widget(temp)
+            
+        self.add_widget(self.reccrows)
+        
+        
 #layout class
 class BoxGrid(BoxLayout):
     def __init__(self, **kwargs):
@@ -104,6 +128,8 @@ class BoxGrid(BoxLayout):
         self.b_coords = f_coords
         custlay = CustomLayout()
         tessel = TessellationWidget()
+        btn = ReccomendationButtons()
+        self.add_widget(btn)
         self.add_widget(custlay)
         self.add_widget(tessel)
         tessel.display_initial_tiling()
@@ -140,28 +166,6 @@ class CustomLayout(BoxLayout):
         for points in self.c_coords:
             self.canvas.add(self.canvas_nodes[i])
             i = i + 1
-=======
-
-# imports for tiling rules
-from Shape_Identification import tiling_rules as tr
-
-class Main:
-    #starts program, creates figure and subplot
-    def __init__(self):
-        self.reccbuttonExists = False
-        self.reccbuttonPressed = False
-        self.buttonsExist = False
-        self.recNum = 0
-        self.imageFile = None
-        self.shapeCoords = None
-        self.base_unit = None
-        self.base_tiling = None
-        self.polygons = None
-        self.tesselbtns_exist = False
-        self.root = tk.Tk()
-        self.root.wm_title("DATO")
-        self.fig = Figure(figsize=(5, 4), dpi=100)
->>>>>>> prototype
         
         self.define_edge()
 
@@ -172,12 +176,11 @@ class Main:
        
     def configCoords(self):
         poly = Polygon(self.c_coords)
-        poly = affinity.translate(poly, xoff= 300, yoff= 500)
+        poly = affinity.translate(poly, xoff= 375, yoff= 500)
         # poly = affinity.scale(poly, xfact= 10, yfact= 10)
         self.c_coords = list(poly.exterior.coords)
         self.c_coords.pop(-1)
         
-<<<<<<< HEAD
         temp2 = []
         for x in self.c_coords:
             temp = []
@@ -185,33 +188,6 @@ class Main:
                 temp.append(int(y))
             temp2.append(tuple(temp))
         self.c_coords = temp2
-=======
-    
-    def _make_base_unit(self):
-        self.quitbutton.pack_forget()
-        self.basebutton.pack_forget()
-        self._process_image()
-        self.base_unit = sm.shape_model(self.shapeCoords)
-
-        # shape identification process starts here
-        tr.identify_shape(self.base_unit)
-
-        x,y = self.base_unit.exterior.xy        
-        self.subplot = self.fig.add_subplot(111)
-        self.subplot.plot(x,y)
-        self.canvas = FigureCanvasTkAgg(self.fig, master=self.root)  # A tk.DrawingArea.
-        self.canvas.draw()
-        self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-        self.toolbar = NavigationToolbar2Tk(self.canvas, self.root)
-        self.toolbar.update()
-        self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-        self.tilingbutton = tk.Button(master=self.root, text="Base Tiling", command=self._make_base_tiling)
-        self.tilingbutton.pack(side=tk.RIGHT)
-        self.quitbutton = tk.Button(master=self.root, text="Quit", command=self._quit)
-        self.quitbutton.pack(side=tk.LEFT)
-        self.newimgbtn = tk.Button(master=self.root, text="New Base Unit", command=self._new_image)
-        self.newimgbtn.pack(side=tk.LEFT)
->>>>>>> prototype
         
     def key_action(self, *args):
        
