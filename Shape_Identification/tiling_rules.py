@@ -16,7 +16,6 @@ def identify_shape(shape):
         return shape
     else:
         number_sides = __num_sides(shape)
-        print(number_sides)
         if (number_sides == 3):
             return process_triangle(shape)
         elif (number_sides == 4):
@@ -33,7 +32,7 @@ def process_triangle(shape):
     connection_coords = tuple((triangle_final_coord[0] + x_length, triangle_final_coord[1] + y_length))
     coords.append(connection_coords)
     coords.append(coords[2])
-    exterior_coords = list([coords[0], coords[1], coords[2], coords[4], coords[0]])
+    exterior_coords = list([coords[0], coords[1], coords[2], coords[4], coords[3]])
     return (Polygon(coords), "parallelogram", True, Polygon(exterior_coords))
 
 # checks cases with parallelogram
