@@ -210,6 +210,8 @@ class TessellationWidget(GridLayout):
         xInc = xInc * (self.xSpacing / 100)
         yInc = yInc * (self.ySpacing / 100)
 
+        print('Y-INC: ' + str(yInc) + ' ROW-INC: ' + str(row_inc))
+
         xCount = 1
         yCount = 1
         self.polygons = []
@@ -217,10 +219,12 @@ class TessellationWidget(GridLayout):
             while xCount <= self.xNum:
                 temp = []
                 for p in shape.exterior.coords:
-                    if yInc == row_inc:
+                    if yInc > row_inc - 5 and yInc < row_inc + 5:
                         temp.append((p[0] + (xInc * xCount) + (xInc2 * yCount), (p[1] + (yInc * yCount) + (yInc2 * xCount))))
                     else:
-                        temp.append((p[0] + (xInc * xCount), (p[1] + (yInc * yCount) + (yInc2 * xCount))))
+                        px = p[0] + ((xInc - xInc2) * yCount)
+                        py = p[1] + (row_inc * yCount)
+                        temp.append((px + (xInc * xCount), py + ((yInc * xCount))))
                 temp_poly = Polygon(temp)
                 self.polygons.append(self.shapely_to_kivy(temp_poly))
                 temp = None
