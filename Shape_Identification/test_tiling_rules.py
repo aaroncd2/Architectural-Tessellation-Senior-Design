@@ -31,7 +31,7 @@ def test_regular_polygons():
 def test_convex():
     print("-----CONVEX TEST-----")
     generic_test("square", tr.__is_convex(square)[0], True)
-    generic_test("rectangle", tr.__is_convex(rectangle[0]), True)
+    generic_test("rectangle", tr.__is_convex(rectangle)[0], True)
     generic_test("triangle_1", tr.__is_convex(triangle_1)[0], True)
     generic_test("triangle_2", tr.__is_convex(triangle_2)[0], True)
     generic_test("triangle_3", tr.__is_convex(triangle_3)[0], True)
@@ -45,17 +45,22 @@ triangle_2 = Polygon([(0, 4), (0, 1), (2, -2), (0, 4)])
 triangle_3 = Polygon([(4, 4), (6, 1), (2, -2), (4, 4)])
 square = Polygon([(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)])
 rectangle = Polygon([(0, 0), (2, 0), (2, 5), (0, 5), (0, 0)])
-arrow = Polygon([(4, 5), (2.5, 3.7), (0, 4), (3, 3), (4, 5)])
+arrows = [Polygon([(0, 0), (-2, 5), (7, 1), (-2, -2), (0, 0)]), Polygon([(4, 5), (2.5, 3.7), (0, 4), (3, 3), (4, 5)]), Polygon([(0, 0), (4, 4), (8, 0), (4, 1), (0, 0)])]
 box_c = Polygon([(10, 10), (5, 10), (5, 2), (10, 2), (10, 4), (7, 4), (7, 7), (10, 7), (10, 10)])
 
 # boolean that represents whether all the tests have passed or not
 all_tests_passed = True
 
 # calls to each series of tests
-plot_polygon(arrow)
-shape, polygon_type, is_transformed, exterior = tr.process_quadrilateral(arrow)
-# test_regular_polygons()
-# test_convex()
+plot_polygon(triangle_1)
+new_triangle_1, polygon_type, is_transformed, exterior = tr.identify_shape(triangle_1)
+plot_polygon(new_triangle_1)
+plot_polygon(exterior)
+for arrow in arrows:
+    plot_polygon(arrow)
+    new_arrow, polygon_type, is_transformed, exterior = tr.identify_shape(arrow)
+    plot_polygon(new_arrow)
+    plot_polygon(exterior)
 
 # logic for printing out overall test results
 if all_tests_passed:
