@@ -179,6 +179,7 @@ class TessellationWidget(GridLayout):
     # tiles a parallelogram
     def tile_parallelogram(self):
         # calculate increment between shapes
+        scale_factor = self.slide_scale.value / 100
         shape = self.shape_info[0]
         exterior = self.shape_info[3]
         bounds = exterior.bounds
@@ -217,12 +218,13 @@ class TessellationWidget(GridLayout):
                 temp = []
                 for p in shape.exterior.coords:
                     if yInc > row_inc - 5 and yInc < row_inc + 5:
-                        temp.append((p[0] + (xInc * xCount) + (xInc2 * yCount), (p[1] + (yInc * yCount) + (yInc2 * xCount))))
+                        temp.append(((p[0] + (xInc * xCount) + (xInc2 * yCount))*scale_factor, (p[1] + (yInc * yCount) + (yInc2 * xCount))*scale_factor))
                     else:
                         px = p[0] + ((xInc - xInc2) * yCount)
                         py = p[1] + (row_inc * yCount)
-                        temp.append((px + (xInc * xCount), py + ((yInc * xCount))))
+                        temp.append(((px + (xInc * xCount))*scale_factor, (py + ((yInc * xCount)))*scale_factor))
                 temp_poly = Polygon(temp)
+                temp_poly = affinity.rotate(temp_poly, self.s.value)
                 self.polygons.append(self.shapely_to_kivy(temp_poly))
                 temp = None
                 xCount = xCount + 1
