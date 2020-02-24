@@ -360,6 +360,17 @@ class CustomLayout(BoxLayout):
             for i in range(len( self.c_coords)):
                 self.canvas.add(self.canvas_edge[i])
                 i = i + 1
+
+            poly = []
+            i = 0
+            for xy in self.canvas_nodes:
+                poly.append(self.canvas_nodes[i].pos)
+                i = i + 1
+
+            newply = Polygon(poly)
+            newply = affinity.translate(newply, xoff= -size[0]/2, yoff= -size[1]/2)
+            self.parent.children[0].polygon = newply
+            self.parent.children[0].tile_regular_polygon()
         else:
             pass
     
