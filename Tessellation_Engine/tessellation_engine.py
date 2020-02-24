@@ -179,29 +179,32 @@ class TessellationWidget(GridLayout):
     # tiles a parallelogram
     def tile_parallelogram(self):
         # calculate increment between shapes
-        bounds = self.polygon.bounds
+        shape = self.shape_info[0]
+        exterior = self.shape_info[3]
+        bounds = exterior.bounds
+        row_inc = bounds[3] - bounds[1]
         count = 0
         while count < 4:
-            if self.polygon.exterior.coords[count][0] == bounds[2]:
+            if exterior.exterior.coords[count][0] == bounds[2]:
                 if count == 0:
-                    xInc = max(self.polygon.exterior.coords[1][0], self.polygon.exterior.coords[3][0]) - bounds[0]
-                    xInc2 = min(self.polygon.exterior.coords[1][0], self.polygon.exterior.coords[3][0]) - bounds[0] 
+                    xInc = max(exterior.exterior.coords[1][0], exterior.exterior.coords[3][0]) - bounds[0]
+                    xInc2 = min(exterior.exterior.coords[1][0], exterior.exterior.coords[3][0]) - bounds[0] 
                 elif count == 3:
-                    xInc = max(self.polygon.exterior.coords[0][0], self.polygon.exterior.coords[2][0]) - bounds[0] 
-                    xInc2 = min(self.polygon.exterior.coords[0][0], self.polygon.exterior.coords[2][0]) - bounds[0] 
+                    xInc = max(exterior.exterior.coords[0][0], exterior.exterior.coords[2][0]) - bounds[0] 
+                    xInc2 = min(exterior.exterior.coords[0][0], exterior.exterior.coords[2][0]) - bounds[0] 
                 else:
-                    xInc = max(self.polygon.exterior.coords[count + 1][0], self.polygon.exterior.coords[count - 1][0]) - bounds[0]
-                    xInc2 = min(self.polygon.exterior.coords[count + 1][0], self.polygon.exterior.coords[count - 1][0]) - bounds[0]    
-            if self.polygon.exterior.coords[count][1] == bounds[3]:
+                    xInc = max(exterior.exterior.coords[count + 1][0], exterior.exterior.coords[count - 1][0]) - bounds[0]
+                    xInc2 = min(exterior.exterior.coords[count + 1][0], exterior.exterior.coords[count - 1][0]) - bounds[0]    
+            if exterior.exterior.coords[count][1] == bounds[3]:
                 if count == 0:
-                    yInc = max(self.polygon.exterior.coords[1][1], self.polygon.exterior.coords[3][1]) - bounds[1]
-                    yInc2 = min(self.polygon.exterior.coords[1][1], self.polygon.exterior.coords[3][1]) - bounds[1] 
+                    yInc = max(exterior.exterior.coords[1][1], exterior.exterior.coords[3][1]) - bounds[1]
+                    yInc2 = min(exterior.exterior.coords[1][1], exterior.exterior.coords[3][1]) - bounds[1] 
                 elif count == 3:
-                     yInc = max(self.polygon.exterior.coords[0][1], self.polygon.exterior.coords[2][1]) - bounds[1]
-                     yInc2 = min(self.polygon.exterior.coords[0][1], self.polygon.exterior.coords[2][1]) - bounds[1]  
+                     yInc = max(exterior.exterior.coords[0][1], exterior.exterior.coords[2][1]) - bounds[1]
+                     yInc2 = min(exterior.exterior.coords[0][1], exterior.exterior.coords[2][1]) - bounds[1]  
                 else:
-                    yInc = max(self.polygon.exterior.coords[count + 1][1], self.polygon.exterior.coords[count - 1][1]) - bounds[1]
-                    yInc2 = min(self.polygon.exterior.coords[count + 1][1], self.polygon.exterior.coords[count - 1][1]) - bounds[1]
+                    yInc = max(exterior.exterior.coords[count + 1][1], exterior.exterior.coords[count - 1][1]) - bounds[1]
+                    yInc2 = min(exterior.exterior.coords[count + 1][1], exterior.exterior.coords[count - 1][1]) - bounds[1]
             count = count + 1
 
         xInc = xInc * (self.xSpacing / 100)
@@ -211,11 +214,13 @@ class TessellationWidget(GridLayout):
         yCount = 1
         self.polygons = []
         while yCount <= self.yNum:
-            #xInc = xInc + xInc2
             while xCount <= self.xNum:
                 temp = []
-                for p in self.polygon.exterior.coords:
-                    temp.append((p[0] + (xInc * xCount) + (xInc2 * (yCount)), p[1] + (yInc * yCount) + (yInc2 * (xCount))))
+                for p in shape.exterior.coords:
+                    if yInc == row_inc:
+                        temp.append((p[0] + (xInc * xCount) + (xInc2 * yCount), (p[1] + (yInc * yCount) + (yInc2 * xCount))))
+                    else:
+                        temp.append((p[0] + (xInc * xCount), (p[1] + (yInc * yCount) + (yInc2 * xCount))))
                 temp_poly = Polygon(temp)
                 self.polygons.append(self.shapely_to_kivy(temp_poly))
                 temp = None
@@ -469,7 +474,7 @@ class TessellationWidget(GridLayout):
         self.canvas_widget.lines.clear()
         self.canvas_widget.lines.add(Color(1., 0, 0))
         for polygon in self.polygons:
-            self.canvas_widget.lines.add(Line(points = polygon, width=2.0))
+            self.canvas_widget.lines.add(Line(points = polygon, width=2.0, close=False))
         self.canvas_widget.canvas.add(self.canvas_widget.lines)
 
     # Adjusts horizontal spacing between polygons
@@ -508,4 +513,18 @@ class TessellationWidget(GridLayout):
 
     # displays the next recommendation to the screen
     def next_recommendation(self, instance):
-        print(str(self.shape_info))
+        if self.type == 'regular':
+            self.type = self.shape_info[1]
+            if self.type == 'regular':
+                self.tile_regular_polygon()
+                self.rec_type.text = 'Type: Freeform'
+            elif self.type == 'parallelogram':
+                self.tile_parallelogram()
+                self.rec_type.text = 'Type: Parallelogram'
+            elif self.type == 'hexagon':
+                self.tile_hexagon()
+                self.rec_type.text = 'Type: Hexagon'
+        else:
+            self.type = 'regular'
+            self.tile_regular_polygon()
+            self.rec_type.text = 'Type: Freeform'
