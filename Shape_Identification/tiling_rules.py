@@ -68,8 +68,7 @@ def process_quadrilateral(shape):
         second_line_y_offset = coords[3][1] - coords[0][1]
         coords.append(tuple((coords[0][0] + first_line_x_offset,  coords[0][1] + first_line_y_offset)))
         coords.append(tuple((coords[5][0] + second_line_x_offset,  coords[5][1] + second_line_y_offset)))
-        exterior_coords = list(coords)
-        del exterior_coords[1] 
+        exterior_coords = list([coords[2], coords[3], coords[4], coords[5], coords[2]])
         return Polygon(coords), "parallelogram", True, Polygon(exterior_coords)
 
 '''private helper functions'''
