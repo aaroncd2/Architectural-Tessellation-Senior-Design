@@ -338,7 +338,10 @@ class CustomLayout(BoxLayout):
                         self.edge = 0
                     elif self.pressed:
                         self.pressed = False
-                        self.canvas.children.remove(self.highlight)
+                        try:
+                            self.canvas.children.remove(self.highlight)
+                        except:
+                            pass
                     return True
             
     def on_touch_move(self, touch):
