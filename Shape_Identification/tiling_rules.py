@@ -33,7 +33,8 @@ def process_triangle(shape):
     connection_coords = tuple((triangle_final_coord[0] + x_length, triangle_final_coord[1] + y_length))
     coords.append(connection_coords)
     coords.append(coords[2])
-    return (Polygon(coords), "parallelogram", True, Polygon(coords))
+    exterior_coords = list([coords[0], coords[1], coords[2], coords[4], coords[0]])
+    return (Polygon(coords), "parallelogram", True, Polygon(exterior_coords))
 
 # checks cases with parallelogram
 def process_quadrilateral(shape):
