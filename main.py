@@ -114,7 +114,7 @@ class ReccomendationButtons(BoxLayout):
         self.reccrows.size_hint = None, None
         self.reccrows.size = 175, 900
         for k in range(0, self.numreccs):
-            temp =ReccomendationButton(text)
+            temp =ReccomendationButton(text = "reccomendations")
             print(temp)
             self.reccrows.add_widget(temp)
             
