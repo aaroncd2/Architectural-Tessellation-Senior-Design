@@ -209,9 +209,6 @@ class TessellationWidget(GridLayout):
 
         xInc = xInc * (self.xSpacing / 100)
         yInc = yInc * (self.ySpacing / 100)
-
-        print('Y-INC: ' + str(yInc) + ' ROW-INC: ' + str(row_inc))
-
         xCount = 1
         yCount = 1
         self.polygons = []
