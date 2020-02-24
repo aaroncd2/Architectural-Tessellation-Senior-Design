@@ -193,7 +193,9 @@ class CustomLayout(BoxLayout):
     def key_action(self, *args):
        
         key_pressed = list(args)
+        print(key_pressed)
 
+        #Delete when pressing delete
         if key_pressed[2] == 42 and self.pressed and len(self.canvas_edge) > 3:
             self.pressed = False
             self.canvas.children.remove(self.highlight)
@@ -214,6 +216,7 @@ class CustomLayout(BoxLayout):
 
             self.draw()
 
+        #Add when pressing a
         elif key_pressed[2] == 4 and self.pressed:
             try:
                 self.canvas.children.remove(self.highlight)
@@ -225,6 +228,11 @@ class CustomLayout(BoxLayout):
             except:
                 print(' Point selected')
             self.pressed = False
+        
+        #Reset when pressing r
+        elif key_pressed[2] == 21:
+            self.c_coords = self.orgi_coords
+            self.draw()
                 
         poly = []
         i = 0
