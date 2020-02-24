@@ -531,3 +531,9 @@ class TessellationWidget(GridLayout):
             self.type = 'regular'
             self.tile_regular_polygon()
             self.rec_type.text = 'Type: Freeform'
+
+    def get_new_recommendations(self):
+        self.reset(self.base_unit)
+        self.shape_info = tr.identify_shape(self.base_unit)
+        self.type = 'regular'
+        self.rec_type.text = 'Type: Freeform'

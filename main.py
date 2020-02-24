@@ -385,6 +385,7 @@ class CustomLayout(BoxLayout):
             print(self.parent.children[0].polygon)
             self.parent.children[0].polygon = newply
             self.parent.children[0].base_unit = newply
+            self.parent.children[0].get_new_recommendations()
             print(self.parent.children[0].polygon)  
             self.parent.children[0].tile_regular_polygon()
 
