@@ -53,14 +53,14 @@ all_tests_passed = True
 
 # calls to each series of tests
 plot_polygon(triangle_1)
-new_triangle_1, polygon_type, is_transformed, exterior = tr.identify_shape(triangle_1)
-plot_polygon(new_triangle_1)
-plot_polygon(exterior)
+triangle_recommendations = tr.identify_shape(triangle_1)
+plot_polygon(triangle_recommendations[0][0])
+plot_polygon(triangle_recommendations[0][3])
 for arrow in arrows:
     plot_polygon(arrow)
-    new_arrow, polygon_type, is_transformed, exterior = tr.identify_shape(arrow)
-    plot_polygon(new_arrow)
-    plot_polygon(exterior)
+    quad_recommendations = tr.identify_shape(arrow)
+    plot_polygon(quad_recommendations[0][0])
+    plot_polygon(quad_recommendations[0][3])
 
 # logic for printing out overall test results
 if all_tests_passed:
