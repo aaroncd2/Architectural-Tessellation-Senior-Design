@@ -144,7 +144,6 @@ class CustomLayout(BoxLayout):
         Window.bind(on_key_down=self.key_action) #Binds Keyboard for key detection
 
         self.c_coords = f_coords
-        self.orgi_coords = self.c_coords
         self.pressed = False
         self.index = -1
         self.edge = -1 
@@ -189,6 +188,7 @@ class CustomLayout(BoxLayout):
                 temp.append(int(y))
             temp2.append(tuple(temp))
         self.c_coords = temp2
+        self.orgi_coords = self.c_coords
         
     def key_action(self, *args):
        
