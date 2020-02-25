@@ -9,6 +9,7 @@ from kivy.uix.label import Label
 from kivy.uix.widget import Widget
 from kivy.uix.textinput import TextInput
 from kivy.graphics import *
+from kivy.graphics.vertex_instructions import Mesh
 
 import sys
 sys.path.insert(1, '../Shape_Identification/tiling_rules.py')
@@ -207,7 +208,9 @@ class TessellationWidget(GridLayout):
                     yInc = max(exterior.exterior.coords[count + 1][1], exterior.exterior.coords[count - 1][1]) - bounds[1]
                     yInc2 = min(exterior.exterior.coords[count + 1][1], exterior.exterior.coords[count - 1][1]) - bounds[1]
             count = count + 1
-
+        
+        print('X1: ' + str(xInc) + ' X2: ' + str(xInc2))
+        print('Y1: ' + str(yInc) + ' Y2: ' + str(yInc2))
         xInc = xInc * (self.xSpacing / 100)
         yInc = yInc * (self.ySpacing / 100)
         xCount = 1
@@ -217,12 +220,9 @@ class TessellationWidget(GridLayout):
             while xCount <= self.xNum:
                 temp = []
                 for p in shape.exterior.coords:
-                    if yInc > row_inc - 5 and yInc < row_inc + 5:
-                        temp.append(((p[0] + (xInc * xCount) + (xInc2 * yCount))*scale_factor, (p[1] + (yInc * yCount) + (yInc2 * xCount))*scale_factor))
-                    else:
-                        px = p[0] + ((xInc - xInc2) * yCount)
-                        py = p[1] + (row_inc * yCount)
-                        temp.append(((px + (xInc * xCount))*scale_factor, (py + ((yInc * xCount)))*scale_factor))
+                    px = (p[0] + (xInc * xCount) + (xInc2 * (yCount - 1))) * scale_factor
+                    py = (p[1] + (yInc * yCount) + (yInc2 * (xCount - 1))) * scale_factor
+                    temp.append((px,py))
                 temp_poly = Polygon(temp)
                 temp_poly = affinity.rotate(temp_poly, self.s.value)
                 self.polygons.append(self.shapely_to_kivy(temp_poly))
@@ -478,6 +478,7 @@ class TessellationWidget(GridLayout):
         self.canvas_widget.lines.add(Color(1., 0, 0))
         for polygon in self.polygons:
             self.canvas_widget.lines.add(Line(points = polygon, width=2.0, close=False))
+            #self.canvas_widget.lines.add(Mesh(vertices = polygon))
         self.canvas_widget.canvas.add(self.canvas_widget.lines)
 
     # Adjusts horizontal spacing between polygons
