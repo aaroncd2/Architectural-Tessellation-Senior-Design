@@ -25,30 +25,35 @@ def identify_shape(shape):
 
 # duplicates triangle and fit sides together to make a parallelogram
 def process_triangle(shape):
+    recommendations = list()
     coords = list(shape.exterior.coords)
     x_length = coords[2][0] - coords[1][0]
     y_length = coords[2][1] - coords[1][1]
     triangle_final_coord = coords[len(coords) - 1]
-    connection_coords = tuple((triangle_final_coord[0] + x_length, triangle_final_coord[1] + y_length))
+    connection_coords = (triangle_final_coord[0] + x_length, triangle_final_coord[1] + y_length)
     coords.append(connection_coords)
     coords.append(coords[2])
-    exterior_coords = list([coords[0], coords[1], coords[2], coords[4], coords[3]])
-    return (Polygon(coords), "parallelogram", True, Polygon(exterior_coords))
+    exterior_coords = [coords[0], coords[1], coords[2], coords[4], coords[3]]
+    recommendations.append((Polygon(coords), "parallelogram", True, Polygon(exterior_coords)))
+    return recommendations
 
 # checks cases with parallelogram
 def process_quadrilateral(shape):
+    recommendations = list()
     coords = list(shape.exterior.coords)
     side1_length = ((coords[1][1] - coords[0][1])**2 + (coords[1][0] - coords[0][0])**2)**0.5
     side2_length = ((coords[2][1] - coords[1][1])**2 + (coords[2][0] - coords[1][0])**2)**0.5
     side3_length = ((coords[3][1] - coords[2][1])**2 + (coords[3][0] - coords[2][0])**2)**0.5
     side4_length = ((coords[4][1] - coords[3][1])**2 + (coords[4][0] - coords[3][0])**2)**0.5
     if side1_length == side3_length and side2_length == side4_length:
-        return shape, "parallelogram", False, shape
+        recommendations.append((shape, "parallelogram", False, shape))
+        return recommendations
     # test concavity 
     is_convex, convex_indexes =  __is_convex(shape)
     if is_convex:
         # flip around and make a hexagon
-        return shape, "convex_quad", False, shape
+        recommendations.append((shape, "convex_quad", False, shape))
+        return recommendations
     else:
         # the given shape is a concave quad, adapt into a parallelogram
         convex_index = convex_indexes[0]
@@ -68,10 +73,11 @@ def process_quadrilateral(shape):
         second_line_y_offset = coords[3][1] - coords[2][1]
         first_line_x_offset = coords[0][0] - coords[3][0]
         first_line_y_offset = coords[0][1] - coords[3][1]
-        coords.append(tuple((coords[6][0] + first_line_x_offset,  coords[6][1] + first_line_y_offset)))
-        coords.append(tuple((coords[7][0] + second_line_x_offset,  coords[7][1] + second_line_y_offset)))
-        exterior_coords = list([coords[0], coords[3], coords[6], coords[7], coords[0]])
-        return Polygon(coords), "parallelogram", True, Polygon(exterior_coords)
+        coords.append((coords[6][0] + first_line_x_offset,  coords[6][1] + first_line_y_offset))
+        coords.append((coords[7][0] + second_line_x_offset,  coords[7][1] + second_line_y_offset))
+        exterior_coords = [coords[0], coords[3], coords[6], coords[7], coords[0]]
+        recommendations.append((Polygon(coords), "parallelogram", True, Polygon(exterior_coords)))
+        return recommendations
 
 '''private helper functions'''
 def __num_sides(shape):
