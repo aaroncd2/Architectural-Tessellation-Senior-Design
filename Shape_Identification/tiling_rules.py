@@ -65,7 +65,7 @@ def process_quadrilateral(shape):
     # test concavity 
     is_convex, convex_indexes =  __is_convex(shape)
     if is_convex:
-        # flip around and make a hexagon
+        # return the convex quad for now
         recommendations.append((shape, "convex_quad", False, shape))
         return recommendations
     else:
