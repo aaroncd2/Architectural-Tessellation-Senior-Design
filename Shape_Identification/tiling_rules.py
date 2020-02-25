@@ -69,7 +69,7 @@ def process_quadrilateral(shape):
         recommendations.append((shape, "convex_quad", False, shape))
         return recommendations
     else:
-        # the given shape is a concave quad, adapt into a parallelogram
+        # the given shape is a concave quad
         convex_index = convex_indexes[0]
         # place convex index at vertex 1
         if convex_index == 0:
@@ -86,6 +86,8 @@ def process_quadrilateral(shape):
         third_to_zeroth_vertex_len_y = original_coords[0][1] - original_coords[3][1]
         first_to_second_vertex_len_x = original_coords[2][0] - original_coords[1][0]
         first_to_second_vertex_len_y = original_coords[2][1] - original_coords[1][1]
+        first_to_zeroth_vertex_len_x = original_coords[0][0] - original_coords[1][0]
+        first_to_zeroth_vertex_len_y = original_coords[0][1] - original_coords[1][1]
         # first recommendation: creates parallelogram wrapper around concave quadrilateral
         first_rec_coords = list(original_coords)
         first_rec_coords.append(first_rec_coords[1])
@@ -103,6 +105,21 @@ def process_quadrilateral(shape):
         second_rec_coords.append(second_rec_coords[0])
         second_rec_exterior_coords = first_rec_exterior_coords
         recommendations.append((Polygon(second_rec_coords), "parallelogram", True, Polygon(second_rec_exterior_coords)))
+        # third recommendation: creates parallelogram by duplicating concave quadrilateral then
+        # flipping across the third vertex, then bounding it with an exterior parallelogram
+        third_rec_coords = list(original_coords)
+        third_rec_coords.append(third_rec_coords[3])
+        third_rec_coords.append((third_rec_coords[3][0] - third_to_zeroth_vertex_len_x, third_rec_coords[3][1] - third_to_zeroth_vertex_len_y))
+        third_rec_coords.append((third_rec_coords[6][0] + first_to_zeroth_vertex_len_x, third_rec_coords[6][1] + first_to_zeroth_vertex_len_y))
+        third_rec_coords.append((third_rec_coords[7][0] - first_to_second_vertex_len_x, third_rec_coords[7][1] - first_to_second_vertex_len_y))
+        third_rec_coords.append(third_rec_coords[3])
+        third_rec_coords.append(third_rec_coords[0])
+        third_rec_coords.append(third_rec_coords[2])
+        third_rec_coords.append(third_rec_coords[6])
+        third_rec_coords.append(third_rec_coords[8])
+        third_rec_coords.append(third_rec_coords[0])
+        third_rec_exterior_coords = [third_rec_coords[0], third_rec_coords[2], third_rec_coords[6], third_rec_coords[8], third_rec_coords[0]]
+        recommendations.append((Polygon(third_rec_coords), "parallelogram", True, Polygon(third_rec_exterior_coords)))
         return recommendations
 
 '''private helper functions'''
