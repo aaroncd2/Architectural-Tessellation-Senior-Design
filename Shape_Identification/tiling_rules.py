@@ -54,11 +54,11 @@ def process_triangle(shape):
 # checks cases with parallelogram
 def process_quadrilateral(shape):
     recommendations = list()
-    coords = list(shape.exterior.coords)
-    side1_length = ((coords[1][1] - coords[0][1])**2 + (coords[1][0] - coords[0][0])**2)**0.5
-    side2_length = ((coords[2][1] - coords[1][1])**2 + (coords[2][0] - coords[1][0])**2)**0.5
-    side3_length = ((coords[3][1] - coords[2][1])**2 + (coords[3][0] - coords[2][0])**2)**0.5
-    side4_length = ((coords[4][1] - coords[3][1])**2 + (coords[4][0] - coords[3][0])**2)**0.5
+    original_coords = list(shape.exterior.coords)
+    side1_length = ((original_coords[1][1] - original_coords[0][1])**2 + (original_coords[1][0] - original_coords[0][0])**2)**0.5
+    side2_length = ((original_coords[2][1] - original_coords[1][1])**2 + (original_coords[2][0] - original_coords[1][0])**2)**0.5
+    side3_length = ((original_coords[3][1] - original_coords[2][1])**2 + (original_coords[3][0] - original_coords[2][0])**2)**0.5
+    side4_length = ((original_coords[4][1] - original_coords[3][1])**2 + (original_coords[4][0] - original_coords[3][0])**2)**0.5
     if side1_length == side3_length and side2_length == side4_length:
         recommendations.append((shape, "parallelogram", False, shape))
         return recommendations
@@ -73,28 +73,28 @@ def process_quadrilateral(shape):
         convex_index = convex_indexes[0]
         # place convex index at vertex 1
         if convex_index == 0:
-            coords.insert(0, coords[3])
-            del coords[len(coords) - 1]
+            original_coords.insert(0, original_coords[3])
+            del original_coords[len(original_coords) - 1]
         elif convex_index > 1:
             while (convex_index > 1):
-                del coords[0]
-                coords.append(coords[0])
+                del original_coords[0]
+                original_coords.append(original_coords[0])
                 convex_index -= 1
-        second_line_x_offset = coords[3][0] - coords[2][0]
-        second_line_y_offset = coords[3][1] - coords[2][1]
-        first_line_x_offset = coords[0][0] - coords[3][0]
-        first_line_y_offset = coords[0][1] - coords[3][1]
+        second_line_x_offset = original_coords[3][0] - original_coords[2][0]
+        second_line_y_offset = original_coords[3][1] - original_coords[2][1]
+        first_line_x_offset = original_coords[0][0] - original_coords[3][0]
+        first_line_y_offset = original_coords[0][1] - original_coords[3][1]
         # first recommendation: creates parallelogram wrapper around concave quadrilateral
-        first_rec_coords = list(coords)
+        first_rec_coords = list(original_coords)
         first_rec_coords.append(first_rec_coords[1])
         first_rec_coords.append(first_rec_coords[2])
         first_rec_coords.append((first_rec_coords[6][0] + first_line_x_offset,  first_rec_coords[6][1] + first_line_y_offset))
         first_rec_coords.append((first_rec_coords[7][0] + second_line_x_offset,  first_rec_coords[7][1] + second_line_y_offset))
-        exterior_coords = [first_rec_coords[0], first_rec_coords[3], first_rec_coords[6], first_rec_coords[7], first_rec_coords[0]]
-        recommendations.append((Polygon(first_rec_coords), "parallelogram", True, Polygon(exterior_coords)))
+        first_rec_exterior_coords = [first_rec_coords[0], first_rec_coords[3], first_rec_coords[6], first_rec_coords[7], first_rec_coords[0]]
+        recommendations.append((Polygon(first_rec_coords), "parallelogram", True, Polygon(first_rec_exterior_coords)))
         # second recommendation: creates parallelogram by duplicating concave quadrilateral then
         # flipping it on the concave side
-        second_rec_coords = list(coords)
+        second_rec_coords = list(original_coords)
         return recommendations
 
 '''private helper functions'''

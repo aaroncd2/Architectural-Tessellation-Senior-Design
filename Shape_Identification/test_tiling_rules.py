@@ -55,18 +55,18 @@ arrows = [arrow_1, arrow_2, arrow_3]
 all_tests_passed = True
 
 # calls to each series of tests
-for triangle in triangles:
-    plot_polygon(triangle)
-    triangle_recommendations = tr.identify_shape(triangle)
-    for recommendation in triangle_recommendations:
-        plot_polygon(recommendation[0])
-        plot_polygon(recommendation[3])
+# for triangle in triangles:
+    # plot_polygon(triangle)
+    # triangle_recommendations = tr.identify_shape(triangle)
+    # for recommendation in triangle_recommendations:
+        # plot_polygon(recommendation[0])
+        # plot_polygon(recommendation[3])
 
-# for arrow in arrows:
-    # plot_polygon(arrow)
-    # quad_recommendations = tr.identify_shape(arrow)
-    # plot_polygon(quad_recommendations[0][0])
-    # plot_polygon(quad_recommendations[0][3])
+for arrow in arrows:
+    plot_polygon(arrow)
+    quad_recommendations = tr.identify_shape(arrow)
+    plot_polygon(quad_recommendations[0][0])
+    plot_polygon(quad_recommendations[0][3])
 
 # logic for printing out overall test results
 if all_tests_passed:
