@@ -221,7 +221,7 @@ class CustomLayout(BoxLayout):
             try:
                 self.canvas.children.remove(self.highlight)
                 mid = midpoint(self.canvas_edge[self.index].points)
-
+                print(self.highlight.points)
                 self.c_coords.insert((self.index+1)%len(self.canvas_nodes), tuple(mid))
                 self.draw()
                 
