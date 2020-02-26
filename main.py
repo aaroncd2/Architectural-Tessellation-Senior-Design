@@ -158,8 +158,8 @@ class ReccomendationButtons(BoxLayout):
             if (k != 0):
                 the_poly = self.make_positive(self.btns_info[k][0])
                 btn_height = (Window.size[1] / self.numreccs)
-                yoff = (btn_height * k)
-                the_poly = affinity.translate(the_poly, xoff= xoff, yoff=Yoff + yoff)
+                yoff = (Yoff ) + btn_height* k
+                the_poly = affinity.translate(the_poly, xoff= xoff, yoff= yoff)
                 if xscale > yscale:
                     the_poly = affinity.scale(the_poly, xfact= xscale, yfact= yscale)
                 else:
@@ -280,7 +280,7 @@ class CustomLayout(BoxLayout):
         xscale = sizeX * .25 / xdistnace
         yscale = sizeY * .25 / ydistance
         center = (poly.centroid.coords[0])
-        xoff = (sizeX/4) - center[0]
+        xoff = ((sizeX/5) + (Window.size[0]*.14)) - center[0]
         yoff = (sizeY/4) - center[1]
 
         poly = affinity.translate(poly, xoff= xoff, yoff= yoff)
