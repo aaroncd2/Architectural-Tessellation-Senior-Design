@@ -1,5 +1,4 @@
 from kivy.app import App
-from kivy.app import App
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout 
@@ -119,10 +118,9 @@ class TessellationWidget(GridLayout):
         self.add_widget(self.controls)
 
         # Add recommendation buttons
-        self.new_rec = Button(text='New Recommendation', background_color = (1,1,1,1))
-        self.buttons.add_widget(self.new_rec)
-        self.new_rec.bind(on_press=self.next_recommendation)
-        self.rec_type = Label(text='Type: Freeform')
+        self.rec_label = Label(text='Tessellation Type:')
+        self.buttons.add_widget(self.rec_label)
+        self.rec_type = Label(text='Freeform')
         self.buttons.add_widget(self.rec_type)
 
     # Display initial tiling
@@ -182,8 +180,8 @@ class TessellationWidget(GridLayout):
     def tile_parallelogram(self):
         # calculate increment between shapes
         scale_factor = self.slide_scale.value / 100
-        shape = self.make_positive(self.shape_info[0])
-        exterior = self.make_positive(self.shape_info[3])
+        shape = self.make_positive(self.rec_shape[0])
+        exterior = self.make_positive(self.rec_shape[3])
         bounds = exterior.bounds
         count = 0
         while count < 4:
@@ -491,7 +489,6 @@ class TessellationWidget(GridLayout):
         self.canvas_widget.lines.add(Color(1., 0, 0))
         for polygon in self.polygons:
             self.canvas_widget.lines.add(Line(points = polygon, width=2.0, close=False))
-            #self.canvas_widget.lines.add(Mesh(vertices = polygon))
         self.canvas_widget.canvas.add(self.canvas_widget.lines)
 
     # Adjusts horizontal spacing between polygons
@@ -529,29 +526,18 @@ class TessellationWidget(GridLayout):
             self.tile_hexagon()
 
     # displays the next recommendation to the screen
-    def next_recommendation(self, instance):
+    def draw_recommendation(self, index):
+        self.rec_shape = self.shape_info[index]
+        self.type = self.rec_shape[1]
         if self.type == 'regular':
-            self.type = self.shape_info[1]
-            if self.type == 'regular':
-                self.tile_regular_polygon()
-                self.rec_type.text = 'Type: Freeform'
-            elif self.type == 'parallelogram':
-                self.tile_parallelogram()
-                self.rec_type.text = 'Type: Parallelogram'
-            elif self.type == 'hexagon':
-                self.tile_hexagon()
-                self.rec_type.text = 'Type: Hexagon'
-        else:
-            self.type = 'regular'
             self.tile_regular_polygon()
-            self.rec_type.text = 'Type: Freeform'
-
-    # generates new recommendations after base unit changes
-    def get_new_recommendations(self):
-        self.reset(self.base_unit)
-        self.shape_info = tr.identify_shape(self.base_unit)
-        self.type = 'regular'
-        self.rec_type.text = 'Type: Freeform'
+            self.rec_type.text = 'Freeform'
+        elif self.type == 'parallelogram':
+            self.tile_parallelogram()
+            self.rec_type.text = 'Parallelogram'
+        elif self.type == 'hexagon':
+            self.tile_hexagon()
+            self.rec_type.text = 'Hexagon'
 
     #offsets a polygon to ensure all its vertices are positive
     def make_positive(self, polygon):
