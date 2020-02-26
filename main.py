@@ -128,18 +128,42 @@ class ReccomendationButtons(BoxLayout):
         self.reccrows.size_hint = None, None
         global the_poly
         the_poly = self.make_positive(self.btns_info[0][0])
-        the_poly = affinity.translate(the_poly, xoff= 0, yoff=50 )
+
+        poly = Polygon(the_poly)
+        sizeX = Window.size[0] * (.14)
+        sizeY = Window.size[1] / self.numreccs
+        xdistnace = (poly.bounds[2] - poly.bounds[0])
+        ydistance = (poly.bounds[3] - poly.bounds[1])
+        xscale = sizeX * .5 / xdistnace
+        yscale = sizeY * .5 / ydistance
+        center = (poly.centroid.coords[0])
+        xoff = (sizeX/2) - center[0]
+        Yoff = (sizeY/2) - center[1]
+        
+        if xscale > yscale:
+            the_poly = affinity.scale(the_poly, xfact= xscale, yfact= yscale)
+        else:
+            the_poly = affinity.scale(the_poly, xfact= xscale, yfact= xscale)
+        
+        the_poly = affinity.translate(the_poly, xoff= xoff, yoff=Yoff)
+
+        
+
         the_poly = self.shapely_to_kivy(the_poly)
         with self.canvas.after:
             Line(points = the_poly)
 
-        self.reccrows.size = (Window.size[0] * (16.2/100)), Window.size[1]
+        self.reccrows.size = (Window.size[0] * (.14)), Window.size[1]
         for k in range(0, self.numreccs):
             if (k != 0):
                 the_poly = self.make_positive(self.btns_info[k][0])
                 btn_height = (Window.size[1] / self.numreccs)
-                yoff = (btn_height * k) + 50
-                the_poly = affinity.translate(the_poly, xoff= 0, yoff=yoff )
+                yoff = (btn_height * k)
+                the_poly = affinity.translate(the_poly, xoff= xoff, yoff=Yoff + yoff)
+                if xscale > yscale:
+                    the_poly = affinity.scale(the_poly, xfact= xscale, yfact= yscale)
+                else:
+                    the_poly = affinity.scale(the_poly, xfact= xscale, yfact= xscale)
                 the_poly = self.shapely_to_kivy(the_poly)
             else:
                 the_poly = None
