@@ -13,7 +13,7 @@ from shapely.geometry import Point
 def identify_shape(shape):
     if (__is_regular(shape)):
         # process to tessellation engine
-        return shape
+        return None
     else:
         number_sides = __num_sides(shape)
         if (number_sides == 3):
@@ -21,7 +21,7 @@ def identify_shape(shape):
         elif (number_sides == 4):
             return process_quadrilateral(shape)
         else:
-            pass
+            return None
 
 # duplicates triangle and fit sides together to make a parallelogram
 def process_triangle(shape):

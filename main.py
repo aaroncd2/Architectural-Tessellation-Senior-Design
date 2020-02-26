@@ -181,6 +181,8 @@ class ReccomendationButtons(BoxLayout):
                     temp.index = 1
                 elif (k ==1):
                     temp.index = 0
+            elif (self.numreccs == 1):
+                temp.index = 0
             #temp.index = k
             
             #temp.lines.add(Line(points = self.shapely_to_kivy(self.btns_info[k][0]) , width = 2.0, close = False)) 
@@ -221,15 +223,14 @@ class BoxGrid(BoxLayout):
         self.b_coords = f_coords
         custlay = CustomLayout()
         tessel = TessellationWidget()
-        
-        
         self.add_widget(custlay)
         self.add_widget(tessel)
         tessel.display_initial_tiling()
         self.main_shape_info = tessel.shape_info
-        btn = ReccomendationButtons()
-        self.add_widget(btn)
-        btn.setup_btns()
+        if (self.main_shape_info != None and len(self.main_shape_info) > 1):
+            btn = ReccomendationButtons()
+            self.add_widget(btn)
+            btn.setup_btns()
 #layout for the main canvas
 
 class CustomLayout(BoxLayout):
