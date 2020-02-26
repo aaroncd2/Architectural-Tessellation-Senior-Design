@@ -322,6 +322,7 @@ class CustomLayout(BoxLayout):
 
         newply = Polygon(poly)
         newply = affinity.translate(newply, xoff= -size[0]/2, yoff= -size[1]/2)
+        self.parent.children[1].reset(0)
         self.parent.children[1].polygon = newply
         self.parent.children[1].tile_regular_polygon()
 
@@ -457,6 +458,7 @@ class CustomLayout(BoxLayout):
 
             newply = Polygon(poly)
             newply = affinity.translate(newply, xoff= -size[0]/2, yoff= -size[1]/2)
+            self.parent.children[1].reset(0)
             self.parent.children[1].polygon = newply
             self.parent.children[1].tile_regular_polygon()
         else:
@@ -482,6 +484,7 @@ class CustomLayout(BoxLayout):
             newply = Polygon(poly)
             newply = affinity.translate(newply, xoff= -size[0]/2, yoff= -size[1]/2)
             print(self.parent.children[1].polygon)
+            self.parent.children[1].reset(0)
             self.parent.children[1].polygon = newply
             self.parent.children[1].base_unit = newply
             #self.parent.children[1].get_new_recommendations()
