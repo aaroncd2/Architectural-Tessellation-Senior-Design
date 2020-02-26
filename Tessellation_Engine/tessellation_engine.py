@@ -483,7 +483,7 @@ class TessellationWidget(GridLayout):
 
     # Draws an array of polygons to the canvas
     def draw_polygons(self):
-        #self.scale_to_fit_window()
+        self.scale_to_fit_window()
         self.canvas_widget.lines.clear()
         self.canvas_widget.lines.add(Color(1., 0, 0))
         for polygon in self.polygons:
@@ -566,19 +566,16 @@ class TessellationWidget(GridLayout):
                 return True
         return False
 
-"""
     #scales tiling before drawing to ensure it fits on window
     def scale_to_fit_window(self):
         size = Window.size
-        min_width = size[0] / 2
-        max_width = size[0]
-        min_height = self.controls.height
-        max_height = size[1]
+        max_width = size[0] / 2
+        max_height = size[1] - self.controls.height
+
         max_x = self.polygons[0][0]
         min_x = self.polygons[0][0]
         max_y = self.polygons[0][1]
         min_y = self.polygons[0][1]
-
         for polygon in self.polygons:
             count = 0
             for p in polygon:
@@ -593,31 +590,46 @@ class TessellationWidget(GridLayout):
                     if p > max_y:
                         max_y = p
                 count += 1
+
         tessel_width = max_x - min_x
         tessel_height = max_y - min_y
         new_width = tessel_width
         new_height = tessel_height
         scale_factor = 1
-        while new_width > max_width and new_height > max_height:
+        while new_width > max_width or new_height > max_height:
             scale_factor = scale_factor - .01
             new_width= tessel_width * scale_factor
             new_height = tessel_height * scale_factor
-        self.fit_to_screen(min_x, min_y, scale_factor)
-        
+       
+        max_x = max_x * scale_factor
+        min_x = min_x * scale_factor
+        max_y = max_y * scale_factor
+        min_y = min_y * scale_factor
+        xOff = 0
+        yOff = 0
+        if min_x < 0:
+            xOff = min_x * -1
+        elif max_x > (size[0] / 2):
+            xOff = min_x * -1
+        if min_y < 0:
+            yOff = min_y * -1
+        elif max_y > (size[1] - self.controls.height):
+            yOff = min_y * -1
+        self.fit_to_screen(xOff, yOff, scale_factor)
+
     # translates the bottom-left corner of the tiling to the origin of the widget
     def fit_to_screen(self, xOff, yOff, scale_factor):
-        if xOff < 0 or yOff < 0:
-            print('ERROR!!!!!!!')
         temp_polygons = []
         for polygon in self.polygons:
             count = 0
             temp_poly = []
             for p in polygon:
                 if count % 2 == 0:
-                    temp_poly.append((p - xOff) * scale_factor)
+                    temp_poly.append((p * scale_factor) + xOff)
+                    #temp_poly.append((p * scale_factor))
                 else:
-                    temp_poly.append((p - yOff) * scale_factor)
-            count += 1
+                    temp_poly.append((p * scale_factor) + yOff)
+                    #temp_poly.append((p * scale_factor))
+                count += 1
             temp_polygons.append(temp_poly)
         self.polygons = temp_polygons
-        """
