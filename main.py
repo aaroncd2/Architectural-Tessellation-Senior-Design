@@ -176,8 +176,22 @@ class CustomLayout(BoxLayout):
        
     def configCoords(self):
         poly = Polygon(self.c_coords)
-        poly = affinity.translate(poly, xoff= 375, yoff= 500)
-        # poly = affinity.scale(poly, xfact= 10, yfact= 10)
+
+        sizeX = Window.size[0]
+        sizeY = Window.size[1]
+        xdistnace = (poly.bounds[2] - poly.bounds[0])
+        ydistance = (poly.bounds[3] - poly.bounds[1])
+        xscale = sizeX * .25 / xdistnace
+        yscale = sizeY * .25 / ydistance
+        center = (poly.centroid.coords[0])
+        xoff = (sizeX/4) - center[0]
+        yoff = (sizeY/4) - center[1]
+
+        poly = affinity.translate(poly, xoff= xoff, yoff= yoff)
+        if xscale > yscale:
+            poly = affinity.scale(poly, xfact= yscale, yfact= yscale)
+        else:
+            poly = affinity.scale(poly, xfact= xscale, yfact= xscale)
         self.c_coords = list(poly.exterior.coords)
         self.c_coords.pop(-1)
         
