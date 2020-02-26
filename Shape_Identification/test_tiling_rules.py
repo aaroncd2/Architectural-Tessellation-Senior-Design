@@ -39,28 +39,35 @@ def test_convex():
     generic_test("box_c", tr.__is_convex(box_c)[0], False)
     print()
 
-# shapely shape objects
+# shapely shape objects (triangles)
 triangle_1 = Polygon([(0, 0), (2, 0), (0, 4), (0, 0)])
 triangle_2 = Polygon([(0, 4), (0, 1), (2, -2), (0, 4)])
 triangle_3 = Polygon([(4, 4), (6, 1), (2, -2), (4, 4)])
-square = Polygon([(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)])
-rectangle = Polygon([(0, 0), (2, 0), (2, 5), (0, 5), (0, 0)])
-arrows = [Polygon([(0, 0), (-2, 5), (7, 1), (-2, -2), (0, 0)]), Polygon([(4, 5), (2.5, 3.7), (0, 4), (3, 3), (4, 5)]), Polygon([(0, 0), (4, 4), (8, 0), (4, 1), (0, 0)])]
-box_c = Polygon([(10, 10), (5, 10), (5, 2), (10, 2), (10, 4), (7, 4), (7, 7), (10, 7), (10, 10)])
+triangles = [triangle_1, triangle_2, triangle_3]
+
+# shapely shape objects (convex quads)
+concave_quad_1 = Polygon([(0, 0), (-2, 5), (7, 1), (-2, -2), (0, 0)])
+concave_quad_2 = Polygon([(4, 5), (2.5, 3.7), (0, 4), (3, 3), (4, 5)])
+concave_quad_3 = Polygon([(0, 0), (4, 4), (8, 0), (4, 1), (0, 0)])
+concave_quads = [concave_quad_1, concave_quad_2, concave_quad_3]
 
 # boolean that represents whether all the tests have passed or not
 all_tests_passed = True
 
 # calls to each series of tests
-plot_polygon(triangle_1)
-new_triangle_1, polygon_type, is_transformed, exterior = tr.identify_shape(triangle_1)
-plot_polygon(new_triangle_1)
-plot_polygon(exterior)
-for arrow in arrows:
-    plot_polygon(arrow)
-    new_arrow, polygon_type, is_transformed, exterior = tr.identify_shape(arrow)
-    plot_polygon(new_arrow)
-    plot_polygon(exterior)
+# for triangle in triangles:
+    # plot_polygon(triangle)
+    # triangle_recommendations = tr.identify_shape(triangle)
+    # for recommendation in triangle_recommendations:
+        # plot_polygon(recommendation[0])
+        # plot_polygon(recommendation[3])
+
+for concave_quad in concave_quads:
+    plot_polygon(concave_quad)
+    quad_recommendations = tr.identify_shape(concave_quad)
+    for recommendation in quad_recommendations:
+        plot_polygon(recommendation[0])
+        plot_polygon(recommendation[3])
 
 # logic for printing out overall test results
 if all_tests_passed:

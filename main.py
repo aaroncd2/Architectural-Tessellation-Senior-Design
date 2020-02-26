@@ -30,8 +30,7 @@ import os
 import sys
 from kivy.core.window import Window
 
-Window.fullscreen = 'auto'
-size = Window.size
+
 
 def angle(a, c, b):
     ang = math.degrees(math.atan2(c[1]-b[1], c[0]-b[0]) - math.atan2(a[1]-b[1], a[0]-b[0]))
@@ -47,21 +46,25 @@ def midpoint(points):
 #adds button on init to open file dialog class
 class RootWidget(BoxLayout):
     def __init__(self, **kwargs):
-         super(RootWidget, self).__init__(**kwargs)
-         self.cb = Button(text='select a file')
+        super(RootWidget, self).__init__(**kwargs)
+        
+        global size
+        size = Window.size
+         #self.cb = Button(text='select a file')
          #bind and add file dialog button to root widget
-         self.cb.bind(on_press=self.file_diag)
-         self.add_widget(self.cb)
+         #self.cb.bind(on_press=self.file_diag)
+         #self.add_widget(self.cb)
+        fchooser = FileChooser()
+        self.add_widget(fchooser)
     #file dialog button callback to open popup
-    def file_diag(self,instance):
+    #def file_diag(self,instance):
         #remove button
-        self.remove_widget(self.cb)
-        global popup
+        #self.remove_widget(self.cb)
+
         #open file dialog popup
-        popup = Popup(title='Select File',
-                      content=FileChooser())
-         
-        popup.open()
+
+        #popup = Popup(title='Select File',content=FileChooser())
+        #popup.open()
                
 #gile chooser class
 class FileChooser(FileChooserListView):
@@ -92,8 +95,8 @@ class FileChooser(FileChooserListView):
                 f_coords = sm.shape_model(coo)
                 print(f_coords)
                 b_grid = BoxGrid()
-                popup.parent.add_widget(b_grid)
-                popup.dismiss()
+                self.parent.add_widget(b_grid)
+                self.parent.remove_widget(self)
             else:
                 self.ids.image.source = filename[0]
 
@@ -106,19 +109,27 @@ class ReccomendationButton(Button):
 class ReccomendationButtons(BoxLayout):
     def __init__(self, **kwargs):
         super(BoxLayout, self).__init__(**kwargs)
-        self.numreccs = 3 #hardcoded for now
+        
         
         self.size_hint= None, None 
-        
+    def setup_btns(self):
+        self.numreccs = 3 #hardcoded for now
+        self.btns_info = self.parent.main_shape_info
+        print("shape info")
+        print(self.btns_info)
         print(self.numreccs)
         self.reccrows= GridLayout(rows=self.numreccs , cols=1)
         self.reccrows.size_hint = None, None
         self.reccrows.size = 175, Window.size[1]
         for k in range(0, self.numreccs):
-            temp =ReccomendationButton(text = "reccomendations")
-            print(temp)
+            temp = ReccomendationButton()
+            #temp.lines.clear()
+            #temp.lines.add(Color(1., 0, 0))
+            #for polygon in self.btns_info[0]:
+             #   temp.lines.add(Line(points = polygon, width=2.0, close=False))
             self.reccrows.add_widget(temp)
             
+
         self.add_widget(self.reccrows)
         
         
@@ -129,11 +140,15 @@ class BoxGrid(BoxLayout):
         self.b_coords = f_coords
         custlay = CustomLayout()
         tessel = TessellationWidget()
-        btn = ReccomendationButtons()
-        self.add_widget(btn)
+        
+        
         self.add_widget(custlay)
         self.add_widget(tessel)
         tessel.display_initial_tiling()
+        self.main_shape_info = tessel.shape_info
+        btn = ReccomendationButtons()
+        self.add_widget(btn)
+        btn.setup_btns()
 #layout for the main canvas
 
 class CustomLayout(BoxLayout):
@@ -256,8 +271,8 @@ class CustomLayout(BoxLayout):
 
         newply = Polygon(poly)
         newply = affinity.translate(newply, xoff= -size[0]/2, yoff= -size[1]/2)
-        self.parent.children[0].polygon = newply
-        self.parent.children[0].tile_regular_polygon()
+        self.parent.children[1].polygon = newply
+        self.parent.children[1].tile_regular_polygon()
 
     def draw(self):
         self.canvas.clear()
@@ -415,11 +430,12 @@ class CustomLayout(BoxLayout):
             print(poly)
             newply = Polygon(poly)
             newply = affinity.translate(newply, xoff= -size[0]/2, yoff= -size[1]/2)
-            print(self.parent.children[0].polygon)
-            self.parent.children[0].polygon = newply
-            self.parent.children[0].base_unit = newply
-            print(self.parent.children[0].polygon)  
-            self.parent.children[0].tile_regular_polygon()
+            print(self.parent.children[1].polygon)
+            self.parent.children[1].polygon = newply
+            self.parent.children[1].base_unit = newply
+            self.parent.children[1].get_new_recommendations()
+            print(self.parent.children[1].polygon)  
+            self.parent.children[1].tile_regular_polygon()
 
         else:
             pass
@@ -428,10 +444,10 @@ class CustomLayout(BoxLayout):
 #main app class to build the root widget on program start
 class DatoApp(App):
     def build(self):
-       
         return RootWidget()
 
 if __name__ == '__main__':
+    Window.fullscreen = True
     DatoApp().run()
    
    

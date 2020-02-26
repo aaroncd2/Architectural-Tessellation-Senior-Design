@@ -25,53 +25,102 @@ def identify_shape(shape):
 
 # duplicates triangle and fit sides together to make a parallelogram
 def process_triangle(shape):
-    coords = list(shape.exterior.coords)
-    x_length = coords[2][0] - coords[1][0]
-    y_length = coords[2][1] - coords[1][1]
-    triangle_final_coord = coords[len(coords) - 1]
-    connection_coords = tuple((triangle_final_coord[0] + x_length, triangle_final_coord[1] + y_length))
-    coords.append(connection_coords)
-    coords.append(coords[2])
-    exterior_coords = list([coords[0], coords[1], coords[2], coords[4], coords[3]])
-    return (Polygon(coords), "parallelogram", True, Polygon(exterior_coords))
+    recommendations = list()
+    original_coords = list(shape.exterior.coords)
+    # determining lengths of each side to prepare for recommendations
+    second_to_first_vertex_len_x = original_coords[1][0] - original_coords[2][0]
+    second_to_first_vertex_len_y = original_coords[1][1] - original_coords[2][1]
+    first_to_zeroth_vertex_len_x = original_coords[0][0] - original_coords[1][0]
+    first_to_zeroth_vertex_len_y = original_coords[0][1] - original_coords[1][1]
+    # first recommendation: flip on first edge to create a parallelogram
+    first_rec_coords = list(original_coords)
+    first_rec_coords.append((first_rec_coords[0][0] + second_to_first_vertex_len_x, first_rec_coords[0][1] + second_to_first_vertex_len_y))
+    first_rec_coords.append(first_rec_coords[1])
+    first_rec_exterior_coords = [first_rec_coords[0], first_rec_coords[2], first_rec_coords[1], first_rec_coords[4], first_rec_coords[0]]
+    recommendations.append((Polygon(first_rec_coords), "parallelogram", True, Polygon(first_rec_exterior_coords)))
+    # second recommendation: reflect on zeroth point and bound the box
+    second_rec_coords = list(original_coords)
+    second_rec_coords.append((second_rec_coords[0][0] + first_to_zeroth_vertex_len_x, second_rec_coords[0][1] + first_to_zeroth_vertex_len_y))
+    second_rec_coords.append((second_rec_coords[4][0] + second_to_first_vertex_len_x, second_rec_coords[4][1] + second_to_first_vertex_len_y))
+    second_rec_coords.append(second_rec_coords[0])
+    second_rec_coords.append(second_rec_coords[1])
+    second_rec_coords.append(second_rec_coords[5])
+    second_rec_coords.append(second_rec_coords[4])
+    second_rec_coords.append(second_rec_coords[2])
+    second_rec_exterior_coords = [second_rec_coords[1], second_rec_coords[5], second_rec_coords[4], second_rec_coords[2], second_rec_coords[1]]
+    recommendations.append((Polygon(second_rec_coords), "parallelogram", True, Polygon(second_rec_exterior_coords)))
+    return recommendations
 
 # checks cases with parallelogram
 def process_quadrilateral(shape):
-    coords = list(shape.exterior.coords)
-    side1_length = ((coords[1][1] - coords[0][1])**2 + (coords[1][0] - coords[0][0])**2)**0.5
-    side2_length = ((coords[2][1] - coords[1][1])**2 + (coords[2][0] - coords[1][0])**2)**0.5
-    side3_length = ((coords[3][1] - coords[2][1])**2 + (coords[3][0] - coords[2][0])**2)**0.5
-    side4_length = ((coords[4][1] - coords[3][1])**2 + (coords[4][0] - coords[3][0])**2)**0.5
+    recommendations = list()
+    original_coords = list(shape.exterior.coords)
+    side1_length = ((original_coords[1][1] - original_coords[0][1])**2 + (original_coords[1][0] - original_coords[0][0])**2)**0.5
+    side2_length = ((original_coords[2][1] - original_coords[1][1])**2 + (original_coords[2][0] - original_coords[1][0])**2)**0.5
+    side3_length = ((original_coords[3][1] - original_coords[2][1])**2 + (original_coords[3][0] - original_coords[2][0])**2)**0.5
+    side4_length = ((original_coords[4][1] - original_coords[3][1])**2 + (original_coords[4][0] - original_coords[3][0])**2)**0.5
     if side1_length == side3_length and side2_length == side4_length:
-        return shape, "parallelogram", False, shape
+        recommendations.append((shape, "parallelogram", False, shape))
+        return recommendations
     # test concavity 
     is_convex, convex_indexes =  __is_convex(shape)
     if is_convex:
-        # flip around and make a hexagon
-        return shape, "convex_quad", False, shape
+        # return the convex quad for now
+        recommendations.append((shape, "convex_quad", False, shape))
+        return recommendations
     else:
-        # the given shape is a concave quad, adapt into a parallelogram
+        # the given shape is a concave quad
         convex_index = convex_indexes[0]
         # place convex index at vertex 1
         if convex_index == 0:
-            coords.insert(0, coords[3])
-            del coords[len(coords) - 1]
+            original_coords.insert(0, original_coords[3])
+            del original_coords[len(original_coords) - 1]
         elif convex_index > 1:
             while (convex_index > 1):
-                del coords[0]
-                coords.append(coords[0])
+                del original_coords[0]
+                original_coords.append(original_coords[0])
                 convex_index -= 1
-        # calculate offsets to append for a new adapted parallelogram
-        coords.append(coords[1])
-        coords.append(coords[2])
-        second_line_x_offset = coords[3][0] - coords[2][0]
-        second_line_y_offset = coords[3][1] - coords[2][1]
-        first_line_x_offset = coords[0][0] - coords[3][0]
-        first_line_y_offset = coords[0][1] - coords[3][1]
-        coords.append(tuple((coords[6][0] + first_line_x_offset,  coords[6][1] + first_line_y_offset)))
-        coords.append(tuple((coords[7][0] + second_line_x_offset,  coords[7][1] + second_line_y_offset)))
-        exterior_coords = list([coords[0], coords[3], coords[6], coords[7], coords[0]])
-        return Polygon(coords), "parallelogram", True, Polygon(exterior_coords)
+        second_to_third_vertex_len_x = original_coords[3][0] - original_coords[2][0]
+        second_to_third_vertex_len_y = original_coords[3][1] - original_coords[2][1]
+        third_to_zeroth_vertex_len_x = original_coords[0][0] - original_coords[3][0]
+        third_to_zeroth_vertex_len_y = original_coords[0][1] - original_coords[3][1]
+        first_to_second_vertex_len_x = original_coords[2][0] - original_coords[1][0]
+        first_to_second_vertex_len_y = original_coords[2][1] - original_coords[1][1]
+        first_to_zeroth_vertex_len_x = original_coords[0][0] - original_coords[1][0]
+        first_to_zeroth_vertex_len_y = original_coords[0][1] - original_coords[1][1]
+        # first recommendation: creates parallelogram wrapper around concave quadrilateral
+        first_rec_coords = list(original_coords)
+        first_rec_coords.append(first_rec_coords[1])
+        first_rec_coords.append(first_rec_coords[2])
+        first_rec_coords.append((first_rec_coords[6][0] + third_to_zeroth_vertex_len_x,  first_rec_coords[6][1] + third_to_zeroth_vertex_len_y))
+        first_rec_coords.append((first_rec_coords[7][0] + second_to_third_vertex_len_x,  first_rec_coords[7][1] + second_to_third_vertex_len_y))
+        first_rec_exterior_coords = [first_rec_coords[0], first_rec_coords[3], first_rec_coords[6], first_rec_coords[7], first_rec_coords[0]]
+        recommendations.append((Polygon(first_rec_coords), "parallelogram", True, Polygon(first_rec_exterior_coords)))
+        # second recommendation: creates parallelogram by duplicating concave quadrilateral then
+        # flipping it on the concave side
+        second_rec_coords = list(first_rec_coords)
+        second_rec_coords.append((second_rec_coords[0][0] + first_to_second_vertex_len_x, second_rec_coords[0][1] + first_to_second_vertex_len_y))
+        second_rec_coords.append(second_rec_coords[2])
+        second_rec_coords.append(second_rec_coords[1])
+        second_rec_coords.append(second_rec_coords[0])
+        second_rec_exterior_coords = first_rec_exterior_coords
+        recommendations.append((Polygon(second_rec_coords), "parallelogram", True, Polygon(second_rec_exterior_coords)))
+        # third recommendation: creates parallelogram by duplicating concave quadrilateral then
+        # flipping across the third vertex, then bounding it with an exterior parallelogram
+        third_rec_coords = list(original_coords)
+        third_rec_coords.append(third_rec_coords[3])
+        third_rec_coords.append((third_rec_coords[3][0] - third_to_zeroth_vertex_len_x, third_rec_coords[3][1] - third_to_zeroth_vertex_len_y))
+        third_rec_coords.append((third_rec_coords[6][0] + first_to_zeroth_vertex_len_x, third_rec_coords[6][1] + first_to_zeroth_vertex_len_y))
+        third_rec_coords.append((third_rec_coords[7][0] - first_to_second_vertex_len_x, third_rec_coords[7][1] - first_to_second_vertex_len_y))
+        third_rec_coords.append(third_rec_coords[3])
+        third_rec_coords.append(third_rec_coords[0])
+        third_rec_coords.append(third_rec_coords[2])
+        third_rec_coords.append(third_rec_coords[6])
+        third_rec_coords.append(third_rec_coords[8])
+        third_rec_coords.append(third_rec_coords[0])
+        third_rec_exterior_coords = [third_rec_coords[0], third_rec_coords[2], third_rec_coords[6], third_rec_coords[8], third_rec_coords[0]]
+        recommendations.append((Polygon(third_rec_coords), "parallelogram", True, Polygon(third_rec_exterior_coords)))
+        return recommendations
 
 '''private helper functions'''
 def __num_sides(shape):
