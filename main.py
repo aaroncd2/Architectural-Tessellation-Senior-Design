@@ -357,6 +357,7 @@ class CustomLayout(BoxLayout):
         else:
             newply = affinity.scale(newply, xfact= 1/self.xscale, yfact= 1/self.xscale)
         self.parent.children[1].reset(0)
+        self.parent.children[1].base_unit = newply
         self.parent.children[1].polygon = newply
         self.parent.children[1].tile_regular_polygon()
 
