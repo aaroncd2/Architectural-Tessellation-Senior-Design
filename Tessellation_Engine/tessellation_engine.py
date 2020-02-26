@@ -372,8 +372,8 @@ class TessellationWidget(GridLayout):
         self.ySpacing = 100
         if instance != 1:
             self.slide_scale.value = 100
-        self.base_unit = self.original_base_unit
-        self.polygon = self.original_base_unit
+        #self.base_unit = self.original_base_unit
+        self.polygon = self.base_unit
         self.tile_regular_polygon()
         self.type = 'regular'
         self.rec_type.text = 'Freeform'
