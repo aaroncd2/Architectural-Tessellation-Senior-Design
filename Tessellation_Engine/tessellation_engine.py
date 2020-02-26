@@ -527,6 +527,7 @@ class TessellationWidget(GridLayout):
 
     # displays the next recommendation to the screen
     def draw_recommendation(self, index):
+        self.reset(0)
         self.rec_shape = self.shape_info[index]
         self.type = self.rec_shape[1]
         if self.type == 'regular':
@@ -574,3 +575,22 @@ class TessellationWidget(GridLayout):
         max_width = size[0]
         min_height = self.controls.height
         max_height = size[1]
+        max_x = self.polygons[0][0]
+        min_x = self.polygons[0][0]
+        max_y = self.polygons[0][1]
+        min_y = self.polygons[0][1]
+
+        for polygon in self.polygons:
+            count = 0
+            for p in polygon:
+                if count % 2 == 0:
+                    if p < min_x:
+                        min_x = p
+                    if p > max_x:
+                        max_x = p
+                else:
+                    if p < min_y:
+                        min_y = p
+                    if p > max_y:
+                        max_y = p
+                count += 1
