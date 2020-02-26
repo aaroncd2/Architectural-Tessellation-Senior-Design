@@ -130,6 +130,7 @@ class TessellationWidget(GridLayout):
         points = self.parent.b_coords
         self.polygon = Polygon(points)
         self.base_unit = self.polygon
+        self.original_base_unit = self.polygon
         self.shape_info = tr.identify_shape(self.base_unit)
         self.type = 'regular'
         polygon = self.shapely_to_kivy(self.polygon)
@@ -218,9 +219,9 @@ class TessellationWidget(GridLayout):
         else:
             xInc3 = xInc - xInc2
             yInc3 = yInc2 + yInc
-        print(str(exterior))
-        print('X1: ' + str(xInc) + ' X2: ' + str(xInc2) + ' MAX X: ' + str(bounds[2]) + ' MIN X: ' + str(bounds[0]))
-        print('Y1: ' + str(yInc) + ' Y2: ' + str(yInc2) + ' MAX Y: ' + str(bounds[3]) + ' MIN Y: ' + str(bounds[1]))
+        #print(str(exterior))
+        #print('X1: ' + str(xInc) + ' X2: ' + str(xInc2) + ' MAX X: ' + str(bounds[2]) + ' MIN X: ' + str(bounds[0]))
+        #print('Y1: ' + str(yInc) + ' Y2: ' + str(yInc2) + ' MAX Y: ' + str(bounds[3]) + ' MIN Y: ' + str(bounds[1]))
         xInc = xInc * (self.xSpacing / 100)
         yInc = yInc * (self.ySpacing / 100)
         xCount = 1
@@ -370,14 +371,11 @@ class TessellationWidget(GridLayout):
         self.slide_vertical.value = 100
         self.ySpacing = 100
         self.slide_scale.value = 100
-        self.polygon = self.base_unit
-        polygon = self.shapely_to_kivy(self.polygon)
-        if self.type == 'regular':
-            self.tile_regular_polygon()
-        elif self.type == 'parallelogram':
-            self.tile_parallelogram()
-        elif self.type == 'hexagon':
-            self.tile_hexagon()
+        self.base_unit = self.original_base_unit
+        self.polygon = self.original_base_unit
+        self.tile_regular_polygon()
+        self.type = 'regular'
+        self.rec_type.text = 'Freeform'
         self.s.value = 0
 
     # Flips alternating rows across their center vertically
@@ -484,7 +482,7 @@ class TessellationWidget(GridLayout):
 
     # Draws an array of polygons to the canvas
     def draw_polygons(self):
-        self.scale_to_fit_window()
+        #self.scale_to_fit_window()
         self.canvas_widget.lines.clear()
         self.canvas_widget.lines.add(Color(1., 0, 0))
         for polygon in self.polygons:
@@ -567,10 +565,10 @@ class TessellationWidget(GridLayout):
                 return True
         return False
 
+"""
     #scales tiling before drawing to ensure it fits on window
     def scale_to_fit_window(self):
         size = Window.size
-        print(str(size[0]))
         min_width = size[0] / 2
         max_width = size[0]
         min_height = self.controls.height
@@ -594,3 +592,31 @@ class TessellationWidget(GridLayout):
                     if p > max_y:
                         max_y = p
                 count += 1
+        tessel_width = max_x - min_x
+        tessel_height = max_y - min_y
+        new_width = tessel_width
+        new_height = tessel_height
+        scale_factor = 1
+        while new_width > max_width and new_height > max_height:
+            scale_factor = scale_factor - .01
+            new_width= tessel_width * scale_factor
+            new_height = tessel_height * scale_factor
+        self.fit_to_screen(min_x, min_y, scale_factor)
+        
+    # translates the bottom-left corner of the tiling to the origin of the widget
+    def fit_to_screen(self, xOff, yOff, scale_factor):
+        if xOff < 0 or yOff < 0:
+            print('ERROR!!!!!!!')
+        temp_polygons = []
+        for polygon in self.polygons:
+            count = 0
+            temp_poly = []
+            for p in polygon:
+                if count % 2 == 0:
+                    temp_poly.append((p - xOff) * scale_factor)
+                else:
+                    temp_poly.append((p - yOff) * scale_factor)
+            count += 1
+            temp_polygons.append(temp_poly)
+        self.polygons = temp_polygons
+        """
