@@ -10,6 +10,7 @@ from kivy.uix.widget import Widget
 from kivy.uix.textinput import TextInput
 from kivy.graphics import *
 from kivy.graphics.vertex_instructions import Mesh
+from kivy.core.window import Window
 
 import sys
 sys.path.insert(1, '../Shape_Identification/tiling_rules.py')
@@ -181,36 +182,47 @@ class TessellationWidget(GridLayout):
     def tile_parallelogram(self):
         # calculate increment between shapes
         scale_factor = self.slide_scale.value / 100
-        shape = self.shape_info[0]
-        exterior = self.shape_info[3]
+        shape = self.make_positive(self.shape_info[0])
+        exterior = self.make_positive(self.shape_info[3])
         bounds = exterior.bounds
-        row_inc = bounds[3] - bounds[1]
         count = 0
         while count < 4:
             if exterior.exterior.coords[count][0] == bounds[2]:
                 if count == 0:
                     xInc = max(exterior.exterior.coords[1][0], exterior.exterior.coords[3][0]) - bounds[0]
-                    xInc2 = min(exterior.exterior.coords[1][0], exterior.exterior.coords[3][0]) - bounds[0] 
                 elif count == 3:
                     xInc = max(exterior.exterior.coords[0][0], exterior.exterior.coords[2][0]) - bounds[0] 
-                    xInc2 = min(exterior.exterior.coords[0][0], exterior.exterior.coords[2][0]) - bounds[0] 
                 else:
-                    xInc = max(exterior.exterior.coords[count + 1][0], exterior.exterior.coords[count - 1][0]) - bounds[0]
-                    xInc2 = min(exterior.exterior.coords[count + 1][0], exterior.exterior.coords[count - 1][0]) - bounds[0]    
+                    xInc = max(exterior.exterior.coords[count + 1][0], exterior.exterior.coords[count - 1][0]) - bounds[0]   
             if exterior.exterior.coords[count][1] == bounds[3]:
                 if count == 0:
-                    yInc = max(exterior.exterior.coords[1][1], exterior.exterior.coords[3][1]) - bounds[1]
-                    yInc2 = min(exterior.exterior.coords[1][1], exterior.exterior.coords[3][1]) - bounds[1] 
+                    if self.max_x_is_max_y(exterior):
+                        yInc = min(exterior.exterior.coords[1][1], exterior.exterior.coords[3][1]) - bounds[1]
+                    else:
+                        yInc = max(exterior.exterior.coords[1][1], exterior.exterior.coords[3][1]) - bounds[1]
                 elif count == 3:
-                     yInc = max(exterior.exterior.coords[0][1], exterior.exterior.coords[2][1]) - bounds[1]
-                     yInc2 = min(exterior.exterior.coords[0][1], exterior.exterior.coords[2][1]) - bounds[1]  
+                    if self.max_x_is_max_y(exterior):
+                        yInc = min(exterior.exterior.coords[0][1], exterior.exterior.coords[2][1]) - bounds[1]
+                    else:
+                        yInc = max(exterior.exterior.coords[0][1], exterior.exterior.coords[2][1]) - bounds[1]
                 else:
-                    yInc = max(exterior.exterior.coords[count + 1][1], exterior.exterior.coords[count - 1][1]) - bounds[1]
-                    yInc2 = min(exterior.exterior.coords[count + 1][1], exterior.exterior.coords[count - 1][1]) - bounds[1]
+                    if self.max_x_is_max_y(exterior):
+                        yInc = min(exterior.exterior.coords[count + 1][1], exterior.exterior.coords[count - 1][1]) - bounds[1]
+                    else:
+                        yInc = max(exterior.exterior.coords[count + 1][1], exterior.exterior.coords[count - 1][1]) - bounds[1]
             count = count + 1
-        
-        print('X1: ' + str(xInc) + ' X2: ' + str(xInc2))
-        print('Y1: ' + str(yInc) + ' Y2: ' + str(yInc2))
+
+        xInc2 = abs((bounds[2]-bounds[0]) - xInc)
+        yInc2 = abs((bounds[3] - bounds[1])- yInc)
+        if self.max_x_is_max_y(exterior):
+            xInc3 = xInc2
+            yInc3 = yInc2
+        else:
+            xInc3 = xInc - xInc2
+            yInc3 = yInc2 + yInc
+        print(str(exterior))
+        print('X1: ' + str(xInc) + ' X2: ' + str(xInc2) + ' MAX X: ' + str(bounds[2]) + ' MIN X: ' + str(bounds[0]))
+        print('Y1: ' + str(yInc) + ' Y2: ' + str(yInc2) + ' MAX Y: ' + str(bounds[3]) + ' MIN Y: ' + str(bounds[1]))
         xInc = xInc * (self.xSpacing / 100)
         yInc = yInc * (self.ySpacing / 100)
         xCount = 1
@@ -220,8 +232,8 @@ class TessellationWidget(GridLayout):
             while xCount <= self.xNum:
                 temp = []
                 for p in shape.exterior.coords:
-                    px = (p[0] + (xInc * xCount) + (xInc2 * (yCount - 1))) * scale_factor
-                    py = (p[1] + (yInc * yCount) + (yInc2 * (xCount - 1))) * scale_factor
+                    px = ((p[0] + (xInc * xCount)) * scale_factor)  + ((xInc3 * (yCount - 1)) * scale_factor)
+                    py = ((p[1] + (yInc * xCount)) * scale_factor) + ((yInc3 * (yCount - 1)) * scale_factor)
                     temp.append((px,py))
                 temp_poly = Polygon(temp)
                 temp_poly = affinity.rotate(temp_poly, self.s.value)
@@ -474,6 +486,7 @@ class TessellationWidget(GridLayout):
 
     # Draws an array of polygons to the canvas
     def draw_polygons(self):
+        self.scale_to_fit_window()
         self.canvas_widget.lines.clear()
         self.canvas_widget.lines.add(Color(1., 0, 0))
         for polygon in self.polygons:
@@ -533,8 +546,45 @@ class TessellationWidget(GridLayout):
             self.tile_regular_polygon()
             self.rec_type.text = 'Type: Freeform'
 
+    # generates new recommendations after base unit changes
     def get_new_recommendations(self):
         self.reset(self.base_unit)
         self.shape_info = tr.identify_shape(self.base_unit)
         self.type = 'regular'
         self.rec_type.text = 'Type: Freeform'
+
+    #offsets a polygon to ensure all its vertices are positive
+    def make_positive(self, polygon):
+        bounds = polygon.bounds
+        temp = []
+        if bounds[0] < 0 and bounds[1] < 0:
+            for p in polygon.exterior.coords:
+                temp.append((p[0] + abs(bounds[0]), p[1] + abs(bounds[1])))
+            return Polygon(temp)
+        elif bounds[1] < 0:
+            for p in polygon.exterior.coords:
+                temp.append((p[0], p[1] + abs(bounds[1])))
+            return Polygon(temp)
+        elif bounds[0] < 0:
+            for p in polygon.exterior.coords:
+                temp.append((p[0] + abs(bounds[0]), p[1]))
+            return Polygon(temp)
+        else:
+            return polygon
+
+    # determines if a coordinate in a shape is (maxX, maxY)
+    def max_x_is_max_y(self, polygon):
+        bounds = polygon.bounds
+        for p in polygon.exterior.coords:
+            if (p[0] == bounds[2] and p[1] == bounds[3]):
+                return True
+        return False
+
+    #scales tiling before drawing to ensure it fits on window
+    def scale_to_fit_window(self):
+        size = Window.size
+        print(str(size[0]))
+        min_width = size[0] / 2
+        max_width = size[0]
+        min_height = self.controls.height
+        max_height = size[1]
