@@ -145,7 +145,13 @@ class ReccomendationButtons(BoxLayout):
                 the_poly = None
             temp = ReccomendationButton()
             the_poly = None
-            temp.index = k
+            if (k==0):
+                temp.index = 2
+            elif (k ==1):
+                temp.index = 1
+            elif (k == 2):
+                temp.index = 0
+            #temp.index = k
             
             #temp.lines.add(Line(points = self.shapely_to_kivy(self.btns_info[k][0]) , width = 2.0, close = False)) 
             self.reccrows.add_widget(temp)            
