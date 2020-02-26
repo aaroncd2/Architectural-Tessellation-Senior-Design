@@ -227,9 +227,9 @@ class BoxGrid(BoxLayout):
         self.add_widget(tessel)
         tessel.display_initial_tiling()
         self.main_shape_info = tessel.shape_info
+        btn = ReccomendationButtons()
+        self.add_widget(btn)
         if (self.main_shape_info != None and len(self.main_shape_info) > 1):
-            btn = ReccomendationButtons()
-            self.add_widget(btn)
             btn.setup_btns()
 #layout for the main canvas
 
