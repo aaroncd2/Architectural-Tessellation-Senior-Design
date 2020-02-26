@@ -47,7 +47,6 @@ def midpoint(points):
 class RootWidget(BoxLayout):
     def __init__(self, **kwargs):
         super(RootWidget, self).__init__(**kwargs)
-        
         global size
         size = Window.size
          #self.cb = Button(text='select a file')
@@ -60,9 +59,7 @@ class RootWidget(BoxLayout):
     #def file_diag(self,instance):
         #remove button
         #self.remove_widget(self.cb)
-
         #open file dialog popup
-
         #popup = Popup(title='Select File',content=FileChooser())
         #popup.open()
                
@@ -109,13 +106,11 @@ class ReccomendationButton(Button):
             with self.canvas.after:
                 Line(points = the_poly)
             with self.canvas.before:
-                Line(points = the_poly)
+                Line(points = the_poly) 
 
-        
-        #self.size_hint = None, None
     def on_press(self, **kwargs):
         print(self.index)
-       # self.parent.parent.parent.children[1].draw_reccommendation(self.index)
+        self.parent.parent.parent.children[1].draw_recommendation(self.index)
 class ReccomendationButtons(BoxLayout):
     def __init__(self, **kwargs):
         super(BoxLayout, self).__init__(**kwargs)
@@ -482,7 +477,7 @@ class CustomLayout(BoxLayout):
             print(self.parent.children[1].polygon)
             self.parent.children[1].polygon = newply
             self.parent.children[1].base_unit = newply
-            self.parent.children[1].get_new_recommendations()
+            #self.parent.children[1].get_new_recommendations()
             print(self.parent.children[1].polygon)  
             self.parent.children[1].tile_regular_polygon()
 
