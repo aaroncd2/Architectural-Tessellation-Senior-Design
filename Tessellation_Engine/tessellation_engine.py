@@ -370,7 +370,8 @@ class TessellationWidget(GridLayout):
         self.xSpacing = 100
         self.slide_vertical.value = 100
         self.ySpacing = 100
-        self.slide_scale.value = 100
+        if instance != 1:
+            self.slide_scale.value = 100
         self.base_unit = self.original_base_unit
         self.polygon = self.original_base_unit
         self.tile_regular_polygon()
@@ -561,7 +562,7 @@ class TessellationWidget(GridLayout):
     def max_x_is_max_y(self, polygon):
         bounds = polygon.bounds
         for p in polygon.exterior.coords:
-            if (p[0] == bounds[2] and p[1] == bounds[3]):
+            if (p[0] == bounds[2] and p[1] == bounds[3]) or (p[0] == bounds[0] and p[1] == bounds[3]):
                 return True
         return False
 
