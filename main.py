@@ -406,8 +406,8 @@ class CustomLayout(BoxLayout):
 
             newply = Polygon(poly)
             newply = affinity.translate(newply, xoff= -size[0]/2, yoff= -size[1]/2)
-            self.parent.children[0].polygon = newply
-            self.parent.children[0].tile_regular_polygon()
+            self.parent.children[1].polygon = newply
+            self.parent.children[1].tile_regular_polygon()
         else:
             pass
     
