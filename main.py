@@ -132,7 +132,8 @@ class ReccomendationButtons(BoxLayout):
         the_poly = self.shapely_to_kivy(the_poly)
         with self.canvas.after:
             Line(points = the_poly)
-        self.reccrows.size = 175, Window.size[1]
+
+        self.reccrows.size = (Window.size[0] * (16.2/100)), Window.size[1]
         for k in range(0, self.numreccs):
             if (k != 0):
                 the_poly = self.make_positive(self.btns_info[k][0])
