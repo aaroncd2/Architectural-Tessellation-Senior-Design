@@ -447,7 +447,7 @@ class DatoApp(App):
         return RootWidget()
 
 if __name__ == '__main__':
-    Window.fullscreen = True
+    Window.fullscreen = "auto"
     DatoApp().run()
    
    
