@@ -104,8 +104,18 @@ class ReccomendationButton(Button):
     def __init__(self, **kwargs):
         super(Button, self).__init__(**kwargs)
         #self.size = 175, 145
-        #self.size_hint = None, None
+        self.index = None
+        if (the_poly != None):
+            with self.canvas.after:
+                Line(points = the_poly)
+            with self.canvas.before:
+                Line(points = the_poly)
+
         
+        #self.size_hint = None, None
+    def on_press(self, **kwargs):
+        print(self.index)
+       # self.parent.parent.parent.children[1].draw_reccommendation(self.index)
 class ReccomendationButtons(BoxLayout):
     def __init__(self, **kwargs):
         super(BoxLayout, self).__init__(**kwargs)
@@ -113,25 +123,64 @@ class ReccomendationButtons(BoxLayout):
         
         self.size_hint= None, None 
     def setup_btns(self):
-        self.numreccs = 3 #hardcoded for now
+        
         self.btns_info = self.parent.main_shape_info
+        self.numreccs = len(self.btns_info) #hardcoded for now
         print("shape info")
         print(self.btns_info)
         print(self.numreccs)
         self.reccrows= GridLayout(rows=self.numreccs , cols=1)
         self.reccrows.size_hint = None, None
+        global the_poly
+        the_poly = self.make_positive(self.btns_info[0][0])
+        the_poly = affinity.translate(the_poly, xoff= 0, yoff=50 )
+        the_poly = self.shapely_to_kivy(the_poly)
+        with self.canvas.after:
+            Line(points = the_poly)
         self.reccrows.size = 175, Window.size[1]
         for k in range(0, self.numreccs):
+            if (k != 0):
+                the_poly = self.make_positive(self.btns_info[k][0])
+                btn_height = (Window.size[1] / self.numreccs)
+                yoff = (btn_height * k) + 50
+                the_poly = affinity.translate(the_poly, xoff= 0, yoff=yoff )
+                the_poly = self.shapely_to_kivy(the_poly)
+            else:
+                the_poly = None
             temp = ReccomendationButton()
-            #temp.lines.clear()
-            #temp.lines.add(Color(1., 0, 0))
-            #for polygon in self.btns_info[0]:
-             #   temp.lines.add(Line(points = polygon, width=2.0, close=False))
-            self.reccrows.add_widget(temp)
+            the_poly = None
+            temp.index = k
             
+            #temp.lines.add(Line(points = self.shapely_to_kivy(self.btns_info[k][0]) , width = 2.0, close = False)) 
+            self.reccrows.add_widget(temp)            
 
         self.add_widget(self.reccrows)
-        
+    
+    def shapely_to_kivy(self, polygon):
+        kivy_points = []
+        for p in polygon.exterior.coords:
+            kivy_points.append(p[0])
+            kivy_points.append(p[1])
+        return kivy_points
+    #offsets a polygon to ensure all its vertices are positive
+    def make_positive(self, polygon):
+        bounds = polygon.bounds
+        temp = []
+        if bounds[0] < 0 and bounds[1] < 0:
+            for p in polygon.exterior.coords:
+                temp.append((p[0] + abs(bounds[0]), p[1] + abs(bounds[1])))
+            return Polygon(temp)
+        elif bounds[1] < 0:
+            for p in polygon.exterior.coords:
+                temp.append((p[0], p[1] + abs(bounds[1])))
+            return Polygon(temp)
+        elif bounds[0] < 0:
+            for p in polygon.exterior.coords:
+                temp.append((p[0] + abs(bounds[0]), p[1]))
+            return Polygon(temp)
+        else:
+            return polygon
+
         
 #layout class
 class BoxGrid(BoxLayout):
@@ -447,7 +496,7 @@ class DatoApp(App):
         return RootWidget()
 
 if __name__ == '__main__':
-    Window.fullscreen = "auto"
+    Window.fullscreen = False
     DatoApp().run()
    
    
