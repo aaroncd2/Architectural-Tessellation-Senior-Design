@@ -21,6 +21,7 @@ import matplotlib.pyplot as plt # for display
 import math # for trig functions
 import pandas as pd # for export
 import numpy as np # for math
+from Tessellation_Engine import tessellation_utilities as tu #for utility functions
 
 ### START TESSELLATION ENGINE ###
 class CanvasWidget(RelativeLayout):
@@ -133,7 +134,7 @@ class TessellationWidget(GridLayout):
         self.original_base_unit = self.polygon
         self.shape_info = tr.identify_shape(self.base_unit)
         self.type = 'regular'
-        polygon = self.shapely_to_kivy(self.polygon)
+        polygon = tu.shapely_to_kivy(self.polygon)
         if self.type == 'regular':
             self.tile_regular_polygon()
         elif self.type == 'parallelogram':
@@ -146,7 +147,7 @@ class TessellationWidget(GridLayout):
 
     # Tiles polygons in an xNum by yNum grid utilizing bounding boxes
     def tile_regular_polygon(self):
-        polygon = self.shapely_to_kivy(self.polygon)
+        polygon = tu.shapely_to_kivy(self.polygon)
         bounds = self.polygon.bounds
         xInc = abs(bounds[2] - bounds[0]) * (self.xSpacing / 100)
         yInc = abs(bounds[3] - bounds[1]) * (self.ySpacing / 100)
@@ -181,8 +182,8 @@ class TessellationWidget(GridLayout):
     def tile_parallelogram(self):
         # calculate increment between shapes
         scale_factor = self.slide_scale.value / 100
-        shape = self.make_positive(self.rec_shape[0])
-        exterior = self.make_positive(self.rec_shape[3])
+        shape = tu.make_positive(self.rec_shape[0])
+        exterior = tu.make_positive(self.rec_shape[3])
         bounds = exterior.bounds
         count = 0
         while count < 4:
@@ -236,7 +237,7 @@ class TessellationWidget(GridLayout):
                     temp.append((px,py))
                 temp_poly = Polygon(temp)
                 temp_poly = affinity.rotate(temp_poly, self.s.value)
-                self.polygons.append(self.shapely_to_kivy(temp_poly))
+                self.polygons.append(tu.shapely_to_kivy(temp_poly))
                 temp = None
                 xCount = xCount + 1
             xCount = 1
@@ -279,36 +280,12 @@ class TessellationWidget(GridLayout):
                 for p in self.polygon.exterior.coords:
                     temp.append(((p[0] + (xInc * xCount)), (p[1] + (yInc * yCount))+temp_inc))
                 temp_poly = Polygon(temp)
-                self.polygons.append(self.shapely_to_kivy(temp_poly))
+                self.polygons.append(tu.shapely_to_kivy(temp_poly))
                 temp = None
                 xCount = xCount + 1
             xCount = 1
             yCount = yCount + 1
         self.draw_polygons()
-
-    # Takes a Shapely Polygon object and converts it to an array format for display
-    # on a Kivy canvas 
-    def shapely_to_kivy(self, polygon):
-        kivy_points = []
-        for p in polygon.exterior.coords:
-            kivy_points.append(p[0])
-            kivy_points.append(p[1])
-        return kivy_points
-
-    def kivy_to_shapely(self, polygon):
-        shapely_points = []
-        xs = []
-        ys = []
-        count = 0
-        for p in polygon:
-            if count % 2 == 0:
-                xs.append(p)
-            else:
-                ys.append(p)
-            count = count + 1
-        for (x,y) in zip(xs,ys):
-            shapely_points.append((x,y))
-        return shapely_points
 
     # Rotates each polygon by the degrees specified by the slider
     def rotate_polygon(self, instance, degrees):
@@ -340,7 +317,7 @@ class TessellationWidget(GridLayout):
             point = ((2 * xCenter) - p[0], p[1])
             flipped.append(point)
         self.polygon = Polygon(flipped)
-        polygon = self.shapely_to_kivy(self.polygon)
+        polygon = tu.shapely_to_kivy(self.polygon)
         if self.type == 'regular':
             self.tile_regular_polygon()
         elif self.type == 'parallelogram':
@@ -356,7 +333,7 @@ class TessellationWidget(GridLayout):
             point = (p[0], (2 * yCenter) - p[1])
             flipped.append(point)
         self.polygon = Polygon(flipped)
-        polygon = self.shapely_to_kivy(self.polygon)
+        polygon = tu.shapely_to_kivy(self.polygon)
         if self.type == 'regular':
             self.tile_regular_polygon()
         elif self.type == 'parallelogram':
@@ -400,7 +377,7 @@ class TessellationWidget(GridLayout):
                 point = (p[0], (2 * yCenter) - p[1])
                 flipped.append(point)
             self.polygon = Polygon(flipped)
-            polygon = self.shapely_to_kivy(self.polygon)
+            polygon = tu.shapely_to_kivy(self.polygon)
             while xCount <= self.xNum:
                 xNext = xCount * xInc
                 yNext = yCount * yInc
@@ -442,7 +419,7 @@ class TessellationWidget(GridLayout):
                     point = ((2 * xCenter) - p[0], p[1])
                     flipped.append(point)
                 self.polygon = Polygon(flipped)
-                polygon = self.shapely_to_kivy(self.polygon)
+                polygon = tu.shapely_to_kivy(self.polygon)
                 
                 xNext = xCount * xInc
                 yNext = yCount * yInc
@@ -462,6 +439,7 @@ class TessellationWidget(GridLayout):
         self.polygons = polygons
         self.draw_polygons()
 
+    # Exports the currently displayed polygons to a CSV file
     def export_tiling(self, instance):
         points = {}
         num = 1
@@ -538,25 +516,6 @@ class TessellationWidget(GridLayout):
         elif self.type == 'hexagon':
             self.tile_hexagon()
             self.rec_type.text = 'Hexagon'
-
-    #offsets a polygon to ensure all its vertices are positive
-    def make_positive(self, polygon):
-        bounds = polygon.bounds
-        temp = []
-        if bounds[0] < 0 and bounds[1] < 0:
-            for p in polygon.exterior.coords:
-                temp.append((p[0] + abs(bounds[0]), p[1] + abs(bounds[1])))
-            return Polygon(temp)
-        elif bounds[1] < 0:
-            for p in polygon.exterior.coords:
-                temp.append((p[0], p[1] + abs(bounds[1])))
-            return Polygon(temp)
-        elif bounds[0] < 0:
-            for p in polygon.exterior.coords:
-                temp.append((p[0] + abs(bounds[0]), p[1]))
-            return Polygon(temp)
-        else:
-            return polygon
 
     # determines if a coordinate in a shape is (maxX, maxY)
     def max_x_is_max_y(self, polygon):
