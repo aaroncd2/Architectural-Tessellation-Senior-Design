@@ -22,6 +22,7 @@ import math # for trig functions
 import pandas as pd # for export
 import numpy as np # for math
 from Tessellation_Engine import tessellation_utilities as tu #for utility functions
+from Tessellation_Engine.save_dialog import SaveDialog
 
 ### START TESSELLATION ENGINE ###
 class CanvasWidget(RelativeLayout):
@@ -360,6 +361,7 @@ class TessellationWidget(GridLayout):
     def alternate_rows(self, instance):
         self.slide_horizontal.value = 100
         self.slide_vertical.value = 100
+        self.polygon = Polygon(tu.kivy_to_shapely(self.polygons[0]))
         bounds = self.polygon.bounds
         xInc = abs(bounds[2] - bounds[0])
         yInc = abs(bounds[3] - bounds[1])
@@ -456,8 +458,9 @@ class TessellationWidget(GridLayout):
             points['x' + str(num)] = xs
             points['y' + str(num)] = ys
             num += 1
-        df = pd.DataFrame(points)
-        df.to_csv(r'output.csv', index=None)
+        self.df = pd.DataFrame(points)
+        #df.to_csv(r'output.csv', index=None)
+        SaveDialog(self).open()
 
     # Draws an array of polygons to the canvas
     def draw_polygons(self):
