@@ -459,7 +459,6 @@ class TessellationWidget(GridLayout):
             points['y' + str(num)] = ys
             num += 1
         self.df = pd.DataFrame(points)
-        #df.to_csv(r'output.csv', index=None)
         SaveDialog(self).open()
 
     # Draws an array of polygons to the canvas

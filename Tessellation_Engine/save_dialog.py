@@ -16,7 +16,7 @@ class SaveDialog(Popup):
         self.title = 'Save Your Tiling'
         self.content = GridLayout(rows=3, cols=2)
 
-        self.label = Label(text='Please enter name for output CSV file, do not include .csv extension')
+        self.label = Label(text='Please enter name for output CSV file, do not include .csv extension.\nSaved tilings can be found in the Saved_Tilings directory')
         self.input_box = TextInput(text='', multiline=False, font_size=32)
 
         self.save_button = Button(text='Save')
