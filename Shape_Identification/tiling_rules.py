@@ -11,7 +11,6 @@ from shapely.geometry import Point
 # central function that takes in
 # a shape and identifies / manipulate it
 def identify_shape(shape):
-<<<<<<< HEAD
     number_sides = __num_sides(shape)
     if (number_sides == 3):
         return process_triangle(shape)
@@ -20,19 +19,6 @@ def identify_shape(shape):
     else:
         # return empty list for no recommendations found
         return list()
-=======
-    if (__is_regular(shape)):
-        # process to tessellation engine
-        return None
-    else:
-        number_sides = __num_sides(shape)
-        if (number_sides == 3):
-            return process_triangle(shape)
-        elif (number_sides == 4):
-            return process_quadrilateral(shape)
-        else:
-            return None
->>>>>>> 95f2d85268dd38a6931512244f7f39db77d3d6d6
 
 # duplicates triangle and fit sides together to make a parallelogram
 def process_triangle(shape):
