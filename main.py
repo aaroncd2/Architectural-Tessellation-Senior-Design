@@ -181,6 +181,8 @@ class ReccomendationButtons(BoxLayout):
                     temp.index = 1
                 elif (k ==1):
                     temp.index = 0
+            elif (self.numreccs == 1):
+                temp.index = 0
             #temp.index = k
             
             #temp.lines.add(Line(points = self.shapely_to_kivy(self.btns_info[k][0]) , width = 2.0, close = False)) 
@@ -221,15 +223,14 @@ class BoxGrid(BoxLayout):
         self.b_coords = f_coords
         custlay = CustomLayout()
         tessel = TessellationWidget()
-        
-        
         self.add_widget(custlay)
         self.add_widget(tessel)
         tessel.display_initial_tiling()
         self.main_shape_info = tessel.shape_info
         btn = ReccomendationButtons()
         self.add_widget(btn)
-        btn.setup_btns()
+        if (self.main_shape_info != None and len(self.main_shape_info) > 1):
+            btn.setup_btns()
 #layout for the main canvas
 
 class CustomLayout(BoxLayout):
@@ -277,17 +278,17 @@ class CustomLayout(BoxLayout):
         sizeY = Window.size[1]
         xdistnace = (poly.bounds[2] - poly.bounds[0])
         ydistance = (poly.bounds[3] - poly.bounds[1])
-        xscale = sizeX * .25 / xdistnace
-        yscale = sizeY * .25 / ydistance
+        self.xscale = sizeX * .25 / xdistnace
+        self.yscale = sizeY * .25 / ydistance
         center = (poly.centroid.coords[0])
         xoff = ((sizeX/5) + (Window.size[0]*.14)) - center[0]
         yoff = (sizeY/4) - center[1]
 
         poly = affinity.translate(poly, xoff= xoff, yoff= yoff)
-        if xscale > yscale:
-            poly = affinity.scale(poly, xfact= yscale, yfact= yscale)
+        if self.xscale > self.yscale:
+            poly = affinity.scale(poly, xfact= self.yscale, yfact= self.yscale)
         else:
-            poly = affinity.scale(poly, xfact= xscale, yfact= xscale)
+            poly = affinity.scale(poly, xfact= self.xscale, yfact= self.xscale)
         self.c_coords = list(poly.exterior.coords)
         self.c_coords.pop(-1)
         
@@ -351,8 +352,13 @@ class CustomLayout(BoxLayout):
             i = i + 1
 
         newply = Polygon(poly)
-        newply = affinity.translate(newply, xoff= -size[0]/2, yoff= -size[1]/2)
+        newply = affinity.translate(newply, xoff= -size[0]/2.95, yoff= -size[1]/4)
+        if self.xscale > self.yscale:
+            newply = affinity.scale(newply, xfact= 1/self.yscale, yfact= 1/self.yscale)
+        else:
+            newply = affinity.scale(newply, xfact= 1/self.xscale, yfact= 1/self.xscale)
         self.parent.children[1].reset(0)
+        self.parent.children[1].base_unit = newply
         self.parent.children[1].polygon = newply
         self.parent.children[1].tile_regular_polygon()
 
@@ -487,7 +493,11 @@ class CustomLayout(BoxLayout):
                 i = i + 1
 
             newply = Polygon(poly)
-            newply = affinity.translate(newply, xoff= -size[0]/2, yoff= -size[1]/2)
+            newply = affinity.translate(newply, xoff= -size[0]/2.95, yoff= -size[1]/4)
+            if self.xscale > self.yscale:
+                newply = affinity.scale(newply, xfact= 1/self.yscale, yfact= 1/self.yscale)
+            else:
+                newply = affinity.scale(newply, xfact= 1/self.xscale, yfact= 1/self.xscale)
             self.parent.children[1].reset(0)
             self.parent.children[1].polygon = newply
             self.parent.children[1].tile_regular_polygon()
@@ -512,7 +522,11 @@ class CustomLayout(BoxLayout):
 
             print(poly)
             newply = Polygon(poly)
-            newply = affinity.translate(newply, xoff= -size[0]/2, yoff= -size[1]/2)
+            newply = affinity.translate(newply, xoff= -size[0]/2.95, yoff= -size[1]/4)
+            if self.xscale > self.yscale:
+                newply = affinity.scale(newply, xfact= 1/self.yscale, yfact= 1/self.yscale)
+            else:
+                newply = affinity.scale(newply, xfact= 1/self.xscale, yfact= 1/self.xscale)
             print(self.parent.children[1].polygon)
             self.parent.children[1].reset(0)
             self.parent.children[1].polygon = newply
