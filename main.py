@@ -3,7 +3,6 @@ from Shape_Modeling import shape_modeling as sm
 from Tessellation_Engine import tessellation_engine as te
 from Tessellation_Engine.tessellation_engine import TessellationWidget
 from Tessellation_Engine.tessellation_engine import CanvasWidget
-from Tessellation_Engine import recommendation_system as rs
 from Shape_Identification import tiling_rules as tr
 import kivy 
 from kivy.app import App
