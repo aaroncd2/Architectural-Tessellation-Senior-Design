@@ -20,6 +20,7 @@ class SaveDialog(Popup):
         self.content = GridLayout(rows=4, cols=1)
 
         self.file_browser = FileChooserIconView(size_hint=(1,None), height=Window.size[1]/2)
+        self.file_browser.path = 'Saved_Tilings\\'
         self.content.add_widget(self.file_browser)
 
         self.input_row = BoxLayout(orientation='horizontal', size_hint=(1,None), height=40)
