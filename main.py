@@ -24,6 +24,7 @@ import pandas as pd # for export
 from kivy.graphics.instructions import InstructionGroup
 from kivy.uix.slider import Slider
 from kivy.uix.gridlayout import GridLayout
+from Shape_Identification import tiling_rules as tr
 import numpy
 import os
 import sys
@@ -110,11 +111,10 @@ class ReccomendationButton(Button):
     def on_press(self, **kwargs):
         print(self.index)
         self.parent.parent.parent.children[1].draw_recommendation(self.index)
+
 class ReccomendationButtons(BoxLayout):
     def __init__(self, **kwargs):
         super(BoxLayout, self).__init__(**kwargs)
-        
-        
         self.size_hint= None, None 
     def setup_btns(self):
         
@@ -145,8 +145,6 @@ class ReccomendationButtons(BoxLayout):
             the_poly = affinity.scale(the_poly, xfact= xscale, yfact= xscale)
         
         the_poly = affinity.translate(the_poly, xoff= xoff, yoff=Yoff)
-
-        
 
         the_poly = self.shapely_to_kivy(the_poly)
         with self.canvas.after:
@@ -500,6 +498,7 @@ class CustomLayout(BoxLayout):
             self.parent.children[1].reset(0)
             self.parent.children[1].polygon = newply
             self.parent.children[1].tile_regular_polygon()
+
         else:
             pass
     
@@ -533,6 +532,24 @@ class CustomLayout(BoxLayout):
             #self.parent.children[1].get_new_recommendations()
             print(self.parent.children[1].polygon)  
             self.parent.children[1].tile_regular_polygon()
+            print("parker")
+            print(self.parent.children[0])
+            if (self.parent.children[0] != None):
+                new_shape_info = tr.identify_shape(newply)
+                self.parent.main_shape_info = new_shape_info
+                self.parent.remove_widget(self.parent.children[0])
+                btns = ReccomendationButtons()
+                self.parent.add_widget(btns)
+                if (new_shape_info != None and len(new_shape_info) >= 1):
+                    btns.setup_btns()
+            
+
+
+            # self.main_shape_info = tessel.shape_info
+        #btn = ReccomendationButtons()
+        #self.add_widget(btn)
+        #if (self.main_shape_info != None and len(self.main_shape_info) > 1):
+         #   btn.setup_btns()
 
         else:
             pass
