@@ -63,22 +63,22 @@ def process_quadrilateral(shape):
     is_convex, convex_indexes =  __is_convex(shape)
     if is_convex:
         # first recommendation: return the convex quad as is
-        # TODO: uncomment this line recommendations.append((shape, "convex_quad", False, shape))
+        recommendations.append((shape, "convex_quad", False, shape))
         # second recommendation: flip around convex quad to make a hexagon
         # first step is to find the side with the largest length
         max_length = max(side1_length, side2_length, side3_length, side4_length)
         # rotate coordinates to get the longest side between the 
         # zeroth and first coordinates
-        # if max_length == side2_length:
-            # rotations = 1
-        # elif max_length == side3_length:
-            # rotations = 2
-        # else:
-            # rotations = 3
+        if max_length == side2_length:
+            rotations = 1
+        elif max_length == side3_length:
+            rotations = 2
+        else:
+            rotations = 3
         first_rec_coords = list(original_coords)
-        # for x in range(0, rotations):
-            # del first_rec_coords[0]
-            # first_rec_coords.append(first_rec_coords[0])
+        for x in range(0, rotations):
+            del first_rec_coords[0]
+            first_rec_coords.append(first_rec_coords[0])
         # debug printouts
         # print('coord 0 is now', first_rec_coords[0])
         # print('max length is', max_length)

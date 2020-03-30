@@ -51,8 +51,9 @@ concave_quad_2 = Polygon([(4, 5), (2.5, 3.7), (0, 4), (3, 3), (4, 5)])
 concave_quad_3 = Polygon([(0, 0), (4, 4), (8, 0), (4, 1), (0, 0)])
 convex_quad_1 = Polygon([(0, 0), (4, 4), (8, 0), (5, -1), (0, 0)])
 convex_quad_2 = Polygon([(0, 0), (7, 0), (5, 2), (3, 3), (0, 0)])
+convex_quad_3 = Polygon([(0, 0), (1, 1), (0, 2), (-7, 1), (0, 0)])
 concave_quads = [concave_quad_1, concave_quad_2, concave_quad_3]
-convex_quads = [convex_quad_2]
+convex_quads = [convex_quad_1, convex_quad_2, convex_quad_3]
 
 # boolean that represents whether all the tests have passed or not
 all_tests_passed = True
