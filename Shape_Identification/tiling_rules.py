@@ -62,8 +62,46 @@ def process_quadrilateral(shape):
     # test concavity 
     is_convex, convex_indexes =  __is_convex(shape)
     if is_convex:
-        # return the convex quad for now
-        recommendations.append((shape, "convex_quad", False, shape))
+        # first recommendation: return the convex quad as is
+        # TODO: uncomment this line recommendations.append((shape, "convex_quad", False, shape))
+        # second recommendation: flip around convex quad to make a hexagon
+        # first step is to find the side with the largest length
+        max_length = max(side1_length, side2_length, side3_length, side4_length)
+        # rotate coordinates to get the longest side between the 
+        # zeroth and first coordinates
+        # if max_length == side2_length:
+            # rotations = 1
+        # elif max_length == side3_length:
+            # rotations = 2
+        # else:
+            # rotations = 3
+        first_rec_coords = list(original_coords)
+        # for x in range(0, rotations):
+            # del first_rec_coords[0]
+            # first_rec_coords.append(first_rec_coords[0])
+        # debug printouts
+        # print('coord 0 is now', first_rec_coords[0])
+        # print('max length is', max_length)
+        # print('rotations needed is', rotations)
+        # here we start reflecting and adding coordinates to 
+        # create the hexagon
+        second_to_first_vertex_len_x = first_rec_coords[1][0] - first_rec_coords[2][0]
+        second_to_first_vertex_len_y = first_rec_coords[1][1] - first_rec_coords[2][1]
+        third_to_second_vertex_len_x = first_rec_coords[2][0] - first_rec_coords[3][0]
+        third_to_second_vertex_len_y = first_rec_coords[2][1] - first_rec_coords[3][1]
+        first_rec_coords.append((first_rec_coords[4][0] + second_to_first_vertex_len_x, first_rec_coords[4][1] + second_to_first_vertex_len_y))
+        first_rec_coords.append((first_rec_coords[5][0] + third_to_second_vertex_len_x, first_rec_coords[5][1] + third_to_second_vertex_len_y))
+        first_rec_coords.append(first_rec_coords[1])
+        # creating exterior of the first recommendation
+        first_rec_exterior_coords = list()
+        first_rec_exterior_coords.append(first_rec_coords[0])
+        first_rec_exterior_coords.append(first_rec_coords[3])
+        first_rec_exterior_coords.append(first_rec_coords[2])
+        first_rec_exterior_coords.append(first_rec_coords[1])
+        first_rec_exterior_coords.append(first_rec_coords[6])
+        first_rec_exterior_coords.append(first_rec_coords[5])
+        first_rec_exterior_coords.append(first_rec_coords[0])
+        recommendations.append((Polygon(first_rec_coords), "hexagon", True, Polygon(first_rec_exterior_coords)))
         return recommendations
     else:
         # the given shape is a concave quad

@@ -49,7 +49,10 @@ triangles = [triangle_1, triangle_2, triangle_3]
 concave_quad_1 = Polygon([(0, 0), (-2, 5), (7, 1), (-2, -2), (0, 0)])
 concave_quad_2 = Polygon([(4, 5), (2.5, 3.7), (0, 4), (3, 3), (4, 5)])
 concave_quad_3 = Polygon([(0, 0), (4, 4), (8, 0), (4, 1), (0, 0)])
+convex_quad_1 = Polygon([(0, 0), (4, 4), (8, 0), (5, -1), (0, 0)])
+convex_quad_2 = Polygon([(0, 0), (7, 0), (5, 2), (3, 3), (0, 0)])
 concave_quads = [concave_quad_1, concave_quad_2, concave_quad_3]
+convex_quads = [convex_quad_2]
 
 # boolean that represents whether all the tests have passed or not
 all_tests_passed = True
@@ -62,9 +65,16 @@ all_tests_passed = True
         # plot_polygon(recommendation[0])
         # plot_polygon(recommendation[3])
 
-for concave_quad in concave_quads:
-    plot_polygon(concave_quad)
-    quad_recommendations = tr.identify_shape(concave_quad)
+# for concave_quad in concave_quads:
+    # plot_polygon(concave_quad)
+    # quad_recommendations = tr.identify_shape(concave_quad)
+    # for recommendation in quad_recommendations:
+        # plot_polygon(recommendation[0])
+        # plot_polygon(recommendation[3])
+
+for convex_quad in convex_quads:
+    plot_polygon(convex_quad)
+    quad_recommendations = tr.identify_shape(convex_quad)
     for recommendation in quad_recommendations:
         plot_polygon(recommendation[0])
         plot_polygon(recommendation[3])
