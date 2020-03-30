@@ -467,7 +467,6 @@ class TessellationWidget(GridLayout):
     def draw_polygons(self):
         self.scale_to_fit_window()
         self.canvas_widget.lines.clear()
-        self.canvas_widget.shapes.clear()
         indices = tu.make_indices_list(self.polygons[0])
         for polygon in self.polygons:
             mesh_points = tu.make_mesh_list(polygon)
@@ -476,7 +475,6 @@ class TessellationWidget(GridLayout):
             self.canvas_widget.lines.add(Color(1., 0, 0))
             self.canvas_widget.lines.add(Line(points = polygon, width=2.0, close=False))
         self.canvas_widget.canvas.add(self.canvas_widget.lines)
-        self.canvas_widget.canvas.add(self.canvas_widget.shapes)
 
     # Adjusts horizontal spacing between polygons
     def adjust_horizontal_spacing(self, instance, amount):
