@@ -70,3 +70,35 @@ def make_indices_list(polygon):
         indices.append(count)
         count = count + 1
     return indices
+
+def is_convex(shape):
+    coords = list(shape.exterior.coords)
+    positive_z_coords = list()
+    negative_z_coords = list()
+    # starting z component coord calculation
+    if compute_z_cross_product(coords[len(coords) - 2], coords[0], coords[1]) >= 0:
+        positive_z_coords.append(0)
+    else:   
+        negative_z_coords.append(0)
+    # rest of the z component coord calculation
+    for i in range(1, len(coords) - 1):
+        if compute_z_cross_product(coords[i - 1], coords[i], coords[i + 1]) >= 0:
+            positive_z_coords.append(i)
+        else:   
+            negative_z_coords.append(i)
+    if len(positive_z_coords) > 0 and len(negative_z_coords) > 0:
+        # the shape is concave
+        if len(positive_z_coords) > len(negative_z_coords):
+            return False
+        else:
+            return False
+    else:
+        # the shape is convex
+        return True
+
+def compute_z_cross_product(first_coord, second_coord, third_coord):
+    dx1 = second_coord[0] - first_coord[0]
+    dy1 = second_coord[1] - first_coord[1]
+    dx2 = third_coord[0] - second_coord[0]
+    dy2 = third_coord[1] - second_coord[1]
+    return dx1 * dy2 - dy1 * dx2

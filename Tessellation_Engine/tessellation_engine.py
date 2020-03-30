@@ -36,6 +36,7 @@ class TessellationWidget(GridLayout):
         self.cols = 1
         self.rows = 3
         self.polygons = []
+        self.exterior = None
         
         # create row for canvas
         self.canvas_widget = CanvasWidget()
@@ -185,6 +186,7 @@ class TessellationWidget(GridLayout):
         scale_factor = self.slide_scale.value / 100
         shape = tu.make_positive(self.rec_shape[0])
         exterior = tu.make_positive(self.rec_shape[3])
+        self.exterior = exterior
         bounds = exterior.bounds
         count = 0
         while count < 4:
@@ -469,9 +471,10 @@ class TessellationWidget(GridLayout):
         self.canvas_widget.lines.clear()
         indices = tu.make_indices_list(self.polygons[0])
         for polygon in self.polygons:
-            mesh_points = tu.make_mesh_list(polygon)
-            self.canvas_widget.lines.add(Color(0,0,1.))
-            self.canvas_widget.lines.add(Mesh(vertices=mesh_points, indices=indices, mode='triangle_fan'))
+            if (self.exterior != None and self.type != 'regular' and tu.is_convex(self.exterior)) or tu.is_convex(self.polygon):
+                mesh_points = tu.make_mesh_list(polygon)
+                self.canvas_widget.lines.add(Color(0,0,1.))
+                self.canvas_widget.lines.add(Mesh(vertices=mesh_points, indices=indices, mode='triangle_strip'))
             self.canvas_widget.lines.add(Color(1., 0, 0))
             self.canvas_widget.lines.add(Line(points = polygon, width=2.0, close=False))
         self.canvas_widget.canvas.add(self.canvas_widget.lines)
