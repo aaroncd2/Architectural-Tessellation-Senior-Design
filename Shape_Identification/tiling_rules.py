@@ -79,10 +79,6 @@ def process_quadrilateral(shape):
         for x in range(0, rotations):
             del first_rec_coords[0]
             first_rec_coords.append(first_rec_coords[0])
-        # debug printouts
-        # print('coord 0 is now', first_rec_coords[0])
-        # print('max length is', max_length)
-        # print('rotations needed is', rotations)
         # here we start reflecting and adding coordinates to 
         # create the hexagon
         second_to_first_vertex_len_x = first_rec_coords[1][0] - first_rec_coords[2][0]
