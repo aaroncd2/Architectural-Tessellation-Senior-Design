@@ -29,7 +29,6 @@ class CanvasWidget(RelativeLayout):
     def __init__(self, **kwargs):
         super(CanvasWidget, self).__init__(**kwargs)
         self.lines = InstructionGroup()
-        self.shapes = InstructionGroup()
         
 class TessellationWidget(GridLayout):
     def __init__(self, **kwargs):
