@@ -226,8 +226,8 @@ class TessellationWidget(GridLayout):
         yInc = yInc * (self.ySpacing / 100)
 
         # calculate between-row increments
-        xInc2 = (bounds[2]-bounds[0] - xInc) * (self.xSpacing / 100)
-        xInc2 = xInc3
+        #xInc2 = (bounds[2]-bounds[0] - xInc) * (self.xSpacing / 100)
+        xInc2 = xInc3 * (self.xSpacing / 100)
         yInc2 = (bounds[3] - bounds[1]) * (self.ySpacing / 100)
     
         xCount = 1
@@ -237,8 +237,11 @@ class TessellationWidget(GridLayout):
             while xCount <= self.xNum:
                 temp = []
                 for p in shape.exterior.coords:
-                    px = ((p[0] + (xInc * xCount)) * scale_factor) + ((xInc2 * (yCount)) * scale_factor)
-                    py = ((p[1] + (yInc * xCount)) * scale_factor) + ((yInc2 * (yCount)) * scale_factor)
+                    if xInc2 < 0:
+                        px = ((p[0] + (xInc * xCount)) * scale_factor) + ((xInc2 * (yCount)) * scale_factor) + ((xInc * yCount) * scale_factor)
+                    else:
+                        px = ((p[0] + (xInc * xCount)) * scale_factor) + ((xInc2 * (yCount)) * scale_factor) - ((xInc * yCount) * scale_factor)
+                    py = ((p[1] + (yInc * xCount)) * scale_factor) + ((yInc2 * (yCount)) * scale_factor) - ((yInc * yCount) * scale_factor)
                     temp.append((px,py))
                 temp_poly = Polygon(temp)
                 temp_poly = affinity.rotate(temp_poly, self.s.value)
