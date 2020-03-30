@@ -29,6 +29,7 @@ class CanvasWidget(RelativeLayout):
     def __init__(self, **kwargs):
         super(CanvasWidget, self).__init__(**kwargs)
         self.lines = InstructionGroup()
+        self.shapes = InstructionGroup()
         
 class TessellationWidget(GridLayout):
     def __init__(self, **kwargs):
@@ -225,8 +226,6 @@ class TessellationWidget(GridLayout):
 
         # calculate between-row increments
         xInc2 = (bounds[2]-bounds[0] - xInc) * (self.xSpacing / 100)
-        #if abs(xInc3) < xInc2:
-        #    xInc2 = xInc3
         xInc2 = xInc3
         yInc2 = (bounds[3] - bounds[1]) * (self.ySpacing / 100)
     
@@ -469,10 +468,16 @@ class TessellationWidget(GridLayout):
     def draw_polygons(self):
         self.scale_to_fit_window()
         self.canvas_widget.lines.clear()
-        self.canvas_widget.lines.add(Color(1., 0, 0))
+        self.canvas_widget.shapes.clear()
+        indices = tu.make_indices_list(self.polygons[0])
         for polygon in self.polygons:
+            mesh_points = tu.make_mesh_list(polygon)
+            self.canvas_widget.lines.add(Color(0,0,1.))
+            self.canvas_widget.lines.add(Mesh(vertices=mesh_points, indices=indices, mode='triangle_fan'))
+            self.canvas_widget.lines.add(Color(1., 0, 0))
             self.canvas_widget.lines.add(Line(points = polygon, width=2.0, close=False))
         self.canvas_widget.canvas.add(self.canvas_widget.lines)
+        self.canvas_widget.canvas.add(self.canvas_widget.shapes)
 
     # Adjusts horizontal spacing between polygons
     def adjust_horizontal_spacing(self, instance, amount):

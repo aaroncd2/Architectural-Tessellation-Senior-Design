@@ -49,3 +49,24 @@ def make_positive(polygon):
         return Polygon(temp)
     else:
         return polygon
+
+# creates a list of points for drawing mesh
+def make_mesh_list(polygon):
+    mesh_points = []
+    count = 0
+    while count < len(polygon):
+        mesh_points.append(polygon[count])
+        mesh_points.append(polygon[count+1])
+        mesh_points.append(0)
+        mesh_points.append(0)
+        count = count + 2
+    return mesh_points
+
+# creates a list of indices in the form [0,1,2,...,# of polygons] for drawing mesh
+def make_indices_list(polygon):
+    indices = []
+    count = 0
+    while count < (len(polygon) / 2):
+        indices.append(count)
+        count = count + 1
+    return indices
