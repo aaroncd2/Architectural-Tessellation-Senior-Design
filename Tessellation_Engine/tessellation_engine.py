@@ -21,6 +21,8 @@ import matplotlib.pyplot as plt # for display
 import math # for trig functions
 import pandas as pd # for export
 import numpy as np # for math
+from Tessellation_Engine import tessellation_utilities as tu #for utility functions
+from Tessellation_Engine.save_dialog import SaveDialog
 
 ### START TESSELLATION ENGINE ###
 class CanvasWidget(RelativeLayout):
@@ -34,6 +36,7 @@ class TessellationWidget(GridLayout):
         self.cols = 1
         self.rows = 3
         self.polygons = []
+        self.exterior = None
         
         # create row for canvas
         self.canvas_widget = CanvasWidget()
@@ -133,7 +136,7 @@ class TessellationWidget(GridLayout):
         self.original_base_unit = self.polygon
         self.shape_info = tr.identify_shape(self.base_unit)
         self.type = 'regular'
-        polygon = self.shapely_to_kivy(self.polygon)
+        polygon = tu.shapely_to_kivy(self.polygon)
         if self.type == 'regular':
             self.tile_regular_polygon()
         elif self.type == 'parallelogram':
@@ -146,7 +149,7 @@ class TessellationWidget(GridLayout):
 
     # Tiles polygons in an xNum by yNum grid utilizing bounding boxes
     def tile_regular_polygon(self):
-        polygon = self.shapely_to_kivy(self.polygon)
+        polygon = tu.shapely_to_kivy(self.polygon)
         bounds = self.polygon.bounds
         xInc = abs(bounds[2] - bounds[0]) * (self.xSpacing / 100)
         yInc = abs(bounds[3] - bounds[1]) * (self.ySpacing / 100)
@@ -181,49 +184,52 @@ class TessellationWidget(GridLayout):
     def tile_parallelogram(self):
         # calculate increment between shapes
         scale_factor = self.slide_scale.value / 100
-        shape = self.make_positive(self.rec_shape[0])
-        exterior = self.make_positive(self.rec_shape[3])
+        shape = tu.make_positive(self.rec_shape[0])
+        exterior = tu.make_positive(self.rec_shape[3])
+        self.exterior = exterior
         bounds = exterior.bounds
         count = 0
         while count < 4:
+            # calculate in-row increments
             if exterior.exterior.coords[count][0] == bounds[2]:
                 if count == 0:
-                    xInc = max(exterior.exterior.coords[1][0], exterior.exterior.coords[3][0]) - bounds[0]
+                    px = max(exterior.exterior.coords[1][0], exterior.exterior.coords[3][0])
+                    xInc = px - bounds[0]
+                    if px == exterior.exterior.coords[1][0]:
+                        yInc = exterior.exterior.coords[count][1] - exterior.exterior.coords[3][1]
+                    else:
+                        yInc = exterior.exterior.coords[count][1] - exterior.exterior.coords[1][1]
                 elif count == 3:
-                    xInc = max(exterior.exterior.coords[0][0], exterior.exterior.coords[2][0]) - bounds[0] 
+                    px = max(exterior.exterior.coords[0][0], exterior.exterior.coords[2][0])
+                    xInc = px - bounds[0]
+                    if px == exterior.exterior.coords[0][0]:
+                        yInc = exterior.exterior.coords[count][1] - exterior.exterior.coords[2][1]
+                    else:
+                        yInc = exterior.exterior.coords[count][1] - exterior.exterior.coords[0][1]
                 else:
-                    xInc = max(exterior.exterior.coords[count + 1][0], exterior.exterior.coords[count - 1][0]) - bounds[0]   
+                    px = max(exterior.exterior.coords[count + 1][0], exterior.exterior.coords[count - 1][0])
+                    xInc = px - bounds[0]
+                    if px == exterior.exterior.coords[count + 1][0]:
+                        yInc = exterior.exterior.coords[count][1] - exterior.exterior.coords[count - 1][1]
+                    else:
+                        yInc = exterior.exterior.coords[count][1] - exterior.exterior.coords[count + 1][1]
+            # calculate between-row x-increments
             if exterior.exterior.coords[count][1] == bounds[3]:
-                if count == 0:
-                    if self.max_x_is_max_y(exterior):
-                        yInc = min(exterior.exterior.coords[1][1], exterior.exterior.coords[3][1]) - bounds[1]
-                    else:
-                        yInc = max(exterior.exterior.coords[1][1], exterior.exterior.coords[3][1]) - bounds[1]
+                if count == 2:
+                    xInc3 = exterior.exterior.coords[count][0] - exterior.exterior.coords[0][0]
                 elif count == 3:
-                    if self.max_x_is_max_y(exterior):
-                        yInc = min(exterior.exterior.coords[0][1], exterior.exterior.coords[2][1]) - bounds[1]
-                    else:
-                        yInc = max(exterior.exterior.coords[0][1], exterior.exterior.coords[2][1]) - bounds[1]
+                    xInc3 = exterior.exterior.coords[count][0] - exterior.exterior.coords[1][0]
                 else:
-                    if self.max_x_is_max_y(exterior):
-                        yInc = min(exterior.exterior.coords[count + 1][1], exterior.exterior.coords[count - 1][1]) - bounds[1]
-                    else:
-                        yInc = max(exterior.exterior.coords[count + 1][1], exterior.exterior.coords[count - 1][1]) - bounds[1]
+                    xInc3 = exterior.exterior.coords[count][0] - exterior.exterior.coords[count + 2][0]
             count = count + 1
-
-        xInc2 = abs((bounds[2]-bounds[0]) - xInc)
-        yInc2 = abs((bounds[3] - bounds[1])- yInc)
-        if self.max_x_is_max_y(exterior):
-            xInc3 = xInc2
-            yInc3 = yInc2
-        else:
-            xInc3 = xInc - xInc2
-            yInc3 = yInc2 + yInc
-        #print(str(exterior))
-        #print('X1: ' + str(xInc) + ' X2: ' + str(xInc2) + ' MAX X: ' + str(bounds[2]) + ' MIN X: ' + str(bounds[0]))
-        #print('Y1: ' + str(yInc) + ' Y2: ' + str(yInc2) + ' MAX Y: ' + str(bounds[3]) + ' MIN Y: ' + str(bounds[1]))
         xInc = xInc * (self.xSpacing / 100)
         yInc = yInc * (self.ySpacing / 100)
+
+        # calculate between-row increments
+        #xInc2 = (bounds[2]-bounds[0] - xInc) * (self.xSpacing / 100)
+        xInc2 = xInc3 * (self.xSpacing / 100)
+        yInc2 = (bounds[3] - bounds[1]) * (self.ySpacing / 100)
+    
         xCount = 1
         yCount = 1
         self.polygons = []
@@ -231,12 +237,15 @@ class TessellationWidget(GridLayout):
             while xCount <= self.xNum:
                 temp = []
                 for p in shape.exterior.coords:
-                    px = ((p[0] + (xInc * xCount)) * scale_factor)  + ((xInc3 * (yCount - 1)) * scale_factor)
-                    py = ((p[1] + (yInc * xCount)) * scale_factor) + ((yInc3 * (yCount - 1)) * scale_factor)
+                    if xInc2 < 0:
+                        px = ((p[0] + (xInc * xCount)) * scale_factor) + ((xInc2 * (yCount)) * scale_factor) + ((xInc * yCount) * scale_factor)
+                    else:
+                        px = ((p[0] + (xInc * xCount)) * scale_factor) + ((xInc2 * (yCount)) * scale_factor) - ((xInc * yCount) * scale_factor)
+                    py = ((p[1] + (yInc * xCount)) * scale_factor) + ((yInc2 * (yCount)) * scale_factor) - ((yInc * yCount) * scale_factor)
                     temp.append((px,py))
                 temp_poly = Polygon(temp)
                 temp_poly = affinity.rotate(temp_poly, self.s.value)
-                self.polygons.append(self.shapely_to_kivy(temp_poly))
+                self.polygons.append(tu.shapely_to_kivy(temp_poly))
                 temp = None
                 xCount = xCount + 1
             xCount = 1
@@ -279,36 +288,12 @@ class TessellationWidget(GridLayout):
                 for p in self.polygon.exterior.coords:
                     temp.append(((p[0] + (xInc * xCount)), (p[1] + (yInc * yCount))+temp_inc))
                 temp_poly = Polygon(temp)
-                self.polygons.append(self.shapely_to_kivy(temp_poly))
+                self.polygons.append(tu.shapely_to_kivy(temp_poly))
                 temp = None
                 xCount = xCount + 1
             xCount = 1
             yCount = yCount + 1
         self.draw_polygons()
-
-    # Takes a Shapely Polygon object and converts it to an array format for display
-    # on a Kivy canvas 
-    def shapely_to_kivy(self, polygon):
-        kivy_points = []
-        for p in polygon.exterior.coords:
-            kivy_points.append(p[0])
-            kivy_points.append(p[1])
-        return kivy_points
-
-    def kivy_to_shapely(self, polygon):
-        shapely_points = []
-        xs = []
-        ys = []
-        count = 0
-        for p in polygon:
-            if count % 2 == 0:
-                xs.append(p)
-            else:
-                ys.append(p)
-            count = count + 1
-        for (x,y) in zip(xs,ys):
-            shapely_points.append((x,y))
-        return shapely_points
 
     # Rotates each polygon by the degrees specified by the slider
     def rotate_polygon(self, instance, degrees):
@@ -340,7 +325,7 @@ class TessellationWidget(GridLayout):
             point = ((2 * xCenter) - p[0], p[1])
             flipped.append(point)
         self.polygon = Polygon(flipped)
-        polygon = self.shapely_to_kivy(self.polygon)
+        polygon = tu.shapely_to_kivy(self.polygon)
         if self.type == 'regular':
             self.tile_regular_polygon()
         elif self.type == 'parallelogram':
@@ -356,7 +341,7 @@ class TessellationWidget(GridLayout):
             point = (p[0], (2 * yCenter) - p[1])
             flipped.append(point)
         self.polygon = Polygon(flipped)
-        polygon = self.shapely_to_kivy(self.polygon)
+        polygon = tu.shapely_to_kivy(self.polygon)
         if self.type == 'regular':
             self.tile_regular_polygon()
         elif self.type == 'parallelogram':
@@ -383,6 +368,7 @@ class TessellationWidget(GridLayout):
     def alternate_rows(self, instance):
         self.slide_horizontal.value = 100
         self.slide_vertical.value = 100
+        self.polygon = Polygon(tu.kivy_to_shapely(self.polygons[0]))
         bounds = self.polygon.bounds
         xInc = abs(bounds[2] - bounds[0])
         yInc = abs(bounds[3] - bounds[1])
@@ -400,7 +386,7 @@ class TessellationWidget(GridLayout):
                 point = (p[0], (2 * yCenter) - p[1])
                 flipped.append(point)
             self.polygon = Polygon(flipped)
-            polygon = self.shapely_to_kivy(self.polygon)
+            polygon = tu.shapely_to_kivy(self.polygon)
             while xCount <= self.xNum:
                 xNext = xCount * xInc
                 yNext = yCount * yInc
@@ -442,7 +428,7 @@ class TessellationWidget(GridLayout):
                     point = ((2 * xCenter) - p[0], p[1])
                     flipped.append(point)
                 self.polygon = Polygon(flipped)
-                polygon = self.shapely_to_kivy(self.polygon)
+                polygon = tu.shapely_to_kivy(self.polygon)
                 
                 xNext = xCount * xInc
                 yNext = yCount * yInc
@@ -462,6 +448,7 @@ class TessellationWidget(GridLayout):
         self.polygons = polygons
         self.draw_polygons()
 
+    # Exports the currently displayed polygons to a CSV file
     def export_tiling(self, instance):
         points = {}
         num = 1
@@ -478,15 +465,20 @@ class TessellationWidget(GridLayout):
             points['x' + str(num)] = xs
             points['y' + str(num)] = ys
             num += 1
-        df = pd.DataFrame(points)
-        df.to_csv(r'output.csv', index=None)
+        self.df = pd.DataFrame(points)
+        SaveDialog(self).open()
 
     # Draws an array of polygons to the canvas
     def draw_polygons(self):
         self.scale_to_fit_window()
         self.canvas_widget.lines.clear()
-        self.canvas_widget.lines.add(Color(1., 0, 0))
+        indices = tu.make_indices_list(self.polygons[0])
         for polygon in self.polygons:
+            if (self.exterior != None and self.type != 'regular' and tu.is_convex(self.exterior)) or tu.is_convex(self.polygon):
+                mesh_points = tu.make_mesh_list(polygon)
+                self.canvas_widget.lines.add(Color(0,0,1.))
+                self.canvas_widget.lines.add(Mesh(vertices=mesh_points, indices=indices, mode='triangle_strip'))
+            self.canvas_widget.lines.add(Color(1., 0, 0))
             self.canvas_widget.lines.add(Line(points = polygon, width=2.0, close=False))
         self.canvas_widget.canvas.add(self.canvas_widget.lines)
 
@@ -538,25 +530,6 @@ class TessellationWidget(GridLayout):
         elif self.type == 'hexagon':
             self.tile_hexagon()
             self.rec_type.text = 'Hexagon'
-
-    #offsets a polygon to ensure all its vertices are positive
-    def make_positive(self, polygon):
-        bounds = polygon.bounds
-        temp = []
-        if bounds[0] < 0 and bounds[1] < 0:
-            for p in polygon.exterior.coords:
-                temp.append((p[0] + abs(bounds[0]), p[1] + abs(bounds[1])))
-            return Polygon(temp)
-        elif bounds[1] < 0:
-            for p in polygon.exterior.coords:
-                temp.append((p[0], p[1] + abs(bounds[1])))
-            return Polygon(temp)
-        elif bounds[0] < 0:
-            for p in polygon.exterior.coords:
-                temp.append((p[0] + abs(bounds[0]), p[1]))
-            return Polygon(temp)
-        else:
-            return polygon
 
     # determines if a coordinate in a shape is (maxX, maxY)
     def max_x_is_max_y(self, polygon):
