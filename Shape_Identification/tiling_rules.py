@@ -63,7 +63,7 @@ def process_quadrilateral(shape):
     is_convex, convex_indexes =  __is_convex(shape)
     if is_convex:
         # first recommendation: return the convex quad as is
-        recommendations.append((shape, "convex_quad", False, shape))
+        # TODO: uncomment this line recommendations.append((shape, "convex_quad", False, shape))
         # second recommendation: flip around convex quad to make a hexagon
         # first step is to find the side with the largest length
         max_length = max(side1_length, side2_length, side3_length, side4_length)
