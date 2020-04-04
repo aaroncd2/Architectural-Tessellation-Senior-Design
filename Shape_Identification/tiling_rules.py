@@ -62,13 +62,12 @@ def process_quadrilateral(shape):
     # test concavity 
     is_convex, convex_indexes =  __is_convex(shape)
     if is_convex:
-        # first recommendation: return the convex quad as is
-        # TODO: uncomment this line recommendations.append((shape, "convex_quad", False, shape))
-        # second recommendation: flip around convex quad to make a hexagon
+        # first recommendation: flip around convex quad to make a hexagon
         # first step is to find the side with the largest length
         max_length = max(side1_length, side2_length, side3_length, side4_length)
         # rotate coordinates to get the longest side between the 
         # zeroth and first coordinates
+        # also need to determine using side lengths if we can add the second recommendation
         if max_length == side2_length:
             rotations = 1
         elif max_length == side3_length:
@@ -98,6 +97,8 @@ def process_quadrilateral(shape):
         first_rec_exterior_coords.append(first_rec_coords[5])
         first_rec_exterior_coords.append(first_rec_coords[0])
         recommendations.append((Polygon(first_rec_coords), "hexagon", True, Polygon(first_rec_exterior_coords)))
+        # second recommendation, only if the quads shorter sides are next to each other
+        
         return recommendations
     else:
         # the given shape is a concave quad
