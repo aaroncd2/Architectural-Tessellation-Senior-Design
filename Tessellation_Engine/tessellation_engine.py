@@ -271,21 +271,32 @@ class TessellationWidget(GridLayout):
             if self.exterior.exterior.coords[count][0] == bounds[2]:
                 if count == 0:
                     xInc = max(self.exterior.exterior.coords[1][0], self.exterior.exterior.coords[5][0]) - bounds[0]
+                    xInc2 = min(self.exterior.exterior.coords[1][0], self.exterior.exterior.coords[5][0]) - bounds[0]
                 elif count == 5:
                     xInc = max(self.exterior.exterior.coords[0][0], self.exterior.exterior.coords[4][0]) - bounds[0] 
+                    xInc2 = min(self.exterior.exterior.coords[0][0], self.exterior.exterior.coords[4][0]) - bounds[0]
                 else:
-                    xInc = max(self.exterior.exterior.coords[count + 1][0], self.exterior.exterior.coords[count - 1][0]) - bounds[0]    
+                    xInc = max(self.exterior.exterior.coords[count + 1][0], self.exterior.exterior.coords[count - 1][0]) - bounds[0]
+                    xInc2 = max(self.exterior.exterior.coords[count + 1][0], self.exterior.exterior.coords[count - 1][0]) - bounds[0]    
             if self.exterior.exterior.coords[count][1] == bounds[3]:
                 if count == 0:
-                    yInc = max(self.exterior.exterior.coords[1][1], self.exterior.exterior.coords[5][1]) - bounds[1]
+                    py = min(self.exterior.exterior.coords[1][1], self.exterior.exterior.coords[5][1])
+                    yInc = py - bounds[1]
+                    yInc2 = max(self.exterior.exterior.coords[1][1], self.exterior.exterior.coords[5][1]) - py
                 elif count == 5:
-                    yInc = max(self.exterior.exterior.coords[0][1], self.exterior.exterior.coords[4][1]) - bounds[1] 
+                    py = min(self.exterior.exterior.coords[0][1], self.exterior.exterior.coords[4][1])
+                    yInc = py - bounds[1]
+                    yInc2 = max(self.exterior.exterior.coords[0][1], self.exterior.exterior.coords[4][1]) - py 
                 else:
-                    yInc = max(self.exterior.exterior.coords[count + 1][1], self.exterior.exterior.coords[count - 1][1]) - bounds[1]
+                    py = min(self.exterior.exterior.coords[count + 1][1], self.exterior.exterior.coords[count - 1][1])
+                    yInc = py - bounds[1]
+                    yInc2 = max(self.exterior.exterior.coords[count + 1][1], self.exterior.exterior.coords[count - 1][1]) - py
             count = count + 1
 
         xInc = xInc * (self.xSpacing / 100)
         yInc = yInc * (self.ySpacing / 100)
+        xInc2 = xInc2 * (self.xSpacing / 100)
+        yInc2 = yInc2 * (self.ySpacing / 100)
         xCount = 1
         yCount = 1
         self.polygons = []
@@ -293,8 +304,9 @@ class TessellationWidget(GridLayout):
             while xCount <= self.xNum:
                 temp = []
                 for p in shape.exterior.coords:
-                    temp.append(((p[0] + (xInc * xCount)), (p[1] + (yInc * yCount))))
+                    temp.append(((p[0] + (xInc * xCount) + (xInc2 * yCount)), (p[1] - (yInc * xCount) + (yInc2 * yCount))))
                 temp_poly = Polygon(temp)
+                temp_poly = affinity.rotate(temp_poly, self.s.value)
                 self.polygons.append(tu.shapely_to_kivy(temp_poly))
                 temp = None
                 xCount = xCount + 1
