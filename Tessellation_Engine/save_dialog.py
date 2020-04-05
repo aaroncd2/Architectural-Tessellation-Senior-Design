@@ -25,7 +25,7 @@ class SaveDialog(Popup):
 
         self.input_row = BoxLayout(orientation='horizontal', size_hint=(1,None), height=40)
         self.label = Label(text='Please enter name for output CSV file, do not include .csv extension.')
-        self.input_box = TextInput(text='', multiline=False, font_size=32)
+        self.input_box = TextInput(text='', multiline=False, font_size=24)
         self.input_row.add_widget(self.label)
         self.input_row.add_widget(self.input_box)
         self.content.add_widget(self.input_row)
