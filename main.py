@@ -72,8 +72,8 @@ class FileChooser(FileChooserListView):
             return data
         else:
             return ""
-        print(data)
-        print(self.rootpath)
+        #print(data)
+        #print(self.rootpath)
     def selected(self,filename,*args):
             if (filename == True):
                 
@@ -85,12 +85,12 @@ class FileChooser(FileChooserListView):
                     head, tail = os.path.split(data)
                     f.write(head)
                     
-                print(fp)
+                #print(fp)
                 #use file path to process as image in imageprocessing.py
                 global f_coords
                 coo = ip.processImage(fp)
                 f_coords = sm.shape_model(coo)
-                print(f_coords)
+                #print(f_coords)
                 b_grid = BoxGrid()
                 self.parent.add_widget(b_grid)
                 self.parent.remove_widget(self)
@@ -109,7 +109,9 @@ class ReccomendationButton(Button):
                 Line(points = the_poly) 
 
     def on_press(self, **kwargs):
-        print(self.index)
+        #print(self.index)
+        print(self.parent.parent.parent.children[1])
+       
         self.parent.parent.parent.children[1].draw_recommendation(self.index)
 
 class ReccomendationButtons(BoxLayout):
@@ -120,9 +122,9 @@ class ReccomendationButtons(BoxLayout):
         
         self.btns_info = self.parent.main_shape_info
         self.numreccs = len(self.btns_info) #hardcoded for now
-        print("shape info")
-        print(self.btns_info)
-        print(self.numreccs)
+        #print("shape info")
+        #print(self.btns_info)
+        #print(self.numreccs)
         self.reccrows= GridLayout(rows=self.numreccs , cols=1)
         self.reccrows.size_hint = None, None
         global the_poly
@@ -151,7 +153,10 @@ class ReccomendationButtons(BoxLayout):
             Line(points = the_poly)
 
         self.reccrows.size = (Window.size[0] * (.14)), Window.size[1]
+        u = self.numreccs
         for k in range(0, self.numreccs):
+            
+            u = u - 1
             if (k != 0):
                 the_poly = self.make_positive(self.btns_info[k][0])
                 btn_height = (Window.size[1] / self.numreccs)
@@ -166,20 +171,26 @@ class ReccomendationButtons(BoxLayout):
                 the_poly = None
             temp = ReccomendationButton()
             the_poly = None
-            if (self.numreccs == 3):
-                if (k==0):
-                    temp.index = 2
-                elif (k ==1):
-                    temp.index = 1
-                elif (k == 2):
-                    temp.index = 0
-            elif (self.numreccs == 2):
-                if (k==0):
-                    temp.index = 1
-                elif (k ==1):
-                    temp.index = 0
-            elif (self.numreccs == 1):
-                temp.index = 0
+            
+            temp.index = u
+            # print("k = ")
+            # print(k)
+            # print("u")
+            # print(u)
+            # if (self.numreccs == 3):
+            #     if (k==0):
+            #         temp.index = 2
+            #     elif (k ==1):
+            #         temp.index = 1
+            #     elif (k == 2):
+            #         temp.index = 0
+            # elif (self.numreccs == 2):
+            #     if (k==0):
+            #         temp.index = 1
+            #     elif (k ==1):
+            #         temp.index = 0
+            # elif (self.numreccs == 1):
+            #     temp.index = 0
             #temp.index = k
             
             #temp.lines.add(Line(points = self.shapely_to_kivy(self.btns_info[k][0]) , width = 2.0, close = False)) 
@@ -301,7 +312,7 @@ class CustomLayout(BoxLayout):
     def key_action(self, *args):
        
         key_pressed = list(args)
-        print(key_pressed)
+        #print(key_pressed)
 
         #Delete when pressing delete
         if key_pressed[2] == 42 and self.pressed and len(self.canvas_edge) > 3:
@@ -329,7 +340,7 @@ class CustomLayout(BoxLayout):
             try:
                 self.canvas.children.remove(self.highlight)
                 mid = midpoint(self.canvas_edge[self.index].points)
-                print(self.highlight.points)
+                #print(self.highlight.points)
                 self.c_coords.insert((self.index+1)%len(self.canvas_nodes), tuple(mid))
                 self.draw()
                 
@@ -518,25 +529,26 @@ class CustomLayout(BoxLayout):
                 poly.append(self.canvas_nodes[i].pos)
                 i = i + 1
 
-            print(poly)
+            #print(poly)
             newply = Polygon(poly)
             newply = affinity.translate(newply, xoff= -size[0]/2.95, yoff= -size[1]/4)
             if self.xscale > self.yscale:
                 newply = affinity.scale(newply, xfact= 1/self.yscale, yfact= 1/self.yscale)
             else:
                 newply = affinity.scale(newply, xfact= 1/self.xscale, yfact= 1/self.xscale)
-            print(self.parent.children[1].polygon)
+            #print(self.parent.children[1].polygon)
             self.parent.children[1].reset(0)
             self.parent.children[1].polygon = newply
             self.parent.children[1].base_unit = newply
             #self.parent.children[1].get_new_recommendations()
-            print(self.parent.children[1].polygon)  
+            #print(self.parent.children[1].polygon)  
             self.parent.children[1].tile_regular_polygon()
-            print("parker")
-            print(self.parent.children[0])
+            #print("parker")
+            #print(self.parent.children[0])
             if (self.parent.children[0] != None):
                 new_shape_info = tr.identify_shape(newply)
                 self.parent.main_shape_info = new_shape_info
+                self.parent.children[1].shape_info = new_shape_info
                 self.parent.remove_widget(self.parent.children[0])
                 btns = ReccomendationButtons()
                 self.parent.add_widget(btns)
