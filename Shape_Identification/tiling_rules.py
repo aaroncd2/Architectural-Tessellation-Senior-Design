@@ -16,6 +16,8 @@ def identify_shape(shape):
         return process_triangle(shape)
     elif (number_sides == 4):
         return process_quadrilateral(shape)
+    elif (number_sides == 6):
+        return process_hexagon(shape)
     else:
         # return empty list for no recommendations found
         return list()
@@ -181,6 +183,10 @@ def process_quadrilateral(shape):
         third_rec_exterior_coords = [third_rec_coords[0], third_rec_coords[2], third_rec_coords[6], third_rec_coords[8], third_rec_coords[0]]
         recommendations.append((Polygon(third_rec_coords), "parallelogram", True, Polygon(third_rec_exterior_coords)))
         return recommendations
+
+
+def process_hexagon(shape):
+    pass
 
 '''private helper functions'''
 def __num_sides(shape):
