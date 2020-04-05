@@ -370,6 +370,17 @@ class CustomLayout(BoxLayout):
         self.parent.children[1].polygon = newply
         self.parent.children[1].tile_regular_polygon()
 
+        if (self.parent.children[0] != None):
+                new_shape_info = tr.identify_shape(newply)
+                self.parent.main_shape_info = new_shape_info
+                self.parent.children[1].shape_info = new_shape_info
+                self.parent.remove_widget(self.parent.children[0])
+                btns = ReccomendationButtons()
+                self.parent.add_widget(btns)
+                if (new_shape_info != None and len(new_shape_info) >= 1):
+                    btns.setup_btns()
+            
+
     def draw(self):
         self.canvas.clear()
         self.define_nodes()
