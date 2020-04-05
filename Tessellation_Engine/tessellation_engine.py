@@ -270,14 +270,26 @@ class TessellationWidget(GridLayout):
         while count < 6:
             if self.exterior.exterior.coords[count][0] == bounds[2]:
                 if count == 0:
-                    xInc = max(self.exterior.exterior.coords[1][0], self.exterior.exterior.coords[5][0]) - bounds[0]
-                    xInc2 = min(self.exterior.exterior.coords[1][0], self.exterior.exterior.coords[5][0]) - bounds[0]
+                    px = max(self.exterior.exterior.coords[1][0], self.exterior.exterior.coords[5][0])
+                    xInc = px - bounds[0]
+                    if self.exterior.exterior.coords[count][1] == bounds[3] or self.exterior.exterior.coords[count][1] == bounds[1]:
+                        xInc2 = px - min(self.exterior.exterior.coords[1][0], self.exterior.exterior.coords[5][0])
+                    else:
+                        xInc2 = min(self.exterior.exterior.coords[1][0], self.exterior.exterior.coords[5][0]) - bounds[0]
                 elif count == 5:
-                    xInc = max(self.exterior.exterior.coords[0][0], self.exterior.exterior.coords[4][0]) - bounds[0] 
-                    xInc2 = min(self.exterior.exterior.coords[0][0], self.exterior.exterior.coords[4][0]) - bounds[0]
+                    px = max(self.exterior.exterior.coords[0][0], self.exterior.exterior.coords[4][0])
+                    xInc = px - bounds[0]
+                    if self.exterior.exterior.coords[count][1] == bounds[3] or self.exterior.exterior.coords[count][1] == bounds[1]:
+                        xInc2 = px - min(self.exterior.exterior.coords[0][0], self.exterior.exterior.coords[4][0])
+                    else:
+                        xInc2 = min(self.exterior.exterior.coords[0][0], self.exterior.exterior.coords[4][0]) - bounds[0]
                 else:
-                    xInc = max(self.exterior.exterior.coords[count + 1][0], self.exterior.exterior.coords[count - 1][0]) - bounds[0]
-                    xInc2 = max(self.exterior.exterior.coords[count + 1][0], self.exterior.exterior.coords[count - 1][0]) - bounds[0]    
+                    px = max(self.exterior.exterior.coords[count + 1][0], self.exterior.exterior.coords[count - 1][0])
+                    xInc = px - bounds[0]
+                    if self.exterior.exterior.coords[count][1] == bounds[3] or self.exterior.exterior.coords[count][1] == bounds[1]:
+                        xInc2 = px - min(self.exterior.exterior.coords[count + 1][0], self.exterior.exterior.coords[count - 1][0]) 
+                    else:
+                        xInc2 = min(self.exterior.exterior.coords[count + 1][0], self.exterior.exterior.coords[count - 1][0]) - bounds[0]
             if self.exterior.exterior.coords[count][1] == bounds[3]:
                 if count == 0:
                     py = min(self.exterior.exterior.coords[1][1], self.exterior.exterior.coords[5][1])
@@ -286,7 +298,7 @@ class TessellationWidget(GridLayout):
                 elif count == 5:
                     py = min(self.exterior.exterior.coords[0][1], self.exterior.exterior.coords[4][1])
                     yInc = py - bounds[1]
-                    yInc2 = max(self.exterior.exterior.coords[0][1], self.exterior.exterior.coords[4][1]) - py 
+                    yInc2 = max(self.exterior.exterior.coords[0][1], self.exterior.exterior.coords[4][1]) - py
                 else:
                     py = min(self.exterior.exterior.coords[count + 1][1], self.exterior.exterior.coords[count - 1][1])
                     yInc = py - bounds[1]
