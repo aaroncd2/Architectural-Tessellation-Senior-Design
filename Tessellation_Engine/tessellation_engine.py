@@ -222,6 +222,7 @@ class TessellationWidget(GridLayout):
         pLeft = None 
         pRight = None
         pointsRight = False
+        pointsUp = False
         hasDoubleMax = False
         count = 0
         while count < 4:
@@ -229,6 +230,18 @@ class TessellationWidget(GridLayout):
                 pRight = exterior.exterior.coords[count]
                 if exterior.exterior.coords[count][1] == bounds[3] or exterior.exterior.coords[count][1] == bounds[1]:
                     hasDoubleMax = True
+                if count == 0 or count == 2:
+                    xMax = max(exterior.exterior.coords[1][0], exterior.exterior.coords[3][0])
+                    if xMax == exterior.exterior.coords[1][0] and exterior.exterior.coords[1][1] > exterior.exterior.coords[3][1]:
+                        pointsUp = True
+                    elif xMax == exterior.exterior.coords[3][0] and exterior.exterior.coords[3][1] > exterior.exterior.coords[1][1]:
+                        pointsUp = True
+                elif count == 1 or count == 3:
+                    xMax = max(exterior.exterior.coords[0][0], exterior.exterior.coords[2][0])
+                    if xMax == exterior.exterior.coords[0][0] and exterior.exterior.coords[0][1] > exterior.exterior.coords[2][1]:
+                        pointsUp = True
+                    elif xMax == exterior.exterior.coords[2][0] and exterior.exterior.coords[2][1] > exterior.exterior.coords[0][1]:
+                        pointsUp = True
             if exterior.exterior.coords[count][0] == bounds[0]:
                 pLeft = exterior.exterior.coords[count]
                 if exterior.exterior.coords[count][1] == bounds[3] or exterior.exterior.coords[count][1] == bounds[1]:
@@ -236,8 +249,6 @@ class TessellationWidget(GridLayout):
             count = count + 1
         if pRight[1] >= pLeft[1]:
             pointsRight = True
-        #if hasDoubleMax and yInc2 == 0:
-        #    xInc2 = xInc
     
         xCount = 1
         yCount = 1
@@ -248,18 +259,36 @@ class TessellationWidget(GridLayout):
                 for p in shape.exterior.coords:
                     if pointsRight:
                         if hasDoubleMax:
-                            px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
-                            py = (p[1] + (yInc * xCount) + (yInc2 * yCount)) * scale_factor
+                            if pointsUp:
+                                px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
+                                py = (p[1] + (yInc2 * xCount) + (yInc * yCount)) * scale_factor
+                            else:
+                                px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
+                                py = (p[1] + (yInc * xCount) + (yInc2 * yCount)) * scale_factor
                         else:
-                            px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
-                            py = (p[1] + (yInc * xCount) - (yInc2 * yCount)) * scale_factor
+                            if pointsUp:
+                                px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
+                                py = (p[1] + (yInc * xCount) - (yInc2 * yCount)) * scale_factor
+                            else:
+                                px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
+                                py = (p[1] - (yInc2 * xCount) + (yInc * yCount)) * scale_factor
                     else:
                         if hasDoubleMax:
-                            px = (p[0] + (xInc * xCount) - (xInc2 * yCount)) * scale_factor
-                            py = (p[1] + (yInc2 * xCount) + (yInc * yCount)) * scale_factor
+                            if pointsUp:
+                                print("POINTS UP")
+                                px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
+                                py = (p[1] - (yInc2 * xCount) - (yInc * yCount)) * scale_factor
+                            else:
+                                print("POINTS DOWN")
+                                px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
+                                py = (p[1] - (yInc2 * xCount) - (yInc * yCount)) * scale_factor
                         else:
-                            px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
-                            py = (p[1] + (yInc * xCount) - (yInc2 * yCount)) * scale_factor
+                            if pointsUp:
+                                px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
+                                py = (p[1] + (yInc2 * xCount) - (yInc * yCount)) * scale_factor
+                            else:
+                                px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
+                                py = (p[1] + (yInc2 * xCount) - (yInc * yCount)) * scale_factor
                     temp.append((px,py))
                 temp_poly = Polygon(temp)
                 temp_poly = affinity.rotate(temp_poly, self.s.value)
