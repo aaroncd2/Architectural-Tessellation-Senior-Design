@@ -275,11 +275,9 @@ class TessellationWidget(GridLayout):
                     else:
                         if hasDoubleMax:
                             if pointsUp:
-                                print("POINTS UP")
                                 px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
                                 py = (p[1] - (yInc2 * xCount) - (yInc * yCount)) * scale_factor
                             else:
-                                print("POINTS DOWN")
                                 px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
                                 py = (p[1] - (yInc2 * xCount) - (yInc * yCount)) * scale_factor
                         else:
