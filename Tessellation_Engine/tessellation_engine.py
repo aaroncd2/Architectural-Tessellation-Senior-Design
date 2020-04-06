@@ -190,52 +190,54 @@ class TessellationWidget(GridLayout):
         bounds = exterior.bounds
         count = 0
         while count < 4:
-            # calculate in-row increments
+            # calculate horizontal increments
             if exterior.exterior.coords[count][0] == bounds[2]:
                 if count == 0:
-                    px = max(exterior.exterior.coords[1][0], exterior.exterior.coords[3][0])
-                    xInc = px - bounds[0]
-                    if px == exterior.exterior.coords[1][0]:
-                        yInc = exterior.exterior.coords[count][1] - exterior.exterior.coords[3][1]
-                    else:
-                        yInc = exterior.exterior.coords[count][1] - exterior.exterior.coords[1][1]
+                    xInc = max(exterior.exterior.coords[1][0], exterior.exterior.coords[3][0]) - bounds[0]
+                    xInc2 = min(exterior.exterior.coords[1][0], exterior.exterior.coords[3][0]) - bounds[0]
                 elif count == 3:
-                    px = max(exterior.exterior.coords[0][0], exterior.exterior.coords[2][0])
-                    xInc = px - bounds[0]
-                    if px == exterior.exterior.coords[0][0]:
-                        yInc = exterior.exterior.coords[count][1] - exterior.exterior.coords[2][1]
-                    else:
-                        yInc = exterior.exterior.coords[count][1] - exterior.exterior.coords[0][1]
+                    xInc = max(exterior.exterior.coords[0][0], exterior.exterior.coords[2][0]) - bounds[0]
+                    xInc2 = min(exterior.exterior.coords[0][0], exterior.exterior.coords[2][0]) - bounds[0]
                 else:
-                    px = max(exterior.exterior.coords[count + 1][0], exterior.exterior.coords[count - 1][0])
-                    xInc = px - bounds[0]
-                    if px == exterior.exterior.coords[count + 1][0]:
-                        yInc = exterior.exterior.coords[count][1] - exterior.exterior.coords[count - 1][1]
-                    else:
-                        yInc = exterior.exterior.coords[count][1] - exterior.exterior.coords[count + 1][1]
-            # calculate between-row x and y increments
+                    xInc = max(exterior.exterior.coords[count + 1][0], exterior.exterior.coords[count - 1][0]) - bounds[0]
+                    xInc2 = min(exterior.exterior.coords[count + 1][0], exterior.exterior.coords[count - 1][0]) - bounds[0]
+            # calculate vertical increments
             if exterior.exterior.coords[count][1] == bounds[3]:
                 if count == 0:
-                    xInc2 = exterior.exterior.coords[count][0] - exterior.exterior.coords[count + 2][0]
-                    py = max(exterior.exterior.coords[1][1], exterior.exterior.coords[3][1])
-                    yInc2 = py - bounds[1]
-                elif count == 1:
-                    xInc2 = exterior.exterior.coords[count][0] - exterior.exterior.coords[count + 2][0]
-                    py = max(exterior.exterior.coords[count + 1][1], exterior.exterior.coords[count - 1][1])
-                    yInc2 = py - bounds[1]
-                elif count == 2:
-                    xInc2 = exterior.exterior.coords[count][0] - exterior.exterior.coords[0][0]
-                    py = max(exterior.exterior.coords[count + 1][1], exterior.exterior.coords[count - 1][1])
-                    yInc2 = py - bounds[1]
+                    yInc = max(exterior.exterior.coords[1][1], exterior.exterior.coords[3][1]) - bounds[1]
+                    yInc2 = min(exterior.exterior.coords[1][1], exterior.exterior.coords[3][1]) - bounds[1]
+                elif count == 3:
+                    yInc = max(exterior.exterior.coords[0][1], exterior.exterior.coords[2][1]) - bounds[1]
+                    yInc2 = min(exterior.exterior.coords[0][1], exterior.exterior.coords[2][1]) - bounds[1]
                 else:
-                    xInc2 = exterior.exterior.coords[count][0] - exterior.exterior.coords[1][0]
-                    py = max(exterior.exterior.coords[0][1], exterior.exterior.coords[2][1])
-                    yInc2 = py - bounds[1]
+                    yInc = max(exterior.exterior.coords[count + 1][1], exterior.exterior.coords[count - 1][1]) - bounds[1]
+                    yInc2 = min(exterior.exterior.coords[count + 1][1], exterior.exterior.coords[count - 1][1]) - bounds[1]
             count = count + 1
         xInc = xInc * (self.xSpacing / 100)
         yInc = yInc * (self.ySpacing / 100)
         xInc2 = xInc2 * (self.xSpacing / 100)
-        yInc2 = (bounds[3] - bounds[1]) * (self.ySpacing / 100)
+        yInc2 = yInc2 * (self.ySpacing / 100)
+    
+        # determine direction of parallelogram
+        pLeft = None 
+        pRight = None
+        pointsRight = False
+        hasDoubleMax = False
+        count = 0
+        while count < 4:
+            if exterior.exterior.coords[count][0] == bounds[2]:
+                pRight = exterior.exterior.coords[count]
+                if exterior.exterior.coords[count][1] == bounds[3] or exterior.exterior.coords[count][1] == bounds[1]:
+                    hasDoubleMax = True
+            if exterior.exterior.coords[count][0] == bounds[0]:
+                pLeft = exterior.exterior.coords[count]
+                if exterior.exterior.coords[count][1] == bounds[3] or exterior.exterior.coords[count][1] == bounds[1]:
+                    hasDoubleMax = True
+            count = count + 1
+        if pRight[1] >= pLeft[1]:
+            pointsRight = True
+        #if hasDoubleMax and yInc2 == 0:
+        #    xInc2 = xInc
     
         xCount = 1
         yCount = 1
@@ -244,11 +246,20 @@ class TessellationWidget(GridLayout):
             while xCount <= self.xNum:
                 temp = []
                 for p in shape.exterior.coords:
-                    if xInc2 < 0:
-                        px = ((p[0] + (xInc * xCount)) * scale_factor) + ((xInc2 * (yCount)) * scale_factor) + ((xInc * yCount) * scale_factor)
+                    if pointsRight:
+                        if hasDoubleMax:
+                            px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
+                            py = (p[1] + (yInc * xCount) + (yInc2 * yCount)) * scale_factor
+                        else:
+                            px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
+                            py = (p[1] + (yInc * xCount) - (yInc2 * yCount)) * scale_factor
                     else:
-                        px = ((p[0] + (xInc * xCount)) * scale_factor) + ((xInc2 * (yCount)) * scale_factor) - ((xInc * yCount) * scale_factor)
-                    py = ((p[1] + (yInc * xCount)) * scale_factor) + ((yInc2 * (yCount)) * scale_factor) - ((yInc * yCount) * scale_factor)
+                        if hasDoubleMax:
+                            px = (p[0] + (xInc * xCount) - (xInc2 * yCount)) * scale_factor
+                            py = (p[1] + (yInc2 * xCount) + (yInc * yCount)) * scale_factor
+                        else:
+                            px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
+                            py = (p[1] + (yInc * xCount) - (yInc2 * yCount)) * scale_factor
                     temp.append((px,py))
                 temp_poly = Polygon(temp)
                 temp_poly = affinity.rotate(temp_poly, self.s.value)
@@ -316,7 +327,7 @@ class TessellationWidget(GridLayout):
             while xCount <= self.xNum:
                 temp = []
                 for p in shape.exterior.coords:
-                    temp.append(((p[0] + (xInc * xCount) + (xInc2 * yCount)), (p[1] - (yInc * xCount) + (yInc2 * yCount))))
+                    temp.append(((p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor, (p[1] - (yInc * xCount) + (yInc2 * yCount)) * scale_factor))
                 temp_poly = Polygon(temp)
                 temp_poly = affinity.rotate(temp_poly, self.s.value)
                 self.polygons.append(tu.shapely_to_kivy(temp_poly))
