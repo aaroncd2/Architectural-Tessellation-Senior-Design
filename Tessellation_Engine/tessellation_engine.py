@@ -299,6 +299,7 @@ class TessellationWidget(GridLayout):
 
     # tiles a hexagon
     def tile_hexagon(self):
+        # calculate increment between shapes
         scale_factor = self.slide_scale.value / 100
         shape = tu.make_positive(self.rec_shape[0])
         exterior = tu.make_positive(self.rec_shape[3])
@@ -306,47 +307,95 @@ class TessellationWidget(GridLayout):
         bounds = exterior.bounds
         count = 0
         while count < 6:
-            if self.exterior.exterior.coords[count][0] == bounds[2]:
+            # calculate horizontal increments
+            if exterior.exterior.coords[count][0] == bounds[2]:
                 if count == 0:
-                    px = max(self.exterior.exterior.coords[1][0], self.exterior.exterior.coords[5][0])
-                    xInc = px - bounds[0]
-                    if self.exterior.exterior.coords[count][1] == bounds[3] or self.exterior.exterior.coords[count][1] == bounds[1]:
-                        xInc2 = px - min(self.exterior.exterior.coords[1][0], self.exterior.exterior.coords[5][0])
-                    else:
-                        xInc2 = min(self.exterior.exterior.coords[1][0], self.exterior.exterior.coords[5][0]) - bounds[0]
+                    xInc = max(exterior.exterior.coords[1][0], exterior.exterior.coords[5][0]) - bounds[0]
+                    xInc2 = min(exterior.exterior.coords[1][0], exterior.exterior.coords[5][0]) - bounds[0]
                 elif count == 5:
-                    px = max(self.exterior.exterior.coords[0][0], self.exterior.exterior.coords[4][0])
-                    xInc = px - bounds[0]
-                    if self.exterior.exterior.coords[count][1] == bounds[3] or self.exterior.exterior.coords[count][1] == bounds[1]:
-                        xInc2 = px - min(self.exterior.exterior.coords[0][0], self.exterior.exterior.coords[4][0])
-                    else:
-                        xInc2 = min(self.exterior.exterior.coords[0][0], self.exterior.exterior.coords[4][0]) - bounds[0]
+                    xInc = max(exterior.exterior.coords[0][0], exterior.exterior.coords[4][0]) - bounds[0]
+                    xInc2 = min(exterior.exterior.coords[0][0], exterior.exterior.coords[4][0]) - bounds[0]
                 else:
-                    px = max(self.exterior.exterior.coords[count + 1][0], self.exterior.exterior.coords[count - 1][0])
-                    xInc = px - bounds[0]
-                    if self.exterior.exterior.coords[count][1] == bounds[3] or self.exterior.exterior.coords[count][1] == bounds[1]:
-                        xInc2 = px - min(self.exterior.exterior.coords[count + 1][0], self.exterior.exterior.coords[count - 1][0]) 
-                    else:
-                        xInc2 = min(self.exterior.exterior.coords[count + 1][0], self.exterior.exterior.coords[count - 1][0]) - bounds[0]
-            if self.exterior.exterior.coords[count][1] == bounds[3]:
+                    xInc = max(exterior.exterior.coords[count + 1][0], exterior.exterior.coords[count - 1][0]) - bounds[0]
+                    xInc2 = min(exterior.exterior.coords[count + 1][0], exterior.exterior.coords[count - 1][0]) - bounds[0]
+            # calculate vertical increments
+            if exterior.exterior.coords[count][1] == bounds[3]:
                 if count == 0:
-                    py = min(self.exterior.exterior.coords[1][1], self.exterior.exterior.coords[5][1])
-                    yInc = py - bounds[1]
-                    yInc2 = max(self.exterior.exterior.coords[1][1], self.exterior.exterior.coords[5][1]) - py
+                    yInc = max(exterior.exterior.coords[1][1], exterior.exterior.coords[5][1]) - bounds[1]
+                    yInc2 = min(exterior.exterior.coords[1][1], exterior.exterior.coords[5][1]) - bounds[1]
                 elif count == 5:
-                    py = min(self.exterior.exterior.coords[0][1], self.exterior.exterior.coords[4][1])
-                    yInc = py - bounds[1]
-                    yInc2 = max(self.exterior.exterior.coords[0][1], self.exterior.exterior.coords[4][1]) - py
+                    yInc = max(exterior.exterior.coords[0][1], exterior.exterior.coords[4][1]) - bounds[1]
+                    yInc2 = min(exterior.exterior.coords[0][1], exterior.exterior.coords[4][1]) - bounds[1]
                 else:
-                    py = min(self.exterior.exterior.coords[count + 1][1], self.exterior.exterior.coords[count - 1][1])
-                    yInc = py - bounds[1]
-                    yInc2 = max(self.exterior.exterior.coords[count + 1][1], self.exterior.exterior.coords[count - 1][1]) - py
+                    yInc = max(exterior.exterior.coords[count + 1][1], exterior.exterior.coords[count - 1][1]) - bounds[1]
+                    yInc2 = min(exterior.exterior.coords[count + 1][1], exterior.exterior.coords[count - 1][1]) - bounds[1]
             count = count + 1
-
         xInc = xInc * (self.xSpacing / 100)
         yInc = yInc * (self.ySpacing / 100)
         xInc2 = xInc2 * (self.xSpacing / 100)
         yInc2 = yInc2 * (self.ySpacing / 100)
+    
+        # determine direction of hexagon
+        pointsUp = False
+        pointsRight = False
+        tiltsUp = False
+        tiltsRight = False
+        hasDoubleMax = False
+        count = 0
+        while count < 6:
+            if exterior.exterior.coords[count][0] == bounds[0]:
+                pLeft = exterior.exterior.coords[count]
+            if exterior.exterior.coords[count][0] == bounds[2]:
+                if exterior.exterior.coords[count][1] == bounds[3] or exterior.exterior.coords[count][1] == bounds[1]:
+                    hasDoubleMax = True
+                pRight = exterior.exterior.coords[count]
+                if count == 0:
+                    xMax = max(exterior.exterior.coords[1][0], exterior.exterior.coords[5][0])
+                    if xMax == exterior.exterior.coords[1][0] and exterior.exterior.coords[1][1] > exterior.exterior.coords[5][1]:
+                        tiltsUp = True
+                    elif xMax == exterior.exterior.coords[5][0] and exterior.exterior.coords[5][1] > exterior.exterior.coords[1][1]:
+                        tiltsUp = True
+                elif count == 5:
+                    xMax = max(exterior.exterior.coords[0][0], exterior.exterior.coords[4][0])
+                    if xMax == exterior.exterior.coords[0][0] and exterior.exterior.coords[0][1] > exterior.exterior.coords[4][1]:
+                        tiltsUp = True
+                    elif xMax == exterior.exterior.coords[4][0] and exterior.exterior.coords[4][1] > exterior.exterior.coords[0][1]:
+                        tiltsUp = True
+                else:
+                    xMax = max(exterior.exterior.coords[count - 1][0], exterior.exterior.coords[count + 1][0])
+                    if xMax == exterior.exterior.coords[count - 1][0] and exterior.exterior.coords[count - 1][1] > exterior.exterior.coords[count + 1][1]:
+                        tiltsUp = True
+                    elif xMax == exterior.exterior.coords[count + 1][0] and exterior.exterior.coords[count + 1][1] > exterior.exterior.coords[count - 1][1]:
+                        tiltsUp = True
+            if exterior.exterior.coords[count][1] == bounds[1]:
+                pDown = exterior.exterior.coords[count]
+            if exterior.exterior.coords[count][1] == bounds[3]:
+                pUp = exterior.exterior.coords[count]
+                if count == 0:
+                    yMax = max(exterior.exterior.coords[1][1], exterior.exterior.coords[5][1])
+                    if yMax == exterior.exterior.coords[1][1] and exterior.exterior.coords[1][0] > exterior.exterior.coords[5][0]:
+                        tiltsRight = True
+                    elif yMax == exterior.exterior.coords[5][1] and exterior.exterior.coords[5][0] > exterior.exterior.coords[1][0]:
+                        tiltsRight = True
+                elif count == 5:
+                    yMax = max(exterior.exterior.coords[0][1], exterior.exterior.coords[4][1])
+                    if yMax == exterior.exterior.coords[0][1] and exterior.exterior.coords[0][0] > exterior.exterior.coords[4][0]:
+                        tiltsRight = True
+                    elif yMax == exterior.exterior.coords[4][1] and exterior.exterior.coords[4][0] > exterior.exterior.coords[0][0]:
+                        tiltsRight = True
+                else:
+                    yMax = max(exterior.exterior.coords[count - 1][1], exterior.exterior.coords[count + 1][1])
+                    if yMax == exterior.exterior.coords[count - 1][1] and exterior.exterior.coords[count - 1][0] > exterior.exterior.coords[count + 1][0]:
+                         tiltsRight = True
+                    elif yMax == exterior.exterior.coords[count + 1][1] and exterior.exterior.coords[count + 1][0] > exterior.exterior.coords[count - 1][0]:
+                        tiltsRight = True
+            count = count + 1
+        if pRight[1] >= pLeft[1]:
+            pointsUp = True
+        if pUp[0] >= pDown[0]:
+            pointsRight = True
+
+        # build tiling
         xCount = 1
         yCount = 1
         self.polygons = []
@@ -354,7 +403,102 @@ class TessellationWidget(GridLayout):
             while xCount <= self.xNum:
                 temp = []
                 for p in shape.exterior.coords:
-                    temp.append(((p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor, (p[1] - (yInc * xCount) + (yInc2 * yCount)) * scale_factor))
+                    if pointsRight:
+                        if pointsUp:
+                            if tiltsUp:
+                                if tiltsRight:
+                                    print("RIGHT + UP | UP + RIGHT")
+                                    px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
+                                    py = (p[1] + (yInc * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
+                                else:
+                                    print("RIGHT + UP | UP + LEFT")
+                                    px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
+                                    py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) * scale_factor
+                            else:
+                                if tiltsRight:
+                                    print("RIGHT + UP | DOWN + RIGHT")
+                                    px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
+                                    py = (p[1] + (yInc * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
+                                else:
+                                    print("RIGHT + UP | DOWN + LEFT")
+                                    if hasDoubleMax:
+                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
+                                        py = (p[1] + (yInc * xCount) + (yInc2 * yCount)) * scale_factor
+                                    else:
+                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
+                                        py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) * scale_factor
+                        else:
+                            if tiltsUp:
+                                if tiltsRight:
+                                    print("RIGHT + DOWN | UP + RIGHT")
+                                    px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
+                                    py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
+                                else:
+                                    print("RIGHT + DOWN | UP + LEFT")
+                                    if xInc2 > (bounds[2] - bounds[0]) / 2:
+                                        px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
+                                        py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) * scale_factor
+                                    else:
+                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
+                                        py = (p[1] - (yInc * xCount) - ((yInc - yInc2) * yCount)) * scale_factor
+                            else:
+                                if tiltsRight:
+                                    print("RIGHT + DOWN | DOWN + RIGHT")
+                                    px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
+                                    py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
+                                else:
+                                    print("RIGHT + DOWN | DOWN + LEFT")
+                                    px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
+                                    py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) * scale_factor
+                    else:
+                        if pointsUp:
+                            if tiltsUp:
+                                if tiltsRight:
+                                    print("LEFT + UP | UP + RIGHT")
+                                    px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
+                                    py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
+                                else:
+                                    print("LEFT + UP | UP + LEFT")
+                                    px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
+                                    py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
+                            else:
+                                if tiltsRight:
+                                    print("LEFT + UP | DOWN + RIGHT")
+                                    if xInc2 > (bounds[2] - bounds[0]) / 2:
+                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
+                                        py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) * scale_factor
+                                    else:
+                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
+                                        py = (p[1] + (yInc * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
+                                else:
+                                    print("LEFT + UP | DOWN + LEFT")
+                                    px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
+                                    py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) * scale_factor
+                        else:
+                            if tiltsUp:
+                                if tiltsRight:
+                                    print("LEFT + DOWN | UP + RIGHT")
+                                    if hasDoubleMax:
+                                        print("DMAX")
+                                        px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
+                                        py = (p[1] - (yInc2 * xCount) - (yInc * yCount)) * scale_factor
+                                    else:
+                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
+                                        py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
+                                else:
+                                    print("LEFT + DOWN | UP + LEFT")
+                                    px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
+                                    py = (p[1] - (yInc * xCount) - ((yInc - yInc2) * yCount)) * scale_factor 
+                            else:
+                                if tiltsRight:
+                                    print("LEFT + DOWN | DOWN + RIGHT")
+                                    px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
+                                    py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
+                                else:
+                                    print("LEFT + DOWN | DOWN + LEFT")
+                                    px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
+                                    py = (p[1] - (yInc * xCount) - ((yInc - yInc2) * yCount)) * scale_factor
+                    temp.append((px,py))
                 temp_poly = Polygon(temp)
                 temp_poly = affinity.rotate(temp_poly, self.s.value)
                 self.polygons.append(tu.shapely_to_kivy(temp_poly))
