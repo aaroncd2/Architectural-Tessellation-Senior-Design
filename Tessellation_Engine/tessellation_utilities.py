@@ -52,11 +52,17 @@ def make_positive(polygon):
 
 # creates a list of points for drawing mesh
 def make_mesh_list(polygon):
+    shapely_poly = Polygon(kivy_to_shapely(polygon))
+    center = shapely_poly.centroid
     mesh_points = []
     count = 0
     while count < len(polygon):
         mesh_points.append(polygon[count])
         mesh_points.append(polygon[count+1])
+        mesh_points.append(0)
+        mesh_points.append(0)
+        mesh_points.append(center.x)
+        mesh_points.append(center.y)
         mesh_points.append(0)
         mesh_points.append(0)
         count = count + 2
@@ -66,9 +72,10 @@ def make_mesh_list(polygon):
 def make_indices_list(polygon):
     indices = []
     count = 0
-    while count < (len(polygon) / 2):
+    while count < len(polygon):
         indices.append(count)
-        count = count + 1
+        indices.append(count + 1)
+        count = count + 2
     return indices
 
 def is_convex(shape):

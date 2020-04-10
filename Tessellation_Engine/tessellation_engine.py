@@ -513,8 +513,12 @@ class TessellationWidget(GridLayout):
                                     py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
                                 else:
                                     #print("LEFT + DOWN | DOWN + LEFT")
-                                    px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
-                                    py = (p[1] - (yInc * xCount) - ((yInc - yInc2) * yCount)) * scale_factor
+                                    if isLeftHorizontal:
+                                        px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
+                                        py = (p[1] - (yInc * xCount) - ((yInc - yInc2) * yCount)) * scale_factor
+                                    else:
+                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
+                                        py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) * scale_factor
                     temp.append((px,py))
                 temp_poly = Polygon(temp)
                 temp_poly = affinity.rotate(temp_poly, self.s.value)
@@ -704,7 +708,7 @@ class TessellationWidget(GridLayout):
         self.canvas_widget.lines.clear()
         indices = tu.make_indices_list(self.polygons[0])
         for polygon in self.polygons:
-            if (self.exterior != None and self.type != 'regular' and tu.is_convex(self.exterior)) or tu.is_convex(self.polygon):
+            if tu.is_convex(self.base_unit):
                 mesh_points = tu.make_mesh_list(polygon)
                 self.canvas_widget.lines.add(Color(0,0,1.))
                 self.canvas_widget.lines.add(Mesh(vertices=mesh_points, indices=indices, mode='triangle_strip'))
