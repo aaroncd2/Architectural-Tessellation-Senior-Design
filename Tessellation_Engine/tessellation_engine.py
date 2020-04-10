@@ -297,7 +297,7 @@ class TessellationWidget(GridLayout):
             yCount = yCount + 1
         self.draw_polygons()
 
-    # tiles a hexagon
+    # tiles a hexagon (with 3 sets of parallel edges)
     def tile_hexagon(self):
         # calculate increment between shapes
         scale_factor = self.slide_scale.value / 100
@@ -341,6 +341,8 @@ class TessellationWidget(GridLayout):
         tiltsUp = False
         tiltsRight = False
         hasDoubleMax = False
+        isLeftHorizontal = False
+        isRightHorizontal = False
         count = 0
         while count < 6:
             if exterior.exterior.coords[count][0] == bounds[0]:
@@ -377,18 +379,30 @@ class TessellationWidget(GridLayout):
                         tiltsRight = True
                     elif yMax == exterior.exterior.coords[5][1] and exterior.exterior.coords[5][0] > exterior.exterior.coords[1][0]:
                         tiltsRight = True
+                    if exterior.exterior.coords[1][0] == bounds[0] or exterior.exterior.coords[5][0] == bounds[0]:
+                        isLeftHorizontal = True
+                    if exterior.exterior.coords[1][0] == bounds[2] or exterior.exterior.coords[5][0] == bounds[2]:
+                        isRightHorizontal = True
                 elif count == 5:
                     yMax = max(exterior.exterior.coords[0][1], exterior.exterior.coords[4][1])
                     if yMax == exterior.exterior.coords[0][1] and exterior.exterior.coords[0][0] > exterior.exterior.coords[4][0]:
                         tiltsRight = True
                     elif yMax == exterior.exterior.coords[4][1] and exterior.exterior.coords[4][0] > exterior.exterior.coords[0][0]:
                         tiltsRight = True
+                    if exterior.exterior.coords[0][0] == bounds[0] or exterior.exterior.coords[4][0] == bounds[0]:
+                        isLeftHorizontal = True
+                    if exterior.exterior.coords[0][0] == bounds[2] or exterior.exterior.coords[4][0] == bounds[2]:
+                        isRightHorizontal = True
                 else:
                     yMax = max(exterior.exterior.coords[count - 1][1], exterior.exterior.coords[count + 1][1])
                     if yMax == exterior.exterior.coords[count - 1][1] and exterior.exterior.coords[count - 1][0] > exterior.exterior.coords[count + 1][0]:
                          tiltsRight = True
                     elif yMax == exterior.exterior.coords[count + 1][1] and exterior.exterior.coords[count + 1][0] > exterior.exterior.coords[count - 1][0]:
                         tiltsRight = True
+                    if exterior.exterior.coords[count - 1][0] == bounds[0] or exterior.exterior.coords[count + 1][0] == bounds[0]:
+                        isLeftHorizontal = True
+                    if exterior.exterior.coords[count - 1][0] == bounds[2] or exterior.exterior.coords[count + 1][0] == bounds[2]:
+                        isRightHorizontal = True
             count = count + 1
         if pRight[1] >= pLeft[1]:
             pointsUp = True
@@ -407,20 +421,24 @@ class TessellationWidget(GridLayout):
                         if pointsUp:
                             if tiltsUp:
                                 if tiltsRight:
-                                    print("RIGHT + UP | UP + RIGHT")
-                                    px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
-                                    py = (p[1] + (yInc * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
+                                    #print("RIGHT + UP | UP + RIGHT")
+                                    if isRightHorizontal:
+                                        px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
+                                        py = (p[1] + (yInc * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
+                                    else:
+                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
+                                        py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
                                 else:
-                                    print("RIGHT + UP | UP + LEFT")
+                                    #print("RIGHT + UP | UP + LEFT")
                                     px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
                                     py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) * scale_factor
                             else:
                                 if tiltsRight:
-                                    print("RIGHT + UP | DOWN + RIGHT")
+                                    #print("RIGHT + UP | DOWN + RIGHT")
                                     px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
                                     py = (p[1] + (yInc * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
                                 else:
-                                    print("RIGHT + UP | DOWN + LEFT")
+                                    #print("RIGHT + UP | DOWN + LEFT")
                                     if hasDoubleMax:
                                         px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
                                         py = (p[1] + (yInc * xCount) + (yInc2 * yCount)) * scale_factor
@@ -430,12 +448,12 @@ class TessellationWidget(GridLayout):
                         else:
                             if tiltsUp:
                                 if tiltsRight:
-                                    print("RIGHT + DOWN | UP + RIGHT")
+                                    #print("RIGHT + DOWN | UP + RIGHT")
                                     px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
                                     py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
                                 else:
-                                    print("RIGHT + DOWN | UP + LEFT")
-                                    if xInc2 > (bounds[2] - bounds[0]) / 2:
+                                    #print("RIGHT + DOWN | UP + LEFT")
+                                    if isRightHorizontal:
                                         px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
                                         py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) * scale_factor
                                     else:
@@ -443,59 +461,58 @@ class TessellationWidget(GridLayout):
                                         py = (p[1] - (yInc * xCount) - ((yInc - yInc2) * yCount)) * scale_factor
                             else:
                                 if tiltsRight:
-                                    print("RIGHT + DOWN | DOWN + RIGHT")
+                                    #print("RIGHT + DOWN | DOWN + RIGHT")
                                     px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
                                     py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
                                 else:
-                                    print("RIGHT + DOWN | DOWN + LEFT")
+                                    #print("RIGHT + DOWN | DOWN + LEFT")
                                     px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
                                     py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) * scale_factor
                     else:
                         if pointsUp:
                             if tiltsUp:
                                 if tiltsRight:
-                                    print("LEFT + UP | UP + RIGHT")
+                                    #print("LEFT + UP | UP + RIGHT")
                                     px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
                                     py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
                                 else:
-                                    print("LEFT + UP | UP + LEFT")
+                                    #print("LEFT + UP | UP + LEFT")
                                     px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
                                     py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
                             else:
                                 if tiltsRight:
-                                    print("LEFT + UP | DOWN + RIGHT")
-                                    if xInc2 > (bounds[2] - bounds[0]) / 2:
-                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
-                                        py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) * scale_factor
+                                    #print("LEFT + UP | DOWN + RIGHT")
+                                    if isLeftHorizontal:
+                                        px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
+                                        py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
                                     else:
                                         px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
                                         py = (p[1] + (yInc * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
                                 else:
-                                    print("LEFT + UP | DOWN + LEFT")
+                                    #print("LEFT + UP | DOWN + LEFT")
                                     px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
                                     py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) * scale_factor
                         else:
                             if tiltsUp:
                                 if tiltsRight:
-                                    print("LEFT + DOWN | UP + RIGHT")
+                                    #print("LEFT + DOWN | UP + RIGHT")
                                     if hasDoubleMax:
-                                        print("DMAX")
                                         px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
                                         py = (p[1] - (yInc2 * xCount) - (yInc * yCount)) * scale_factor
                                     else:
                                         px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
                                         py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
                                 else:
-                                    print("LEFT + DOWN | UP + LEFT")
+                                    #print("LEFT + DOWN | UP + LEFT")
                                     px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
                                     py = (p[1] - (yInc * xCount) - ((yInc - yInc2) * yCount)) * scale_factor 
                             else:
                                 if tiltsRight:
-                                    print("LEFT + DOWN | DOWN + RIGHT")
+                                    #print("LEFT + DOWN | DOWN + RIGHT")
                                     px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
                                     py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
                                 else:
-                                    print("LEFT + DOWN | DOWN + LEFT")
+                                    #print("LEFT + DOWN | DOWN + LEFT")
                                     px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
                                     py = (p[1] - (yInc * xCount) - ((yInc - yInc2) * yCount)) * scale_factor
                     temp.append((px,py))
