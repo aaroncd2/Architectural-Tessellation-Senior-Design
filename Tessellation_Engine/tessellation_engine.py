@@ -44,17 +44,17 @@ class TessellationWidget(GridLayout):
         imageRow.add_widget(self.canvas_widget)
         self.add_widget(imageRow)
 
-        self.controls = BoxLayout(orientation='horizontal', size_hint=(1,None), height=160)
+        self.controls = BoxLayout(orientation='horizontal', size_hint=(1,.30))
         self.buttons = GridLayout(rows=4, cols=2)
         self.sliders = GridLayout(rows=4, cols=2)
 
         # Add slider and label to widget
         self.s = Slider(min=0, max=360, value=0, value_track = True)
         self.rotation_value = 0
-        self.label_box = BoxLayout(orientation='horizontal', size_hint=(1,None), height=40)
-        self.input_box = TextInput(text='0', input_filter='float', multiline=False)
+        self.label_box = BoxLayout(orientation='horizontal', size_hint=(1,1))
+        self.input_box = TextInput(text='0', input_filter='float', multiline=False, font_size='12dp')
         self.input_box.bind(on_text_validate=self.on_enter)
-        self.label = Label(text ='Rotation:')
+        self.label = Label(text ='Rotation:', font_size='12dp')
         self.label_box.add_widget(self.label)
         self.label_box.add_widget(self.input_box)
         self.sliders.add_widget(self.label_box) 
@@ -62,7 +62,7 @@ class TessellationWidget(GridLayout):
         self.s.bind(value=self.rotate_polygon)
 
         # Add horizontal translation slider
-        self.h_label = Label(text='Horizontal Spacing')
+        self.h_label = Label(text='Horizontal Spacing', font_size='12dp')
         self.sliders.add_widget(self.h_label)
         self.slide_horizontal = Slider(min=0, max=200, value=100, value_track = True)
         self.xSpacing = 100
@@ -70,7 +70,7 @@ class TessellationWidget(GridLayout):
         self.sliders.add_widget(self.slide_horizontal)
 
         # Add vertical translation slider
-        self.v_label = Label(text='Vertical Spacing')
+        self.v_label = Label(text='Vertical Spacing', font_size='12dp')
         self.sliders.add_widget(self.v_label)
         self.slide_vertical = Slider(min=0, max=200, value=100, value_track = True)
         self.ySpacing = 100
@@ -78,7 +78,7 @@ class TessellationWidget(GridLayout):
         self.sliders.add_widget(self.slide_vertical)
 
         # Add scale slider
-        self.scale_label = Label(text='Scale')
+        self.scale_label = Label(text='Scale', font_size='12dp')
         self.sliders.add_widget(self.scale_label)
         self.slide_scale = Slider(min=0, max=200, value=100, value_track = True)
         self.slide_scale.bind(value = self.scale_polygons)
@@ -87,32 +87,32 @@ class TessellationWidget(GridLayout):
         self.controls.add_widget(self.sliders)
 
         # Add flip horizontal button
-        self.horizontal_button = Button(text = 'Flip Horizontal', background_color = (1,1,1,1))
+        self.horizontal_button = Button(text = 'Flip Horizontal', background_color = (1,1,1,1), font_size='12dp')
         self.buttons.add_widget(self.horizontal_button)
         self.horizontal_button.bind(on_press=self.flip_horizontal)
 
         # Add flip vertical button
-        self.vertical_button = Button(text = 'Flip Vertical', background_color = (1,1,1,1))
+        self.vertical_button = Button(text = 'Flip Vertical', background_color = (1,1,1,1), font_size='12dp')
         self.buttons.add_widget(self.vertical_button)
         self.vertical_button.bind(on_press=self.flip_vertical)
 
         # Add alternate row button
-        self.alternate_row_button = Button(text = 'Alternate Rows', background_color = (1,1,1,1))
+        self.alternate_row_button = Button(text = 'Alternate Rows', background_color = (1,1,1,1), font_size='12dp')
         self.buttons.add_widget(self.alternate_row_button)
         self.alternate_row_button.bind(on_press=self.alternate_rows)
 
         # Add alternate column button
-        self.alternate_col_button = Button(text = 'Alternate Columns', background_color = (1,1,1,1))
+        self.alternate_col_button = Button(text = 'Alternate Cols', background_color = (1,1,1,1), font_size='12dp')
         self.buttons.add_widget(self.alternate_col_button)
         self.alternate_col_button.bind(on_press=self.alternate_cols)
 
         # Add export button
-        self.export_button = Button(text = 'Export', background_color = (1,1,1,1))
+        self.export_button = Button(text = 'Export', background_color = (1,1,1,1), font_size='12dp')
         self.buttons.add_widget(self.export_button)
         self.export_button.bind(on_press=self.export_tiling)
 
         # Add reset button
-        self.reset_button = Button(text = 'Reset', background_color = (1,1,1,1))
+        self.reset_button = Button(text = 'Reset', background_color = (1,1,1,1), font_size='12dp')
         self.buttons.add_widget(self.reset_button)
         self.reset_button.bind(on_press=self.reset)
 
@@ -121,9 +121,9 @@ class TessellationWidget(GridLayout):
         self.add_widget(self.controls)
 
         # Add recommendation buttons
-        self.rec_label = Label(text='Tessellation Type:')
+        self.rec_label = Label(text='Tessellation Type:', font_size='12dp')
         self.buttons.add_widget(self.rec_label)
-        self.rec_type = Label(text='Freeform')
+        self.rec_type = Label(text='Freeform', font_size='12dp')
         self.buttons.add_widget(self.rec_type)
 
     # Display initial tiling
@@ -136,13 +136,7 @@ class TessellationWidget(GridLayout):
         self.original_base_unit = self.polygon
         self.shape_info = tr.identify_shape(self.base_unit)
         self.type = 'regular'
-        polygon = tu.shapely_to_kivy(self.polygon)
-        if self.type == 'regular':
-            self.tile_regular_polygon()
-        elif self.type == 'parallelogram':
-            self.tile_parallelogram()
-        elif self.type == 'hexagon':
-            self.tile_hexagon()
+        self.tile_regular_polygon()
 
     def set_coords(self, num):
         self.points = num
