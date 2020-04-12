@@ -543,20 +543,12 @@ class TessellationWidget(GridLayout):
     # Handles textbox input
     def on_enter(self, value):
         self.s.value = float(self.input_box.text)
+        if self.s.value > 360:
+            self.s.value = self.s.value % 360
         self.rotate_polygon(self.input_box, float(self.input_box.text))
 
     # flips a polygon horizontally across its center
     def flip_horizontal(self, instance):
-        """
-        xCenter = self.polygon.centroid.x
-        flipped = []
-        for p in self.polygon.exterior.coords:
-            point = ((2 * xCenter) - p[0], p[1])
-            flipped.append(point)
-        self.polygon = Polygon(flipped)
-        polygon = tu.shapely_to_kivy(self.polygon)
-        self.draw_polygons()
-        """
         polygons = []
         for polygon in self.polygons:
             shapely_poly = Polygon(tu.kivy_to_shapely(polygon))
@@ -576,19 +568,22 @@ class TessellationWidget(GridLayout):
 
     # flips a polygon vertically across its center
     def flip_vertical(self, instance):
-        yCenter = self.polygon.centroid.y
-        flipped = []
-        for p in self.polygon.exterior.coords:
-            point = (p[0], (2 * yCenter) - p[1])
-            flipped.append(point)
-        self.polygon = Polygon(flipped)
-        polygon = tu.shapely_to_kivy(self.polygon)
-        if self.type == 'regular':
-            self.tile_regular_polygon()
-        elif self.type == 'parallelogram':
-            self.tile_parallelogram()
-        elif self.type == 'hexagon':
-            self.tile_hexagon()
+        polygons = []
+        for polygon in self.polygons:
+            shapely_poly = Polygon(tu.kivy_to_shapely(polygon))
+            bounds = shapely_poly.bounds
+            temp = []
+            centerY = bounds[1] + ((bounds[3] - bounds[1]) / 2.0)
+            count = 0
+            for p in polygon:
+                if count % 2 == 0:
+                    temp.append(p)
+                else:
+                    temp.append((2 * centerY) - p)
+                count = count + 1
+            polygons.append(temp)
+        self.polygons = polygons
+        self.draw_polygons()
 
     # resets the screen
     def reset(self, instance):
@@ -609,7 +604,6 @@ class TessellationWidget(GridLayout):
     def alternate_rows(self, instance):
         self.slide_horizontal.value = 100
         self.slide_vertical.value = 100
-        self.polygon = Polygon(tu.kivy_to_shapely(self.polygons[0]))
         bounds = self.polygon.bounds
         xInc = abs(bounds[2] - bounds[0])
         yInc = abs(bounds[3] - bounds[1])
