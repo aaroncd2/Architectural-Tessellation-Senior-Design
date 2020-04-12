@@ -15,6 +15,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.filechooser import FileChooserListView
 from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.label import Label
+from kivy.uix.image import Image
 from kivy.uix.boxlayout import BoxLayout
 from shapely.geometry import Polygon, Point
 from shapely import affinity
@@ -25,6 +26,7 @@ from kivy.graphics.instructions import InstructionGroup
 from kivy.uix.slider import Slider
 from kivy.uix.gridlayout import GridLayout
 from Shape_Identification import tiling_rules as tr
+import csv
 import numpy
 import os
 import sys
@@ -49,20 +51,95 @@ class RootWidget(BoxLayout):
         super(RootWidget, self).__init__(**kwargs)
         global size
         size = Window.size
+        self.main_menu = MainMenuWidget()
+        self.add_widget(self.main_menu)
          #self.cb = Button(text='select a file')
          #bind and add file dialog button to root widget
-         #self.cb.bind(on_press=self.file_diag)
-         #self.add_widget(self.cb)
+         #
+       #  #self.add_widget(self.cb)
+        #fchooser = FileChooser()
+        #self.add_widget(fchooser)
+    #file dialog button callback
+    def run_file_diag(self):
+        self.remove_widget(self.main_menu)
         fchooser = FileChooser()
         self.add_widget(fchooser)
-    #file dialog button callback to open popup
-    #def file_diag(self,instance):
-        #remove button
-        #self.remove_widget(self.cb)
-        #open file dialog popup
-        #popup = Popup(title='Select File',content=FileChooser())
-        #popup.open()
-               
+    def load_existing(self):
+        self.remove_widget(self.main_menu)
+        load_existing_chooser = LoadExistingChooser()
+        self.add_widget(load_existing_chooser)
+
+#widget for main menu 'splash screen'
+class MainMenuWidget(GridLayout):
+    def __init__(self, **kwargs):
+        super(MainMenuWidget, self).__init__(**kwargs)
+        self.cols=2
+        self.rows=2
+        self.add_widget(Label(text="Welcome To DATO"))
+        menu_img = Image(source='Image_Processing/Images/flower_pic.jpg')
+        self.add_widget(menu_img)
+        self.cb = FileDiagButton()
+        self.add_widget(self.cb)
+        self.loadbtn = LoadExistingButton()
+        self.add_widget(self.loadbtn)
+
+class FileDiagButton(Button):
+    def __init__(self, **kwargs):
+        super(Button, self).__init__(**kwargs)
+        self.text ="Choose New Image"
+    def on_press(self, **kwargs):
+        self.parent.parent.run_file_diag()
+
+class LoadExistingButton(Button):
+    def __init__(self, **kwargs):
+        super(Button, self).__init__(**kwargs)
+        self.text = "Load Existing CSV"
+    def on_press(self, **kwargs):
+        self.parent.parent.load_existing()
+
+
+class LoadExistingChooser(FileChooserListView):
+    def getpath(self):
+        with open('pathfile.txt', 'r') as f:
+            data = f.read()
+        if (data != None):
+            return data
+        else:
+            return ""
+        #print(data)
+        #print(self.rootpath)
+    def selected(self,filename,*args):
+            if (filename == True):
+                global fp
+                #store file path
+                fp = args[0][0]
+                with open('pathfile.txt', 'w') as f:
+                    data = fp
+                    head, tail = os.path.split(data)
+                    f.write(head)
+                print(fp)
+                coo = []
+                with open(fp) as csv_file:
+                    csv_reader = csv.reader(csv_file, delimiter=',')
+                    line_count = 0
+                    for row in csv_reader:
+                        if line_count == 0:
+                            print(f'Column names are {", ".join(row)}')
+                            line_count += 1
+                        elif line_count == 1:
+                            for num in row:
+                                coo.append(float(num))
+                            print(row)
+                            line_count += 1
+                            print(f'Processed {line_count} lines.')
+                print(coo)
+                global f_coords
+                f_coords = sm.shape_model(coo)
+                #print(f_coords)
+                b_grid = BoxGrid()
+                self.parent.add_widget(b_grid)
+                self.parent.remove_widget(self)
+
 #gile chooser class
 class FileChooser(FileChooserListView):
     def getpath(self):
@@ -89,8 +166,9 @@ class FileChooser(FileChooserListView):
                 #use file path to process as image in imageprocessing.py
                 global f_coords
                 coo = ip.processImage(fp)
+                print(coo)
                 f_coords = sm.shape_model(coo)
-                #print(f_coords)
+                print(f_coords)
                 b_grid = BoxGrid()
                 self.parent.add_widget(b_grid)
                 self.parent.remove_widget(self)
