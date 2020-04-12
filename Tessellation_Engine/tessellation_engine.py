@@ -295,7 +295,7 @@ class TessellationWidget(GridLayout):
     def tile_hexagon(self):
         # calculate increment between shapes
         scale_factor = self.slide_scale.value / 100
-        shape = tu.make_positive(self.rec_shape[0])
+        shape = self.polygon
         exterior = tu.make_positive(self.rec_shape[3])
         self.exterior = exterior
         bounds = exterior.bounds
@@ -547,6 +547,7 @@ class TessellationWidget(GridLayout):
 
     # flips a polygon horizontally across its center
     def flip_horizontal(self, instance):
+        """
         xCenter = self.polygon.centroid.x
         flipped = []
         for p in self.polygon.exterior.coords:
@@ -554,12 +555,24 @@ class TessellationWidget(GridLayout):
             flipped.append(point)
         self.polygon = Polygon(flipped)
         polygon = tu.shapely_to_kivy(self.polygon)
-        if self.type == 'regular':
-            self.tile_regular_polygon()
-        elif self.type == 'parallelogram':
-            self.tile_parallelogram()
-        elif self.type == 'hexagon':
-            self.tile_hexagon()
+        self.draw_polygons()
+        """
+        polygons = []
+        for polygon in self.polygons:
+            shapely_poly = Polygon(tu.kivy_to_shapely(polygon))
+            bounds = shapely_poly.bounds
+            temp = []
+            centerX = bounds[0] + ((bounds[2] - bounds[0]) / 2.0)
+            count = 0
+            for p in polygon:
+                if count % 2 == 0:
+                    temp.append((2 * centerX) - p)
+                else:
+                    temp.append(p)
+                count = count + 1
+            polygons.append(temp)
+        self.polygons = polygons
+        self.draw_polygons()
 
     # flips a polygon vertically across its center
     def flip_vertical(self, instance):
@@ -585,7 +598,7 @@ class TessellationWidget(GridLayout):
         self.ySpacing = 100
         if instance != 1:
             self.slide_scale.value = 100
-        #self.base_unit = self.original_base_unit
+        self.base_unit = self.original_base_unit
         self.polygon = self.base_unit
         self.tile_regular_polygon()
         self.type = 'regular'
@@ -702,10 +715,9 @@ class TessellationWidget(GridLayout):
         self.canvas_widget.lines.clear()
         indices = tu.make_indices_list(self.polygons[0])
         for polygon in self.polygons:
-            if tu.is_convex(self.base_unit):
-                mesh_points = tu.make_mesh_list(polygon)
-                self.canvas_widget.lines.add(Color(0,0,1.))
-                self.canvas_widget.lines.add(Mesh(vertices=mesh_points, indices=indices, mode='triangle_strip'))
+            mesh_points = tu.make_mesh_list(polygon)
+            self.canvas_widget.lines.add(Color(0,0,1.))
+            self.canvas_widget.lines.add(Mesh(vertices=mesh_points, indices=indices, mode='triangle_strip'))
             self.canvas_widget.lines.add(Color(1., 0, 0))
             self.canvas_widget.lines.add(Line(points = polygon, width=2.0, close=False))
         self.canvas_widget.canvas.add(self.canvas_widget.lines)
@@ -748,6 +760,8 @@ class TessellationWidget(GridLayout):
     def draw_recommendation(self, index):
         self.reset(0)
         self.rec_shape = self.shape_info[index]
+        self.base_unit = tu.make_positive(self.rec_shape[0])
+        self.polygon = tu.make_positive(self.rec_shape[0])
         self.type = self.rec_shape[1]
         if self.type == 'regular':
             self.tile_regular_polygon()

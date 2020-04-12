@@ -365,10 +365,10 @@ class CustomLayout(BoxLayout):
             newply = affinity.scale(newply, xfact= 1/self.yscale, yfact= 1/self.yscale)
         else:
             newply = affinity.scale(newply, xfact= 1/self.xscale, yfact= 1/self.xscale)
-        self.parent.children[1].reset(0)
-        self.parent.children[1].base_unit = newply
+        self.parent.children[1].original_base_unit = newply
         self.parent.children[1].polygon = newply
-        self.parent.children[1].tile_regular_polygon()
+        self.parent.children[1].reset(0)
+        #self.parent.children[1].tile_regular_polygon()
 
         if (self.parent.children[0] != None):
                 new_shape_info = tr.identify_shape(newply)
@@ -517,9 +517,9 @@ class CustomLayout(BoxLayout):
                 newply = affinity.scale(newply, xfact= 1/self.yscale, yfact= 1/self.yscale)
             else:
                 newply = affinity.scale(newply, xfact= 1/self.xscale, yfact= 1/self.xscale)
-            self.parent.children[1].reset(0)
+            self.parent.children[1].original_base_unit = newply
             self.parent.children[1].polygon = newply
-            self.parent.children[1].tile_regular_polygon()
+            self.parent.children[1].reset(0)
 
         else:
             pass
