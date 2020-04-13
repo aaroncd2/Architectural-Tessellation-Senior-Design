@@ -37,6 +37,7 @@ class TessellationWidget(GridLayout):
         self.rows = 3
         self.polygons = []
         self.exterior = None
+        self.type = None
         
         # create row for canvas
         self.canvas_widget = CanvasWidget()
@@ -135,7 +136,8 @@ class TessellationWidget(GridLayout):
         self.base_unit = self.polygon
         self.original_base_unit = self.polygon
         self.shape_info = tr.identify_shape(self.base_unit)
-        self.type = 'regular'
+        if self.type == None:
+            self.type = 'regular'
         if self.type == 'regular':
             self.tile_regular_polygon()
         elif self.type == 'parallelogram':
