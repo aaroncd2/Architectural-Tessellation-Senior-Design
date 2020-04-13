@@ -15,6 +15,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.filechooser import FileChooserListView
 from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.label import Label
+from kivy.uix.image import Image
 from kivy.uix.boxlayout import BoxLayout
 from shapely.geometry import Polygon, Point
 from shapely import affinity
@@ -25,6 +26,7 @@ from kivy.graphics.instructions import InstructionGroup
 from kivy.uix.slider import Slider
 from kivy.uix.gridlayout import GridLayout
 from Shape_Identification import tiling_rules as tr
+import csv
 import numpy
 import os
 import sys
@@ -49,20 +51,95 @@ class RootWidget(BoxLayout):
         super(RootWidget, self).__init__(**kwargs)
         global size
         size = Window.size
+        self.main_menu = MainMenuWidget()
+        self.add_widget(self.main_menu)
          #self.cb = Button(text='select a file')
          #bind and add file dialog button to root widget
-         #self.cb.bind(on_press=self.file_diag)
-         #self.add_widget(self.cb)
+         #
+       #  #self.add_widget(self.cb)
+        #fchooser = FileChooser()
+        #self.add_widget(fchooser)
+    #file dialog button callback
+    def run_file_diag(self):
+        self.remove_widget(self.main_menu)
         fchooser = FileChooser()
         self.add_widget(fchooser)
-    #file dialog button callback to open popup
-    #def file_diag(self,instance):
-        #remove button
-        #self.remove_widget(self.cb)
-        #open file dialog popup
-        #popup = Popup(title='Select File',content=FileChooser())
-        #popup.open()
-               
+    def load_existing(self):
+        self.remove_widget(self.main_menu)
+        load_existing_chooser = LoadExistingChooser()
+        self.add_widget(load_existing_chooser)
+
+#widget for main menu 'splash screen'
+class MainMenuWidget(GridLayout):
+    def __init__(self, **kwargs):
+        super(MainMenuWidget, self).__init__(**kwargs)
+        self.cols=2
+        self.rows=2
+        self.add_widget(Label(text="Welcome To DATO"))
+        menu_img = Image(source='Image_Processing/Images/flower_pic.jpg')
+        self.add_widget(menu_img)
+        self.cb = FileDiagButton()
+        self.add_widget(self.cb)
+        self.loadbtn = LoadExistingButton()
+        self.add_widget(self.loadbtn)
+
+class FileDiagButton(Button):
+    def __init__(self, **kwargs):
+        super(Button, self).__init__(**kwargs)
+        self.text ="Choose New Image"
+    def on_press(self, **kwargs):
+        self.parent.parent.run_file_diag()
+
+class LoadExistingButton(Button):
+    def __init__(self, **kwargs):
+        super(Button, self).__init__(**kwargs)
+        self.text = "Load Existing CSV"
+    def on_press(self, **kwargs):
+        self.parent.parent.load_existing()
+
+
+class LoadExistingChooser(FileChooserListView):
+    def getpath(self):
+        with open('pathfile.txt', 'r') as f:
+            data = f.read()
+        if (data != None):
+            return data
+        else:
+            return ""
+        #print(data)
+        #print(self.rootpath)
+    def selected(self,filename,*args):
+            if (filename == True):
+                global fp
+                #store file path
+                fp = args[0][0]
+                with open('pathfile.txt', 'w') as f:
+                    data = fp
+                    head, tail = os.path.split(data)
+                    f.write(head)
+                print(fp)
+                coo = []
+                with open(fp) as csv_file:
+                    csv_reader = csv.reader(csv_file, delimiter=',')
+                    line_count = 0
+                    for row in csv_reader:
+                        if line_count == 0:
+                            print(f'Column names are {", ".join(row)}')
+                            line_count += 1
+                        elif line_count == 1:
+                            for num in row:
+                                coo.append(float(num))
+                            print(row)
+                            line_count += 1
+                            print(f'Processed {line_count} lines.')
+                print(coo)
+                global f_coords
+                f_coords = sm.shape_model(coo)
+                #print(f_coords)
+                b_grid = BoxGrid()
+                self.parent.add_widget(b_grid)
+                self.parent.remove_widget(self)
+
 #gile chooser class
 class FileChooser(FileChooserListView):
     def getpath(self):
@@ -72,8 +149,8 @@ class FileChooser(FileChooserListView):
             return data
         else:
             return ""
-        print(data)
-        print(self.rootpath)
+        #print(data)
+        #print(self.rootpath)
     def selected(self,filename,*args):
             if (filename == True):
                 
@@ -85,10 +162,11 @@ class FileChooser(FileChooserListView):
                     head, tail = os.path.split(data)
                     f.write(head)
                     
-                print(fp)
+                #print(fp)
                 #use file path to process as image in imageprocessing.py
                 global f_coords
                 coo = ip.processImage(fp)
+                print(coo)
                 f_coords = sm.shape_model(coo)
                 print(f_coords)
                 b_grid = BoxGrid()
@@ -109,7 +187,9 @@ class ReccomendationButton(Button):
                 Line(points = the_poly) 
 
     def on_press(self, **kwargs):
-        print(self.index)
+        #print(self.index)
+        print(self.parent.parent.parent.children[1])
+       
         self.parent.parent.parent.children[1].draw_recommendation(self.index)
 
 class ReccomendationButtons(BoxLayout):
@@ -120,9 +200,9 @@ class ReccomendationButtons(BoxLayout):
         
         self.btns_info = self.parent.main_shape_info
         self.numreccs = len(self.btns_info) #hardcoded for now
-        print("shape info")
-        print(self.btns_info)
-        print(self.numreccs)
+        #print("shape info")
+        #print(self.btns_info)
+        #print(self.numreccs)
         self.reccrows= GridLayout(rows=self.numreccs , cols=1)
         self.reccrows.size_hint = None, None
         global the_poly
@@ -151,7 +231,10 @@ class ReccomendationButtons(BoxLayout):
             Line(points = the_poly)
 
         self.reccrows.size = (Window.size[0] * (.14)), Window.size[1]
+        u = self.numreccs
         for k in range(0, self.numreccs):
+            
+            u = u - 1
             if (k != 0):
                 the_poly = self.make_positive(self.btns_info[k][0])
                 btn_height = (Window.size[1] / self.numreccs)
@@ -166,20 +249,26 @@ class ReccomendationButtons(BoxLayout):
                 the_poly = None
             temp = ReccomendationButton()
             the_poly = None
-            if (self.numreccs == 3):
-                if (k==0):
-                    temp.index = 2
-                elif (k ==1):
-                    temp.index = 1
-                elif (k == 2):
-                    temp.index = 0
-            elif (self.numreccs == 2):
-                if (k==0):
-                    temp.index = 1
-                elif (k ==1):
-                    temp.index = 0
-            elif (self.numreccs == 1):
-                temp.index = 0
+            
+            temp.index = u
+            # print("k = ")
+            # print(k)
+            # print("u")
+            # print(u)
+            # if (self.numreccs == 3):
+            #     if (k==0):
+            #         temp.index = 2
+            #     elif (k ==1):
+            #         temp.index = 1
+            #     elif (k == 2):
+            #         temp.index = 0
+            # elif (self.numreccs == 2):
+            #     if (k==0):
+            #         temp.index = 1
+            #     elif (k ==1):
+            #         temp.index = 0
+            # elif (self.numreccs == 1):
+            #     temp.index = 0
             #temp.index = k
             
             #temp.lines.add(Line(points = self.shapely_to_kivy(self.btns_info[k][0]) , width = 2.0, close = False)) 
@@ -301,7 +390,7 @@ class CustomLayout(BoxLayout):
     def key_action(self, *args):
        
         key_pressed = list(args)
-        print(key_pressed)
+        #print(key_pressed)
 
         #Delete when pressing delete
         if key_pressed[2] == 42 and self.pressed and len(self.canvas_edge) > 3:
@@ -329,7 +418,7 @@ class CustomLayout(BoxLayout):
             try:
                 self.canvas.children.remove(self.highlight)
                 mid = midpoint(self.canvas_edge[self.index].points)
-                print(self.highlight.points)
+                #print(self.highlight.points)
                 self.c_coords.insert((self.index+1)%len(self.canvas_nodes), tuple(mid))
                 self.draw()
                 
@@ -354,10 +443,21 @@ class CustomLayout(BoxLayout):
             newply = affinity.scale(newply, xfact= 1/self.yscale, yfact= 1/self.yscale)
         else:
             newply = affinity.scale(newply, xfact= 1/self.xscale, yfact= 1/self.xscale)
-        self.parent.children[1].reset(0)
-        self.parent.children[1].base_unit = newply
+        self.parent.children[1].original_base_unit = newply
         self.parent.children[1].polygon = newply
-        self.parent.children[1].tile_regular_polygon()
+        self.parent.children[1].reset(0)
+        #self.parent.children[1].tile_regular_polygon()
+
+        if (self.parent.children[0] != None):
+                new_shape_info = tr.identify_shape(newply)
+                self.parent.main_shape_info = new_shape_info
+                self.parent.children[1].shape_info = new_shape_info
+                self.parent.remove_widget(self.parent.children[0])
+                btns = ReccomendationButtons()
+                self.parent.add_widget(btns)
+                if (new_shape_info != None and len(new_shape_info) >= 1):
+                    btns.setup_btns()
+            
 
     def draw(self):
         self.canvas.clear()
@@ -495,9 +595,9 @@ class CustomLayout(BoxLayout):
                 newply = affinity.scale(newply, xfact= 1/self.yscale, yfact= 1/self.yscale)
             else:
                 newply = affinity.scale(newply, xfact= 1/self.xscale, yfact= 1/self.xscale)
-            self.parent.children[1].reset(0)
+            self.parent.children[1].original_base_unit = newply
             self.parent.children[1].polygon = newply
-            self.parent.children[1].tile_regular_polygon()
+            self.parent.children[1].reset(0)
 
         else:
             pass
@@ -518,25 +618,26 @@ class CustomLayout(BoxLayout):
                 poly.append(self.canvas_nodes[i].pos)
                 i = i + 1
 
-            print(poly)
+            #print(poly)
             newply = Polygon(poly)
             newply = affinity.translate(newply, xoff= -size[0]/2.95, yoff= -size[1]/4)
             if self.xscale > self.yscale:
                 newply = affinity.scale(newply, xfact= 1/self.yscale, yfact= 1/self.yscale)
             else:
                 newply = affinity.scale(newply, xfact= 1/self.xscale, yfact= 1/self.xscale)
-            print(self.parent.children[1].polygon)
+            #print(self.parent.children[1].polygon)
             self.parent.children[1].reset(0)
             self.parent.children[1].polygon = newply
             self.parent.children[1].base_unit = newply
             #self.parent.children[1].get_new_recommendations()
-            print(self.parent.children[1].polygon)  
+            #print(self.parent.children[1].polygon)  
             self.parent.children[1].tile_regular_polygon()
-            print("parker")
-            print(self.parent.children[0])
+            #print("parker")
+            #print(self.parent.children[0])
             if (self.parent.children[0] != None):
                 new_shape_info = tr.identify_shape(newply)
                 self.parent.main_shape_info = new_shape_info
+                self.parent.children[1].shape_info = new_shape_info
                 self.parent.remove_widget(self.parent.children[0])
                 btns = ReccomendationButtons()
                 self.parent.add_widget(btns)
