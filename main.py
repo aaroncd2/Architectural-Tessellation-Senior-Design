@@ -97,7 +97,7 @@ class LoadExistingButton(Button):
     def on_press(self, **kwargs):
         self.parent.parent.load_existing()
 
-
+#file dialog prompt to load csv file of existing polygon
 class LoadExistingChooser(FileChooserListView):
     def getpath(self):
         with open('pathfile.txt', 'r') as f:
@@ -126,15 +126,18 @@ class LoadExistingChooser(FileChooserListView):
                         if line_count == 0:
                             print(f'Column names are {", ".join(row)}')
                             line_count += 1
-                        elif line_count == 1:
-                            for num in row:
-                                coo.append(float(num))
+                        else:
+                            coo.append(float(row[0]))
+                            coo.append(float(row[1]))
                             print(row)
                             line_count += 1
                             print(f'Processed {line_count} lines.')
                 print(coo)
                 global f_coords
-                f_coords = sm.shape_model(coo)
+                points = list(zip(coo[::2],coo[1::2]))
+                poly = Polygon(points)
+                f_coords = poly.exterior.coords
+                #f_coords = sm.shape_model(coo)
                 #print(f_coords)
                 b_grid = BoxGrid()
                 self.parent.add_widget(b_grid)
@@ -307,6 +310,7 @@ class BoxGrid(BoxLayout):
     def __init__(self, **kwargs):
         super(BoxGrid, self).__init__(**kwargs)
         self.b_coords = f_coords
+        
         custlay = CustomLayout()
         tessel = TessellationWidget()
         self.add_widget(custlay)
@@ -318,6 +322,11 @@ class BoxGrid(BoxLayout):
         if (self.main_shape_info != None and len(self.main_shape_info) > 1):
             btn.setup_btns()
 #layout for the main canvas
+
+class BackButton(Button):
+    def __init__(self, **kwargs):
+        super(Button, self).__init__(**kwargs)
+
 
 class CustomLayout(BoxLayout):
     def __init__(self, **kwargs):
