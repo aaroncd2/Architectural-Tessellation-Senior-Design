@@ -42,7 +42,7 @@ class SaveDialog(Popup):
         self.error_message = Label(text='', color=(1,0,0,1), font_size=32)
         self.content.add_widget(self.error_message)
 
-    # saves data to csv file in Saved_Tilings folder
+    # saves data to csv file
     def save(self,*args):
         if self.input_box.text != '':
             file_name = self.file_browser.path + '\\' + self.input_box.text + '.csv'
