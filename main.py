@@ -31,7 +31,10 @@ import numpy
 import os
 import sys
 from kivy.core.window import Window
+from kivy.uix.colorpicker import ColorPicker
 
+from kivy.config import Config
+Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 
 
 def angle(a, c, b):
@@ -335,6 +338,17 @@ class CustomLayout(BoxLayout):
 
         Window.bind(on_key_down=self.key_action) #Binds Keyboard for key detection
 
+        # Add change color button
+        self.color_picker_button = Button(text = 'Choose Color', 
+                                          background_color = (1,1,1,1), 
+                                          size_hint = (.3,.07), 
+                                          pos_hint = {'bottom': 0.3})
+        self.add_widget(self.color_picker_button)
+        self.color_picker_button.bind(on_press=self.changeColor)
+
+        self.shape = InstructionGroup()
+        self.col = [1,1,1,1]
+
         self.c_coords = f_coords
         self.pressed = False
         self.index = -1
@@ -467,9 +481,11 @@ class CustomLayout(BoxLayout):
                 if (new_shape_info != None and len(new_shape_info) >= 1):
                     btns.setup_btns()
             
-
     def draw(self):
-        self.canvas.clear()
+        r,g,b,a = self.col[0], self.col[1], self.col[2], self.col[3]
+        self.canvas.add(Color(r,g,b,a))
+        self.canvas.remove_group('shape')
+        self.canvas.remove(self.shape)
         self.define_nodes()
         i = 0
         for i in range(len(self.c_coords)):
@@ -494,6 +510,7 @@ class CustomLayout(BoxLayout):
             self.canvas_nodes[i] = Ellipse(
                 size = self.nodesize,
                 pos =  [x,y],
+                group = 'shape',
                 )
             i = i + 1
             
@@ -523,64 +540,77 @@ class CustomLayout(BoxLayout):
                 joint = 'round',
                 cap = 'round',
                 width = 3,
-                close = False
+                close = False,
+                group = 'shape'
                 )
             i = i + 1
 
     def on_touch_down(self, touch):       
         i = 0
-        for lines in self.canvas_edge:
-            x,y = self.canvas_edge[i].points[0], self.canvas_edge[i].points[1]
-            a = [x,y]
-            x,y = self.canvas_edge[i].points[2], self.canvas_edge[i].points[3]
-            b = [x,y]
-            c = list(touch.pos)
-            if angle(a,b,c) and not self.pressed:
-                points = [a,b]
-                self.canvas.add(Color(1,0,0, .5))
-                self.highlight = Line(
-                    points = points, 
-                    width = 5
-                    )
-                self.canvas.add(self.highlight)
-                self.pressed = True
-                self.index = i
-                self.edge = 1
-                break
-            else:
-                if self.pressed:
-                    self.pressed = False
-                    self.canvas.children.remove(self.highlight)
-            i = i + 1
-           
-        for key, value in self.canvas_nodes.items():
-            if (value.pos[0] - self.nodesize[0]) <= touch.pos[0] <= (value.pos[0] + self.nodesize[0]):
-                if (value.pos[1] - self.nodesize[1]) <= touch.pos[1] <= (value.pos[1] + self.nodesize[1]):                    
-                    touch.grab(self)
-                    self.grabbed = self.canvas_nodes[key]       
-                    self.canvas.add(Color(1,0,0, .5))
-                    self.highlight = Ellipse(
-                        size = self.nodesize,
-                        pos =  self.canvas_nodes[key].pos
+        print(self.color_picker_button.pos)
+        if self.color_picker_button.collide_point(*touch.pos):
+            self.changeColor()
+        else:
+            for lines in self.canvas_edge:
+                x,y = self.canvas_edge[i].points[0], self.canvas_edge[i].points[1]
+                a = [x,y]
+                x,y = self.canvas_edge[i].points[2], self.canvas_edge[i].points[3]
+                b = [x,y]
+                c = list(touch.pos)
+                if angle(a,b,c) and not self.pressed:
+                    points = [a,b]
+                    
+                    self.shape.add(Color(1,0,0, .5))
+                    self.canvas.add(self.shape)
+                    self.highlight = Line(
+                        points = points, 
+                        width = 5, 
+                        group = 'shape'
                         )
-                    if not self.pressed:
-                        self.canvas.add(self.highlight)
-                        self.pressed = True
-                        self.index = key
-                        self.edge = 0
-                    elif self.pressed:
+                    self.canvas.add(self.highlight)
+                    self.pressed = True
+                    self.index = i
+                    self.edge = 1
+                    break
+                else:
+                    if self.pressed:
                         self.pressed = False
-                        try:
-                            self.canvas.children.remove(self.highlight)
-                        except:
-                            pass
-                    return True
+                        self.canvas.children.remove(self.highlight)
+                i = i + 1
+            
+            for key, value in self.canvas_nodes.items():
+                if (value.pos[0] - self.nodesize[0]) <= touch.pos[0] <= (value.pos[0] + self.nodesize[0]):
+                    if (value.pos[1] - self.nodesize[1]) <= touch.pos[1] <= (value.pos[1] + self.nodesize[1]):                    
+                        touch.grab(self)
+                        self.grabbed = self.canvas_nodes[key]       
+                        self.shape.add(Color(1,0,0, .5))
+                        self.canvas.add(self.shape)
+                        self.highlight = Ellipse(
+                            size = self.nodesize,
+                            pos =  self.canvas_nodes[key].pos,
+                            group = 'shape'
+                            )
+                        if not self.pressed:
+                            self.canvas.add(self.highlight)
+                            self.pressed = True
+                            self.index = key
+                            self.edge = 0
+                        elif self.pressed:
+                            self.pressed = False
+                            try:
+                                self.canvas.children.remove(self.highlight)
+                            except:
+                                pass
+                        return True
             
     def on_touch_move(self, touch):
         self.pressed = False
         if touch.grab_current is self:
             self.grabbed.pos = [touch.pos[0] - self.nodesize[0] / 2, touch.pos[1] - self.nodesize[1] / 2]
-            self.canvas.clear()
+            self.canvas.remove_group('shape')
+            self.canvas.remove(self.shape)
+            r,g,b,a = self.col[0], self.col[1], self.col[2], self.col[3]
+            self.canvas.add(Color(r,g,b,a))
             i = 0
             for i in range(len(self.c_coords)):
                 self.canvas.add(self.canvas_nodes[i])
@@ -663,6 +693,33 @@ class CustomLayout(BoxLayout):
 
         else:
             pass
+
+    def changeColor(self,*args):
+        print("button works")
+        self.picker = ColorPicker(pos_hint={'center_x': .5, 'center_y': .5},
+                             size_hint = (1, 1))
+        self.picker.add_widget(Button(text = 'Select', 
+                                  pos_hint = {'center_x': .76, 'y': -.02}, 
+                                  size_hint = (None, None), 
+                                  size = (100, 35), 
+                                  on_press = self.selected))
+        self.ColPop = Popup(title = "Choose Color", 
+                        size_hint = (None, None),
+                        content = self.picker,
+                        size = (1500, 750),
+                        auto_dismiss = False)
+
+        # self.picker.bind(color=self.on_color) 
+        self.ColPop.open()  
+
+    def selected(self, *args):
+        self.ColPop.dismiss() 
+        print(self.picker.color)
+        self.col = self.picker.color
+        self.draw()
+
+
+      
             
 
 #main app class to build the root widget on program start

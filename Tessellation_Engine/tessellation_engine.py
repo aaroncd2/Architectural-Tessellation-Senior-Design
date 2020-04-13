@@ -37,6 +37,7 @@ class TessellationWidget(GridLayout):
         self.rows = 3
         self.polygons = []
         self.exterior = None
+        self.type = None
         
         # create row for canvas
         self.canvas_widget = CanvasWidget()
@@ -135,8 +136,14 @@ class TessellationWidget(GridLayout):
         self.base_unit = self.polygon
         self.original_base_unit = self.polygon
         self.shape_info = tr.identify_shape(self.base_unit)
-        self.type = 'regular'
-        self.tile_regular_polygon()
+        if self.type == None:
+            self.type = 'regular'
+        if self.type == 'regular':
+            self.tile_regular_polygon()
+        elif self.type == 'parallelogram':
+            self.tile_parallelogram()
+        elif self.type == 'hexagon':
+            self.tile_hexagon()
 
     def set_coords(self, num):
         self.points = num
@@ -178,7 +185,7 @@ class TessellationWidget(GridLayout):
     def tile_parallelogram(self):
         # calculate increment between shapes
         scale_factor = self.slide_scale.value / 100
-        shape = tu.make_positive(self.rec_shape[0])
+        shape = self.polygon
         exterior = tu.make_positive(self.rec_shape[3])
         self.exterior = exterior
         bounds = exterior.bounds
@@ -686,6 +693,7 @@ class TessellationWidget(GridLayout):
     # Exports the currently displayed polygons to a CSV file
     def export_tiling(self, instance):
         points = {}
+        points['type'] = self.type
         num = 1
         for poly in self.polygons:
             xs = []
