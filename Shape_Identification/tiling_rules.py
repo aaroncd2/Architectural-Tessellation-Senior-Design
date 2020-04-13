@@ -19,6 +19,7 @@ def identify_shape(shape):
     elif (number_sides == 6):
         return process_hexagon(shape)
     else:
+        return process_hexagon(shape)
         # return empty list for no recommendations found
         return list()
 
@@ -224,6 +225,8 @@ def process_hexagon(shape):
     first_rec_exterior_coords.append((max_x, max_y))
     first_rec_exterior_coords.append((max_x, min_y))
     recommendations.append((Polygon(first_rec_coords), "parallelogram", True, Polygon(first_rec_exterior_coords)))
+    # second recommendation: create an x-shaped figure with the hexagon reflecting on all 4 axes
+
     return recommendations
 
 '''private helper functions'''
