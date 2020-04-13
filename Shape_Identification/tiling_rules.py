@@ -184,9 +184,38 @@ def process_quadrilateral(shape):
         recommendations.append((Polygon(third_rec_coords), "parallelogram", True, Polygon(third_rec_exterior_coords)))
         return recommendations
 
-
 def process_hexagon(shape):
-    pass
+    recommendations = list()
+    original_coords = list(shape.exterior.coords)
+    # first recommendation: create a bounding parallelogram box around the hexagon
+    # first we need to find the extreme points of the hexagon
+    min_x = original_coords[0][0]
+    min_y = original_coords[0][1]
+    max_x = original_coords[0][0]
+    max_y = original_coords[0][1]
+    for i in range(1, len(original_coords)):
+        if original_coords[i][0] < min_x:
+            min_x = original_coords[i][0]
+        if original_coords[i][0] > max_x:
+            max_x = original_coords[i][0]
+        if original_coords[i][1] < min_y:
+            min_y = original_coords[i][1]
+        if original_coords[i][1] > max_y:
+            max_y = original_coords[i][1]
+    # next we utilize these points to create the bounding parallelogram
+    first_rec_coords = list(original_coords)
+    first_rec_coords.append((min_x, min_y))
+    first_rec_coords.append((min_x, max_y))
+    first_rec_coords.append((max_x, max_y))
+    first_rec_coords.append((max_x, min_y))
+    # making the exterior box
+    first_rec_exterior_coords = []
+    first_rec_exterior_coords.append((min_x, min_y))
+    first_rec_exterior_coords.append((min_x, max_y))
+    first_rec_exterior_coords.append((max_x, max_y))
+    first_rec_exterior_coords.append((max_x, min_y))
+    recommendations.append((Polygon(first_rec_coords), "parallelogram", True, Polygon(first_rec_exterior_coords)))
+    return recommendations
 
 '''private helper functions'''
 def __num_sides(shape):
