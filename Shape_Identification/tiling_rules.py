@@ -204,10 +204,19 @@ def process_hexagon(shape):
             max_y = original_coords[i][1]
     # next we utilize these points to create the bounding parallelogram
     first_rec_coords = list(original_coords)
+    # rotate the coordinates in the list such that the first one has a min_x value
+    min_x_found = False
+    while not min_x_found:
+        if first_rec_coords[0][0] == min_x:
+            min_x_found = True
+        else:
+            del first_rec_coords[0]
+            first_rec_coords.append(first_rec_coords[0])
     first_rec_coords.append((min_x, min_y))
     first_rec_coords.append((min_x, max_y))
     first_rec_coords.append((max_x, max_y))
     first_rec_coords.append((max_x, min_y))
+    first_rec_coords.append((min_x, min_y))
     # making the exterior box
     first_rec_exterior_coords = []
     first_rec_exterior_coords.append((min_x, min_y))
