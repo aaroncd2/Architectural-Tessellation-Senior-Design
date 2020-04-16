@@ -190,12 +190,14 @@ def process_universal(shape):
     min_x = original_coords[0][0]
     min_y = original_coords[0][1]
     max_x = original_coords[0][0]
+    max_x_y_coord = original_coords[0][1]
     max_y = original_coords[0][1]
     for i in range(1, len(original_coords)):
         if original_coords[i][0] < min_x:
             min_x = original_coords[i][0]
         if original_coords[i][0] > max_x:
             max_x = original_coords[i][0]
+            max_x_y_coord = original_coords[i][1]
         if original_coords[i][1] < min_y:
             min_y = original_coords[i][1]
         if original_coords[i][1] > max_y:
@@ -254,6 +256,21 @@ def process_universal(shape):
     second_rec_coords.append((min_x, min_y))
     second_rec_coords.append((max_x, min_y))
     second_rec_coords.append((max_x, max_y))
+    # connecting polygon back to the center point (due to shapely polygon always appending the last point)
+    second_rec_coords.append((max_x, max_x_y_coord))
+    # loop through the original shape to get to the specified max_x coord
+    max_x_found = False
+    max_x_index = 0
+    while not max_x_found:
+        if second_rec_coords[max_x_index][0] == max_x and second_rec_coords[max_x_index][1] == max_x_y_coord:
+            max_x_found = True
+        else:
+            max_x_index += 1
+    # appending back to the central point
+    max_x_index_offset = 1
+    while second_rec_coords[max_x_index + max_x_index_offset][0] != center_x:
+        second_rec_coords.append(second_rec_coords[max_x_index + max_x_index_offset])
+        max_x_index_offset += 1
     # making the exterior box
     second_rec_exterior_coords = []
     second_rec_exterior_coords.append((max_x, max_y))
