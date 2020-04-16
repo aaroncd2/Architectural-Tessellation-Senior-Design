@@ -71,6 +71,14 @@ class RootWidget(BoxLayout):
         self.remove_widget(self.main_menu)
         load_existing_chooser = LoadExistingChooser()
         self.add_widget(load_existing_chooser)
+    def back_to_start(self):
+        print(self.children[0].children)
+        self.children[0].remove_widget(self.children[0].children[0])
+        self.children[0].remove_widget(self.children[0].children[1])
+        self.children[0].remove_widget(self.children[0].children[0])
+        self.remove_widget(self.children[0])
+        self.main_menu = MainMenuWidget()
+        self.add_widget(self.main_menu)
 
 #widget for main menu 'splash screen'
 class MainMenuWidget(GridLayout):
@@ -92,6 +100,14 @@ class FileDiagButton(Button):
         self.text ="Choose New Image"
     def on_press(self, **kwargs):
         self.parent.parent.run_file_diag()
+
+class BackButton(Button):
+    def __init__(self, **kwargs):
+        super(Button, self).__init__(**kwargs)
+        self.text ="Choose New Image"
+        print(self.parent)
+    def on_press(self, **kwargs):
+        print(self.parent)
 
 class LoadExistingButton(Button):
     def __init__(self, **kwargs):
@@ -257,27 +273,6 @@ class ReccomendationButtons(BoxLayout):
             the_poly = None
             
             temp.index = u
-            # print("k = ")
-            # print(k)
-            # print("u")
-            # print(u)
-            # if (self.numreccs == 3):
-            #     if (k==0):
-            #         temp.index = 2
-            #     elif (k ==1):
-            #         temp.index = 1
-            #     elif (k == 2):
-            #         temp.index = 0
-            # elif (self.numreccs == 2):
-            #     if (k==0):
-            #         temp.index = 1
-            #     elif (k ==1):
-            #         temp.index = 0
-            # elif (self.numreccs == 1):
-            #     temp.index = 0
-            #temp.index = k
-            
-            #temp.lines.add(Line(points = self.shapely_to_kivy(self.btns_info[k][0]) , width = 2.0, close = False)) 
             self.reccrows.add_widget(temp)            
 
         self.add_widget(self.reccrows)
@@ -324,13 +319,12 @@ class BoxGrid(BoxLayout):
         self.add_widget(btn)
         if (self.main_shape_info != None and len(self.main_shape_info) > 1):
             btn.setup_btns()
-#layout for the main canvas
-
-class BackButton(Button):
-    def __init__(self, **kwargs):
-        super(Button, self).__init__(**kwargs)
 
 
+
+
+
+#layout for baseunit and functions
 class CustomLayout(BoxLayout):
     def __init__(self, **kwargs):
 
@@ -338,11 +332,17 @@ class CustomLayout(BoxLayout):
 
         Window.bind(on_key_down=self.key_action) #Binds Keyboard for key detection
 
+        self.back_button = Button(text = 'Back', 
+                                          background_color = (1,1,1,1), 
+                                          size_hint = (.3,.07), 
+                                          pos_hint = {'bottom': 0.3})
         # Add change color button
         self.color_picker_button = Button(text = 'Choose Color', 
                                           background_color = (1,1,1,1), 
                                           size_hint = (.3,.07), 
                                           pos_hint = {'bottom': 0.3})
+        self.add_widget(self.back_button)
+        self.back_button.bind(on_press=self.go_back)
         self.add_widget(self.color_picker_button)
         self.color_picker_button.bind(on_press=self.changeColor)
 
@@ -379,7 +379,7 @@ class CustomLayout(BoxLayout):
         for i in range(len(self.c_coords)):
             self.canvas.add(self.canvas_edge[i])
             i = i + 1
-       
+
     def configCoords(self):
         poly = Polygon(self.c_coords)
 
@@ -550,6 +550,8 @@ class CustomLayout(BoxLayout):
         print(self.color_picker_button.pos)
         if self.color_picker_button.collide_point(*touch.pos):
             self.changeColor()
+        if self.back_button.collide_point(*touch.pos):
+            self.go_back()
         else:
             for lines in self.canvas_edge:
                 x,y = self.canvas_edge[i].points[0], self.canvas_edge[i].points[1]
@@ -693,6 +695,11 @@ class CustomLayout(BoxLayout):
 
         else:
             pass
+    #handler for back button
+    def go_back(self, *args):
+        print(self.parent.parent)
+        self.parent.parent.back_to_start()
+        print("hello")
 
     def changeColor(self,*args):
         print("button works")
