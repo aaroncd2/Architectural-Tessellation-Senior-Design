@@ -220,6 +220,8 @@ class ReccomendationButtons(BoxLayout):
         self.size_hint= None, None 
     def setup_btns(self):
         
+        
+        #self.saved_states =
         self.btns_info = self.parent.main_shape_info
         self.numreccs = len(self.btns_info) #hardcoded for now
         #print("shape info")
@@ -277,6 +279,26 @@ class ReccomendationButtons(BoxLayout):
 
         self.add_widget(self.reccrows)
     
+    def add_saved_session_btn(self,polygon,polygon_tiling, tiling_type):
+        print(polygon)
+        print(polygon_tiling)
+        print(tiling_type)
+        print("adding saved state btn to reccrows")
+        saved_tiling_btn_var = SavedTilingButton(text = "savedtilegenerated")
+        saved_tiling_btn_var.polygon = polygon
+        saved_tiling_btn_var.polygon_tiling = polygon_tiling
+        saved_tiling_btn_var.tiling_type = tiling_type
+        print(saved_tiling_btn_var.polygon)
+        print(saved_tiling_btn_var.polygon_tiling)
+        print(saved_tiling_btn_var.tiling_type)
+        self.numreccs = self.numreccs+1
+        self.reccrows.rows =self.numreccs
+        self.remove_widget(self.reccrows)
+        self.reccrows.add_widget(saved_tiling_btn_var)
+        self.add_widget(self.reccrows)
+
+        #self.reccrows= GridLayout(rows=self.numreccs , cols=1)
+
     def shapely_to_kivy(self, polygon):
         kivy_points = []
         for p in polygon.exterior.coords:
@@ -302,7 +324,22 @@ class ReccomendationButtons(BoxLayout):
         else:
             return polygon
 
-        
+class SavedTilingButton(Button):
+    def __init__(self, **kwargs):
+        super(Button, self).__init__(**kwargs)
+        self.polygon = None 
+        self.polygon_tiling = None
+        self.tiling_type = None
+    def on_press(self, **kwargs):
+        self.parent.parent.parent.children[1].polygon = self.polygon
+        self.parent.parent.parent.children[1].polygons = self.polygon_tiling
+        self.parent.parent.parent.children[1].type = self.tiling_type
+        print("on press afterwards in te:")
+        print(self.parent.parent.parent.children[1].polygon)
+        print(self.parent.parent.parent.children[1].polygons)
+        print(self.parent.parent.parent.children[1].type)
+        self.parent.parent.parent.children[1].draw_polygons()
+
 #layout class
 class BoxGrid(BoxLayout):
     def __init__(self, **kwargs):

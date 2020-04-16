@@ -46,7 +46,7 @@ class TessellationWidget(GridLayout):
         self.add_widget(imageRow)
 
         self.controls = BoxLayout(orientation='horizontal', size_hint=(1,.30))
-        self.buttons = GridLayout(rows=4, cols=2)
+        self.buttons = GridLayout(rows=5, cols=3)
         self.sliders = GridLayout(rows=4, cols=2)
 
         # Add slider and label to widget
@@ -86,6 +86,12 @@ class TessellationWidget(GridLayout):
         self.sliders.add_widget(self.slide_scale)
 
         self.controls.add_widget(self.sliders)
+
+        # Add save state btn
+        self.save_state_button = Button(text = 'Save State', background_color = (1,1,1,1), font_size='12dp')
+        self.buttons.add_widget(self.save_state_button)
+        self.save_state_button.bind(on_press=self.save_state)
+
 
         # Add flip horizontal button
         self.horizontal_button = Button(text = 'Flip Horizontal', background_color = (1,1,1,1), font_size='12dp')
@@ -553,6 +559,13 @@ class TessellationWidget(GridLayout):
         if self.s.value > 360:
             self.s.value = self.s.value % 360
         self.rotate_polygon(self.input_box, float(self.input_box.text))
+
+    def save_state(self, instance):
+        print("saving state")
+        print(self.parent.children[0])
+        self.parent.children[0].add_saved_session_btn(self.polygon, self.polygons, self.type)
+
+
 
     # flips a polygon horizontally across its center
     def flip_horizontal(self, instance):
