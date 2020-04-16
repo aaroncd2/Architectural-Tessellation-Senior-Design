@@ -250,6 +250,7 @@ def process_universal(shape):
         else:
             second_rec_coords.append(second_rec_coords[coord_index])
             coord_index += 1
+    second_rec_coords.append(second_rec_coords[coord_index])
     # start appending exterior to the coordinate list
     second_rec_coords.append((max_x, max_y))
     second_rec_coords.append((min_x, max_y))
@@ -257,8 +258,8 @@ def process_universal(shape):
     second_rec_coords.append((max_x, min_y))
     second_rec_coords.append((max_x, max_y))
     # connecting polygon back to the center point (due to shapely polygon always appending the last point)
-    second_rec_coords.append((max_x, max_x_y_coord))
     # loop through the original shape to get to the specified max_x coord
+    second_rec_coords.append((max_x, max_x_y_coord))
     max_x_found = False
     max_x_index = 0
     while not max_x_found:
