@@ -213,6 +213,7 @@ def process_universal(shape):
     # set up second recommendation coordinates with the minimum x value
     # coordinate at the front of the list
     second_rec_coords = list(first_rec_coords)
+    print('coord list: ', second_rec_coords)
     # appending the exterior box to the list
     first_rec_coords.append((min_x, min_y))
     first_rec_coords.append((min_x, max_y))
@@ -228,10 +229,9 @@ def process_universal(shape):
     first_rec_exterior_coords.append((min_x, min_y))
     recommendations.append((Polygon(first_rec_coords), "parallelogram", True, Polygon(first_rec_exterior_coords)))
     # second recommendation: reflect shape across the y-axis to the left, then wrap with a parallelogram exterior
-    # TODO: insert this back: for i in range(0, len(original_coords) - 1):
-    for i in range(0, 0):
-        x_increment = original_coords[i][0] - original_coords[i + 1][0]
-        y_increment = original_coords[i + 1][1] - original_coords[i][1]
+    for i in range(0, len(original_coords) - 1):
+        x_increment = second_rec_coords[i][0] - second_rec_coords[i + 1][0]
+        y_increment = second_rec_coords[i + 1][1] - second_rec_coords[i][1]
         second_rec_coords.append((second_rec_coords[len(second_rec_coords) - 1][0] + x_increment, second_rec_coords[len(second_rec_coords) - 1][1] + y_increment))
     # appending the second recommendation exterior, first we need to find the new
     # minimum x value by utilizing the center_x value 
