@@ -18,9 +18,7 @@ def identify_shape(shape):
         return process_quadrilateral(shape)
     else:
         # generic recommendation
-        return process_hexagon(shape)
-        # return empty list for no recommendations found
-        return list()
+        return process_universal(shape)
 
 # duplicates triangle and fit sides together to make a parallelogram
 def process_triangle(shape):
@@ -184,7 +182,7 @@ def process_quadrilateral(shape):
         recommendations.append((Polygon(third_rec_coords), "parallelogram", True, Polygon(third_rec_exterior_coords)))
         return recommendations
 
-def process_hexagon(shape):
+def process_universal(shape):
     recommendations = list()
     original_coords = list(shape.exterior.coords)
     # first recommendation: create a bounding parallelogram box around the hexagon
@@ -227,13 +225,43 @@ def process_hexagon(shape):
     first_rec_exterior_coords.append((min_x, max_y))
     first_rec_exterior_coords.append((max_x, max_y))
     first_rec_exterior_coords.append((max_x, min_y))
+    first_rec_exterior_coords.append((min_x, min_y))
     recommendations.append((Polygon(first_rec_coords), "parallelogram", True, Polygon(first_rec_exterior_coords)))
     # second recommendation: reflect shape across the y-axis to the left, then wrap with a parallelogram exterior
-    for i in range(0, len(original_coords) - 1):
+    # TODO: insert this back: for i in range(0, len(original_coords) - 1):
+    for i in range(0, 0):
         x_increment = original_coords[i][0] - original_coords[i + 1][0]
         y_increment = original_coords[i + 1][1] - original_coords[i][1]
         second_rec_coords.append((second_rec_coords[len(second_rec_coords) - 1][0] + x_increment, second_rec_coords[len(second_rec_coords) - 1][1] + y_increment))
-    recommendations.append((Polygon(second_rec_coords), "parallelogram", True, Polygon(first_rec_exterior_coords)))
+    # appending the second recommendation exterior, first we need to find the new
+    # minimum x value by utilizing the center_x value 
+    center_x = second_rec_coords[0][0]
+    x_total_length = 2 * (max_x - center_x)
+    min_x = max_x - x_total_length
+    # traverse to the edge of the object before appending the exterior
+    # on the right side
+    coord_index = 1
+    max_x_found = False
+    while not max_x_found:
+        if first_rec_coords[coord_index][0] == max_x:
+            max_x_found = True
+        else:
+            second_rec_coords.append(second_rec_coords[coord_index])
+            coord_index += 1
+    # start appending exterior to the coordinate list
+    second_rec_coords.append((max_x, max_y))
+    second_rec_coords.append((min_x, max_y))
+    second_rec_coords.append((min_x, min_y))
+    second_rec_coords.append((max_x, min_y))
+    second_rec_coords.append((max_x, max_y))
+    # making the exterior box
+    second_rec_exterior_coords = []
+    second_rec_exterior_coords.append((max_x, max_y))
+    second_rec_exterior_coords.append((min_x, max_y))
+    second_rec_exterior_coords.append((min_x, min_y))
+    second_rec_exterior_coords.append((max_x, min_y))
+    second_rec_exterior_coords.append((max_x, max_y))
+    recommendations.append((Polygon(second_rec_coords), "parallelogram", True, Polygon(second_rec_exterior_coords)))
     return recommendations
 
 '''private helper functions'''
