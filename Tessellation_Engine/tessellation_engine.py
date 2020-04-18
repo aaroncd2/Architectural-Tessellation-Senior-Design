@@ -562,8 +562,10 @@ class TessellationWidget(GridLayout):
 
     def save_state(self, instance):
         print("saving state")
-        print(self.parent.children[0])
-        self.parent.children[0].add_saved_session_btn(self.polygon, self.polygons, self.type)
+        #self.shape_info.append((self.polygon,self.type, True , self.polygons))
+    
+        self.parent.children[2].add_saved_state(self.polygon, self.type, True, self.polygons)
+        #self.parent.children[0].add_saved_session_btn(self.polygon, self.polygons, self.type)
 
 
 
@@ -775,6 +777,8 @@ class TessellationWidget(GridLayout):
     def draw_recommendation(self, index):
         self.reset(0)
         self.rec_shape = self.shape_info[index]
+        if self.rec_shape[3] == None:
+            self.parent.children[2].config_from_shapely_poly(self.rec_shape[0])
         self.base_unit = tu.make_positive(self.rec_shape[0])
         self.polygon = tu.make_positive(self.rec_shape[0])
         self.type = self.rec_shape[1]

@@ -218,12 +218,13 @@ class ReccomendationButtons(BoxLayout):
     def __init__(self, **kwargs):
         super(BoxLayout, self).__init__(**kwargs)
         self.size_hint= None, None 
+        #self.saved_states = []
     def setup_btns(self):
         
         
-        #self.saved_states =
+        print(self.parent.main_shape_info)
         self.btns_info = self.parent.main_shape_info
-        self.numreccs = len(self.btns_info) #hardcoded for now
+        self.numreccs = len(self.btns_info)
         #print("shape info")
         #print(self.btns_info)
         #print(self.numreccs)
@@ -279,23 +280,27 @@ class ReccomendationButtons(BoxLayout):
 
         self.add_widget(self.reccrows)
     
-    def add_saved_session_btn(self,polygon,polygon_tiling, tiling_type):
-        print(polygon)
-        print(polygon_tiling)
-        print(tiling_type)
-        print("adding saved state btn to reccrows")
-        saved_tiling_btn_var = SavedTilingButton(text = "savedtilegenerated")
-        saved_tiling_btn_var.polygon = polygon
-        saved_tiling_btn_var.polygon_tiling = polygon_tiling
-        saved_tiling_btn_var.tiling_type = tiling_type
-        print(saved_tiling_btn_var.polygon)
-        print(saved_tiling_btn_var.polygon_tiling)
-        print(saved_tiling_btn_var.tiling_type)
-        self.numreccs = self.numreccs+1
-        self.reccrows.rows =self.numreccs
-        self.remove_widget(self.reccrows)
-        self.reccrows.add_widget(saved_tiling_btn_var)
-        self.add_widget(self.reccrows)
+    # def add_saved_session_btn(self,polygon,polygon_tiling, tiling_type):
+    #     print(polygon)
+    #     print(polygon_tiling)
+    #     print(tiling_type)
+    #     print("adding saved state btn to reccrows")
+    #     saved_tiling_btn_var = SavedTilingButton(text = "savedtilegenerated")
+    #     saved_tiling_btn_var.polygon = polygon
+    #     saved_tiling_btn_var.polygon_tiling = polygon_tiling
+    #     saved_tiling_btn_var.tiling_type = tiling_type
+    #     print(saved_tiling_btn_var.polygon)
+    #     print(saved_tiling_btn_var.polygon_tiling)
+    #     print(saved_tiling_btn_var.tiling_type)
+    #     #self.saved_states.append([polygon, polygon_tiling, tiling_type])
+    #     print("saving states ...")
+    #     print(self.saved_states)
+    #     print("states saved ...")
+    #     self.numreccs = self.numreccs+1
+    #     self.reccrows.rows =self.numreccs
+    #     self.remove_widget(self.reccrows)
+    #     self.reccrows.add_widget(saved_tiling_btn_var)
+    #     self.add_widget(self.reccrows)
 
         #self.reccrows= GridLayout(rows=self.numreccs , cols=1)
 
@@ -324,21 +329,21 @@ class ReccomendationButtons(BoxLayout):
         else:
             return polygon
 
-class SavedTilingButton(Button):
-    def __init__(self, **kwargs):
-        super(Button, self).__init__(**kwargs)
-        self.polygon = None 
-        self.polygon_tiling = None
-        self.tiling_type = None
-    def on_press(self, **kwargs):
-        self.parent.parent.parent.children[1].polygon = self.polygon
-        self.parent.parent.parent.children[1].polygons = self.polygon_tiling
-        self.parent.parent.parent.children[1].type = self.tiling_type
-        print("on press afterwards in te:")
-        print(self.parent.parent.parent.children[1].polygon)
-        print(self.parent.parent.parent.children[1].polygons)
-        print(self.parent.parent.parent.children[1].type)
-        self.parent.parent.parent.children[1].draw_polygons()
+# class SavedTilingButton(Button):
+#     def __init__(self, **kwargs):
+#         super(Button, self).__init__(**kwargs)
+#         self.polygon = None 
+#         self.polygon_tiling = None
+#         self.tiling_type = None
+#     def on_press(self, **kwargs):
+#         self.parent.parent.parent.children[1].polygon = self.polygon
+#         self.parent.parent.parent.children[1].polygons = self.polygon_tiling
+#         self.parent.parent.parent.children[1].type = self.tiling_type
+#         print("on press afterwards in te:")
+#         print(self.parent.parent.parent.children[1].polygon)
+#         print(self.parent.parent.parent.children[1].polygons)
+#         print(self.parent.parent.parent.children[1].type)
+#         self.parent.parent.parent.children[1].draw_polygons()
 
 #layout class
 class BoxGrid(BoxLayout):
@@ -368,6 +373,8 @@ class CustomLayout(BoxLayout):
         super(CustomLayout, self).__init__(**kwargs)
 
         Window.bind(on_key_down=self.key_action) #Binds Keyboard for key detection
+
+        self.saved_states= []
 
         self.back_button = Button(text = 'Back', 
                                           background_color = (1,1,1,1), 
@@ -420,6 +427,36 @@ class CustomLayout(BoxLayout):
     def configCoords(self):
         poly = Polygon(self.c_coords)
 
+        sizeX = Window.size[0]
+        sizeY = Window.size[1]
+        xdistnace = (poly.bounds[2] - poly.bounds[0])
+        ydistance = (poly.bounds[3] - poly.bounds[1])
+        self.xscale = sizeX * .25 / xdistnace
+        self.yscale = sizeY * .25 / ydistance
+        center = (poly.centroid.coords[0])
+        xoff = ((sizeX/5) + (Window.size[0]*.14)) - center[0]
+        yoff = (sizeY/4) - center[1]
+
+        poly = affinity.translate(poly, xoff= xoff, yoff= yoff)
+        if self.xscale > self.yscale:
+            poly = affinity.scale(poly, xfact= self.yscale, yfact= self.yscale)
+        else:
+            poly = affinity.scale(poly, xfact= self.xscale, yfact= self.xscale)
+        self.c_coords = list(poly.exterior.coords)
+        self.c_coords.pop(-1)
+        
+        temp2 = []
+        for x in self.c_coords:
+            temp = []
+            for y in x:
+                temp.append(int(y))
+            temp2.append(tuple(temp))
+        self.c_coords = temp2
+        self.orgi_coords = self.c_coords
+
+    def config_from_shapely_poly(self, shapely_poly_saved):
+        poly = shapely_poly_saved
+        self.c_coords = poly.exterior.coords
         sizeX = Window.size[0]
         sizeY = Window.size[1]
         xdistnace = (poly.bounds[2] - poly.bounds[0])
@@ -512,6 +549,8 @@ class CustomLayout(BoxLayout):
                 new_shape_info = tr.identify_shape(newply)
                 self.parent.main_shape_info = new_shape_info
                 self.parent.children[1].shape_info = new_shape_info
+                for state in self.saved_states:
+                    new_shape_info.append(state)
                 self.parent.remove_widget(self.parent.children[0])
                 btns = ReccomendationButtons()
                 self.parent.add_widget(btns)
@@ -713,8 +752,14 @@ class CustomLayout(BoxLayout):
             #print("parker")
             #print(self.parent.children[0])
             if (self.parent.children[0] != None):
+                #self.saved_states = self.parent.saved_states
+                print("fetching any saved states")
+                print(self.saved_states)
+                print("got saved states ...")
                 new_shape_info = tr.identify_shape(newply)
                 self.parent.main_shape_info = new_shape_info
+                for state in self.saved_states:
+                    new_shape_info.append(state)
                 self.parent.children[1].shape_info = new_shape_info
                 self.parent.remove_widget(self.parent.children[0])
                 btns = ReccomendationButtons()
@@ -732,6 +777,19 @@ class CustomLayout(BoxLayout):
 
         else:
             pass
+    def add_saved_state(self, polygon, typet, tf, polygons):
+        print('adding')
+        self.saved_states.append((polygon,typet, tf, None))
+        print('added')
+        print(self.saved_states)
+        state = (polygon,typet, tf, None)
+        self.parent.main_shape_info.append(state)
+        self.parent.remove_widget(self.parent.children[0])
+        btns = ReccomendationButtons()
+        self.parent.add_widget(btns)
+        if (self.parent.main_shape_info != None and len(self.parent.main_shape_info) >= 1):
+            btns.setup_btns()
+
     #handler for back button
     def go_back(self, *args):
         print(self.parent.parent)
