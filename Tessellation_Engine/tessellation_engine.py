@@ -264,34 +264,45 @@ class TessellationWidget(GridLayout):
             while xCount <= self.xNum:
                 temp = []
                 for p in shape.exterior.coords:
-                    if pointsRight:
+                    if xInc2 == 0 and yInc2 == 0:
+                        px = (p[0] + (xInc * xCount)) * scale_factor
+                        py = (p[1] + (yInc * yCount)) * scale_factor
+                    elif pointsRight:
                         if hasDoubleMax:
                             if pointsUp:
+                                #print("RIGHT DMAX UP")
                                 px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
                                 py = (p[1] + (yInc2 * xCount) + (yInc * yCount)) * scale_factor
                             else:
+                                #print("RIGHT DMAX DOWN")
                                 px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
                                 py = (p[1] + (yInc * xCount) + (yInc2 * yCount)) * scale_factor
                         else:
                             if pointsUp:
+                                #print("RIGHT UP")
                                 px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
                                 py = (p[1] + (yInc * xCount) - (yInc2 * yCount)) * scale_factor
                             else:
+                                #print("RIGHT DOWN")
                                 px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
                                 py = (p[1] - (yInc2 * xCount) + (yInc * yCount)) * scale_factor
                     else:
                         if hasDoubleMax:
                             if pointsUp:
+                                #print("LEFT DMAX DOWN")
                                 px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
                                 py = (p[1] - (yInc2 * xCount) - (yInc * yCount)) * scale_factor
                             else:
+                                #print("LEFT DMAX UP")
                                 px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
                                 py = (p[1] - (yInc2 * xCount) - (yInc * yCount)) * scale_factor
                         else:
                             if pointsUp:
+                                #print("LEFT UP")
                                 px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
                                 py = (p[1] + (yInc2 * xCount) - (yInc * yCount)) * scale_factor
                             else:
+                                #print("LEFT DOWN")
                                 px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
                                 py = (p[1] + (yInc2 * xCount) - (yInc * yCount)) * scale_factor
                     temp.append((px,py))
