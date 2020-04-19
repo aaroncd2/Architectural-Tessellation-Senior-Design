@@ -36,6 +36,7 @@ class TessellationWidget(GridLayout):
         self.cols = 1
         self.rows = 3
         self.polygons = []
+        self.actions = []
         self.exterior = None
         self.type = None
         
@@ -46,7 +47,7 @@ class TessellationWidget(GridLayout):
         self.add_widget(imageRow)
 
         self.controls = BoxLayout(orientation='horizontal', size_hint=(1,.30))
-        self.buttons = GridLayout(rows=5, cols=3)
+        self.buttons = GridLayout(rows=5, cols=2)
         self.sliders = GridLayout(rows=4, cols=2)
 
         # Add slider and label to widget
@@ -88,38 +89,42 @@ class TessellationWidget(GridLayout):
         self.controls.add_widget(self.sliders)
 
         # Add save state btn
-        self.save_state_button = Button(text = 'Save State', background_color = (1,1,1,1), font_size='12dp')
+        self.save_state_button = Button(text = 'Save State', background_color = (1,1,1,1), font_size='10dp')
         self.buttons.add_widget(self.save_state_button)
         self.save_state_button.bind(on_press=self.save_state)
 
+        # Add export button
+        self.export_button = Button(text = 'Export', background_color = (1,1,1,1), font_size='10dp')
+        self.buttons.add_widget(self.export_button)
+        self.export_button.bind(on_press=self.export_tiling)
 
         # Add flip horizontal button
-        self.horizontal_button = Button(text = 'Flip Horizontal', background_color = (1,1,1,1), font_size='12dp')
+        self.horizontal_button = Button(text = 'Flip Horizontal', background_color = (1,1,1,1), font_size='10dp')
         self.buttons.add_widget(self.horizontal_button)
         self.horizontal_button.bind(on_press=self.flip_horizontal)
 
         # Add flip vertical button
-        self.vertical_button = Button(text = 'Flip Vertical', background_color = (1,1,1,1), font_size='12dp')
+        self.vertical_button = Button(text = 'Flip Vertical', background_color = (1,1,1,1), font_size='10dp')
         self.buttons.add_widget(self.vertical_button)
         self.vertical_button.bind(on_press=self.flip_vertical)
 
         # Add alternate row button
-        self.alternate_row_button = Button(text = 'Alternate Rows', background_color = (1,1,1,1), font_size='12dp')
+        self.alternate_row_button = Button(text = 'Alternate Rows', background_color = (1,1,1,1), font_size='10dp')
         self.buttons.add_widget(self.alternate_row_button)
         self.alternate_row_button.bind(on_press=self.alternate_rows)
 
         # Add alternate column button
-        self.alternate_col_button = Button(text = 'Alternate Cols', background_color = (1,1,1,1), font_size='12dp')
+        self.alternate_col_button = Button(text = 'Alternate Cols', background_color = (1,1,1,1), font_size='10dp')
         self.buttons.add_widget(self.alternate_col_button)
         self.alternate_col_button.bind(on_press=self.alternate_cols)
 
-        # Add export button
-        self.export_button = Button(text = 'Export', background_color = (1,1,1,1), font_size='12dp')
-        self.buttons.add_widget(self.export_button)
-        self.export_button.bind(on_press=self.export_tiling)
+        # Add undo button
+        self.undo_button = Button(text = 'Undo', background_color = (1,1,1,1), font_size='10dp')
+        self.buttons.add_widget(self.undo_button)
+        self.undo_button.bind(on_press=self.undo)
 
         # Add reset button
-        self.reset_button = Button(text = 'Reset', background_color = (1,1,1,1), font_size='12dp')
+        self.reset_button = Button(text = 'Reset', background_color = (1,1,1,1), font_size='10dp')
         self.buttons.add_widget(self.reset_button)
         self.reset_button.bind(on_press=self.reset)
 
@@ -127,10 +132,10 @@ class TessellationWidget(GridLayout):
         self.controls.add_widget(self.buttons)
         self.add_widget(self.controls)
 
-        # Add recommendation buttons
-        self.rec_label = Label(text='Tessellation Type:', font_size='12dp')
+        # Add tiling type label
+        self.rec_label = Label(text='Tessellation Type:', font_size='10dp')
         self.buttons.add_widget(self.rec_label)
-        self.rec_type = Label(text='Freeform', font_size='12dp')
+        self.rec_type = Label(text='Freeform', font_size='10dp')
         self.buttons.add_widget(self.rec_type)
 
     # Display initial tiling
@@ -582,6 +587,8 @@ class TessellationWidget(GridLayout):
 
     # flips a polygon horizontally across its center
     def flip_horizontal(self, instance):
+        if instance != 0:
+            self.actions.append(('horizontal flip', 0))
         polygons = []
         for polygon in self.polygons:
             shapely_poly = Polygon(tu.kivy_to_shapely(polygon))
@@ -601,6 +608,8 @@ class TessellationWidget(GridLayout):
 
     # flips a polygon vertically across its center
     def flip_vertical(self, instance):
+        if instance != 0:
+            self.actions.append(('vertical flip', 0))
         polygons = []
         for polygon in self.polygons:
             shapely_poly = Polygon(tu.kivy_to_shapely(polygon))
@@ -617,6 +626,15 @@ class TessellationWidget(GridLayout):
             polygons.append(temp)
         self.polygons = polygons
         self.draw_polygons()
+
+    # undoes last action performed by user
+    def undo(self, instance):
+        if len(self.actions) > 0:
+            action = self.actions.pop()
+            if action[0] == 'horizontal flip':
+                self.flip_horizontal(0)
+            elif action[0] == 'vertical flip':
+                self.flip_vertical(0)
 
     # resets the screen
     def reset(self, instance):
