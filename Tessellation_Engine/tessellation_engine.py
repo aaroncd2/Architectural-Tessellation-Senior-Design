@@ -635,6 +635,10 @@ class TessellationWidget(GridLayout):
                 self.flip_horizontal(0)
             elif action[0] == 'vertical flip':
                 self.flip_vertical(0)
+            elif action[0] == 'alternate rows':
+                self.alternate_rows(0)
+            elif action[0] == 'alternate cols':
+                self.alternate_cols(0)
 
     # resets the screen
     def reset(self, instance):
@@ -653,84 +657,64 @@ class TessellationWidget(GridLayout):
 
     # Flips alternating rows across their center vertically
     def alternate_rows(self, instance):
-        self.slide_horizontal.value = 100
-        self.slide_vertical.value = 100
-        bounds = self.polygon.bounds
-        xInc = abs(bounds[2] - bounds[0])
-        yInc = abs(bounds[3] - bounds[1])
-
+        if instance != 0:
+            self.actions.append(('alternate rows', 0))
         polygons = []
-        temp = []
-        xCount = 1
-        yCount = 1
-        self.canvas_widget.canvas.add(Color(1., 0, 0))
-
-        while yCount <= self.yNum:
-            yCenter = self.polygon.centroid.y
-            flipped = []
-            for p in self.polygon.exterior.coords:
-                point = (p[0], (2 * yCenter) - p[1])
-                flipped.append(point)
-            self.polygon = Polygon(flipped)
-            polygon = tu.shapely_to_kivy(self.polygon)
-            while xCount <= self.xNum:
-                xNext = xCount * xInc
-                yNext = yCount * yInc
+        poly_count = 0
+        flip = False
+        for polygon in self.polygons:
+            if flip == True:
+                shapely_poly = Polygon(tu.kivy_to_shapely(polygon))
+                bounds = shapely_poly.bounds
+                temp = []
+                centerY = bounds[1] + ((bounds[3] - bounds[1]) / 2.0)
                 count = 0
                 for p in polygon:
                     if count % 2 == 0:
-                        temp.append(p + xNext)
+                        temp.append(p)
                     else:
-                        temp.append(p + yNext)
+                        temp.append((2 * centerY) - p)
                     count = count + 1
-                xCount = xCount + 1
-                polygons.append(temp)
-                temp = []
-            yCount = yCount + 1
-            xCount = 1
-
+            else:
+                temp = polygon
+            polygons.append(temp)
+            poly_count = poly_count + 1
+            if poly_count % self.xNum == 0:
+                if flip:
+                    flip = False
+                else:
+                    flip = True
         self.polygons = polygons
         self.draw_polygons()
 
     # flips alternating columns across their center horizontally
     def alternate_cols(self, instance):
-        self.slide_horizontal.value = 100
-        self.slide_vertical.value = 100
-        bounds = self.polygon.bounds
-        xInc = abs(bounds[2] - bounds[0])
-        yInc = abs(bounds[3] - bounds[1])
-
+        if instance != 0:
+            self.actions.append(('alternate cols', 0))
         polygons = []
-        temp = []
-        xCount = 1
-        yCount = 1
-        self.canvas_widget.canvas.add(Color(1., 0, 0))
-
-        while yCount <= self.yNum:
-            while xCount <= self.xNum:
-                xCenter = self.polygon.centroid.x
-                flipped = []
-                for p in self.polygon.exterior.coords:
-                    point = ((2 * xCenter) - p[0], p[1])
-                    flipped.append(point)
-                self.polygon = Polygon(flipped)
-                polygon = tu.shapely_to_kivy(self.polygon)
-                
-                xNext = xCount * xInc
-                yNext = yCount * yInc
+        poly_count = 0
+        flip = False
+        for polygon in self.polygons:
+            if flip == True:
+                shapely_poly = Polygon(tu.kivy_to_shapely(polygon))
+                bounds = shapely_poly.bounds
+                temp = []
+                centerX = bounds[0] + ((bounds[2] - bounds[0]) / 2.0)
                 count = 0
                 for p in polygon:
                     if count % 2 == 0:
-                        temp.append(p + xNext)
+                        temp.append((2 * centerX) - p)
                     else:
-                        temp.append(p + yNext)
+                        temp.append(p)
                     count = count + 1
-                xCount = xCount + 1
-                polygons.append(temp)
-                temp = []
-            yCount = yCount + 1
-            xCount = 1
-
+                flip = False
+            else:
+                temp = polygon
+                flip = True
+            polygons.append(temp)
+            poly_count = poly_count + 1
+            if poly_count % self.xNum == 0:
+                flip = False
         self.polygons = polygons
         self.draw_polygons()
 
