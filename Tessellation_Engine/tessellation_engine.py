@@ -790,20 +790,35 @@ class TessellationWidget(GridLayout):
     def draw_recommendation(self, index):
         self.reset(0)
         self.rec_shape = self.shape_info[index]
-        if self.rec_shape[3] == None:
-            self.parent.children[2].config_from_shapely_poly(self.rec_shape[0])
-        self.base_unit = tu.make_positive(self.rec_shape[0])
-        self.polygon = tu.make_positive(self.rec_shape[0])
-        self.type = self.rec_shape[1]
-        if self.type == 'regular':
-            self.tile_regular_polygon()
-            self.rec_type.text = 'Freeform'
-        elif self.type == 'parallelogram':
-            self.tile_parallelogram()
-            self.rec_type.text = 'Parallelogram'
-        elif self.type == 'hexagon':
-            self.tile_hexagon()
-            self.rec_type.text = 'Hexagon'
+        print(self.shape_info)
+        if len(self.rec_shape) == 5:
+            if self.rec_shape[4] == "s":
+                #self.polygon = self.rec_shape[0]
+                #self.parent.children[2].config_from_shapely_poly(self.rec_shape[0])
+                self.base_unit = tu.make_positive(self.rec_shape[0])
+                self.polygon = tu.make_positive(self.rec_shape[0])
+                self.polygons = self.rec_shape[3]
+                self.type = self.rec_shape[1]
+                if self.type == 'regular':
+                    self.rec_type.text = 'Freeform'
+                elif self.type == 'parallelogram':
+                    self.rec_type.text = 'Parallelogram'
+                elif self.type == 'hexagon':
+                     self.rec_type.text = 'Hexagon'
+                self.draw_polygons()
+        else:
+            self.base_unit = tu.make_positive(self.rec_shape[0])
+            self.polygon = tu.make_positive(self.rec_shape[0])
+            self.type = self.rec_shape[1]     
+            if self.type == 'regular':
+                self.tile_regular_polygon()
+                self.rec_type.text = 'Freeform'
+            elif self.type == 'parallelogram':
+                self.tile_parallelogram()
+                self.rec_type.text = 'Parallelogram'
+            elif self.type == 'hexagon':
+                self.tile_hexagon()
+                self.rec_type.text = 'Hexagon'
 
     # determines if a coordinate in a shape is (maxX, maxY)
     def max_x_is_max_y(self, polygon):

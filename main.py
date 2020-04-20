@@ -14,6 +14,7 @@ from kivy.properties import ListProperty
 from kivy.uix.popup import Popup
 from kivy.uix.filechooser import FileChooserListView
 from kivy.uix.relativelayout import RelativeLayout
+from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
 from kivy.uix.image import Image
 from kivy.uix.boxlayout import BoxLayout
@@ -72,7 +73,6 @@ class RootWidget(BoxLayout):
         load_existing_chooser = LoadExistingChooser()
         self.add_widget(load_existing_chooser)
     def back_to_start(self):
-        print(self.children[0].children)
         self.children[0].remove_widget(self.children[0].children[0])
         self.children[0].remove_widget(self.children[0].children[1])
         self.children[0].remove_widget(self.children[0].children[0])
@@ -101,13 +101,7 @@ class FileDiagButton(Button):
     def on_press(self, **kwargs):
         self.parent.parent.run_file_diag()
 
-class BackButton(Button):
-    def __init__(self, **kwargs):
-        super(Button, self).__init__(**kwargs)
-        self.text ="Choose New Image"
-        print(self.parent)
-    def on_press(self, **kwargs):
-        print(self.parent)
+
 
 class LoadExistingButton(Button):
     def __init__(self, **kwargs):
@@ -136,22 +130,22 @@ class LoadExistingChooser(FileChooserListView):
                     data = fp
                     head, tail = os.path.split(data)
                     f.write(head)
-                print(fp)
+                #print(fp)
                 coo = []
                 with open(fp) as csv_file:
                     csv_reader = csv.reader(csv_file, delimiter=',')
                     line_count = 0
                     for row in csv_reader:
                         if line_count == 0:
-                            print(f'Column names are {", ".join(row)}')
+                            #print(f'Column names are {", ".join(row)}')
                             line_count += 1
                         else:
                             coo.append(float(row[0]))
                             coo.append(float(row[1]))
-                            print(row)
+                            #print(row)
                             line_count += 1
-                            print(f'Processed {line_count} lines.')
-                print(coo)
+                            #print(f'Processed {line_count} lines.')
+                #print(coo)
                 global f_coords
                 points = list(zip(coo[::2],coo[1::2]))
                 poly = Polygon(points)
@@ -188,9 +182,9 @@ class FileChooser(FileChooserListView):
                 #use file path to process as image in imageprocessing.py
                 global f_coords
                 coo = ip.processImage(fp)
-                print(coo)
+                #print(coo)
                 f_coords = sm.shape_model(coo)
-                print(f_coords)
+                #print(f_coords)
                 b_grid = BoxGrid()
                 self.parent.add_widget(b_grid)
                 self.parent.remove_widget(self)
@@ -201,6 +195,10 @@ class ReccomendationButton(Button):
     def __init__(self, **kwargs):
         super(Button, self).__init__(**kwargs)
         #self.size = 175, 145
+        
+        
+        self.background_color = [.3, .3, 0.3, .75]
+        self.pressed=False
         self.index = None
         if (the_poly != None):
             with self.canvas.after:
@@ -210,19 +208,36 @@ class ReccomendationButton(Button):
 
     def on_press(self, **kwargs):
         #print(self.index)
-        print(self.parent.parent.parent.children[1])
-       
+        #print(self.parent.parent.parent.children[1])
+        #self.parent.parent.parent.children
+        self.pressed=True
         self.parent.parent.parent.children[1].draw_recommendation(self.index)
+        #self.button_normal =''
+        self.background_color = [.3, .7, .4, .75]
+        self.parent.parent.press_helper_func(self)
 
-class ReccomendationButtons(BoxLayout):
+class ReccomendationButtons(FloatLayout):
     def __init__(self, **kwargs):
-        super(BoxLayout, self).__init__(**kwargs)
+        super(FloatLayout, self).__init__(**kwargs)
         self.size_hint= None, None 
         #self.saved_states = []
-    def setup_btns(self):
+        
+    def press_helper_func(self,eleref):
+        print(eleref)
+        for btn in self.reccrows.children:
+            if btn != eleref:
+                print(self.btns_info[btn.index])
+                tempsaveinfo = self.btns_info[btn.index]
+                if len(tempsaveinfo) != 5:
+                    btn.background_color = [.3, .3, 0.3, .75]
+                else:
+                    btn.background_color =[1, .3, .4, .85]
+        #print(self.reccrows.children)
+    
+    def setup_btns(self, is_resize):
         
         
-        print(self.parent.main_shape_info)
+        #print(self.parent.main_shape_info)
         self.btns_info = self.parent.main_shape_info
         self.numreccs = len(self.btns_info)
         #print("shape info")
@@ -232,7 +247,7 @@ class ReccomendationButtons(BoxLayout):
         self.reccrows.size_hint = None, None
         global the_poly
         the_poly = self.make_positive(self.btns_info[0][0])
-
+        
         poly = Polygon(the_poly)
         sizeX = Window.size[0] * (.14)
         sizeY = Window.size[1] / self.numreccs
@@ -276,9 +291,21 @@ class ReccomendationButtons(BoxLayout):
             the_poly = None
             
             temp.index = u
-            self.reccrows.add_widget(temp)            
+            
+            colorcheck = self.btns_info[u]
+            if len(colorcheck) == 5:
+                if colorcheck[4] == "s":
+                    temp.background_normal= ''
+                    temp.background_color =[1, .3, .4, .85]
+            self.reccrows.add_widget(temp)   
+            #temp.add_widget(Label(text="testt",valign='bottom'), index=0)
+        self.add_widget(self.reccrows, index=1)
+        # # for k in range(0, self.numreccs):
+        #      label = Label(text="hello")
+        #      self.add_widget(label)
+        
 
-        self.add_widget(self.reccrows)
+        
     
     # def add_saved_session_btn(self,polygon,polygon_tiling, tiling_type):
     #     print(polygon)
@@ -357,10 +384,12 @@ class BoxGrid(BoxLayout):
         self.add_widget(tessel)
         tessel.display_initial_tiling()
         self.main_shape_info = tessel.shape_info
-        btn = ReccomendationButtons()
-        self.add_widget(btn)
+        self.btn = ReccomendationButtons()
+        self.add_widget(self.btn)
         if (self.main_shape_info != None and len(self.main_shape_info) > 1):
-            btn.setup_btns()
+            self.btn.setup_btns(False)
+    
+    
 
 
 
@@ -373,7 +402,7 @@ class CustomLayout(BoxLayout):
         super(CustomLayout, self).__init__(**kwargs)
 
         Window.bind(on_key_down=self.key_action) #Binds Keyboard for key detection
-
+        Window.bind(on_resize=self.on_window_resize)
         self.saved_states= []
 
         self.back_button = Button(text = 'Back', 
@@ -555,8 +584,50 @@ class CustomLayout(BoxLayout):
                 btns = ReccomendationButtons()
                 self.parent.add_widget(btns)
                 if (new_shape_info != None and len(new_shape_info) >= 1):
-                    btns.setup_btns()
-            
+                    btns.setup_btns(False)
+
+    def on_window_resize(self, window, width, height):
+        self.remove_widget(self.back_button)
+        self.remove_widget(self.color_picker_button)
+        self.back_button = Button(text = 'Back', 
+                                          background_color = (1,1,1,1), 
+                                          size_hint = (.3,.07), 
+                                          pos_hint = {'bottom': 0.3})
+        # Add change color button
+        self.color_picker_button = Button(text = 'Choose Color', 
+                                          background_color = (1,1,1,1), 
+                                          size_hint = (.3,.07), 
+                                          pos_hint = {'bottom': 0.3})
+        self.add_widget(self.back_button)
+        self.back_button.bind(on_press=self.go_back)
+        self.add_widget(self.color_picker_button)
+        self.color_picker_button.bind(on_press=self.changeColor)
+        self.canvas.clear()
+        self.configCoords()
+
+        #declare a canvas
+        with self.canvas.after:
+            pass
+        
+        self.define_nodes()
+
+        i = 0
+        for points in self.c_coords:
+            self.canvas.add(self.canvas_nodes[i])
+            i = i + 1
+        
+        self.define_edge()
+
+        i = 0
+        for i in range(len(self.c_coords)):
+            self.canvas.add(self.canvas_edge[i])
+            i = i + 1
+        self.parent.remove_widget(self.parent.children[0])
+        btns = ReccomendationButtons()
+        self.parent.add_widget(btns)   
+        if (self.parent.main_shape_info != None and len(self.parent.main_shape_info) >= 1):
+            btns.setup_btns(False)
+
     def draw(self):
         r,g,b,a = self.col[0], self.col[1], self.col[2], self.col[3]
         self.canvas.add(Color(r,g,b,a))
@@ -623,7 +694,7 @@ class CustomLayout(BoxLayout):
 
     def on_touch_down(self, touch):       
         i = 0
-        print(self.color_picker_button.pos)
+        #print(self.color_picker_button.pos)
         if self.color_picker_button.collide_point(*touch.pos):
             self.changeColor()
         if self.back_button.collide_point(*touch.pos):
@@ -712,6 +783,8 @@ class CustomLayout(BoxLayout):
                 newply = affinity.scale(newply, xfact= 1/self.yscale, yfact= 1/self.yscale)
             else:
                 newply = affinity.scale(newply, xfact= 1/self.xscale, yfact= 1/self.xscale)
+            #123 references to tessellation engine objects
+            #self.parent.children[1].draw_polygons()
             self.parent.children[1].original_base_unit = newply
             self.parent.children[1].polygon = newply
             self.parent.children[1].reset(0)
@@ -753,9 +826,9 @@ class CustomLayout(BoxLayout):
             #print(self.parent.children[0])
             if (self.parent.children[0] != None):
                 #self.saved_states = self.parent.saved_states
-                print("fetching any saved states")
-                print(self.saved_states)
-                print("got saved states ...")
+                #print("fetching any saved states")
+                #print(self.saved_states)
+                #print("got saved states ...")
                 new_shape_info = tr.identify_shape(newply)
                 self.parent.main_shape_info = new_shape_info
                 for state in self.saved_states:
@@ -765,7 +838,7 @@ class CustomLayout(BoxLayout):
                 btns = ReccomendationButtons()
                 self.parent.add_widget(btns)
                 if (new_shape_info != None and len(new_shape_info) >= 1):
-                    btns.setup_btns()
+                    btns.setup_btns(False)
             
 
 
@@ -777,27 +850,28 @@ class CustomLayout(BoxLayout):
 
         else:
             pass
+    
     def add_saved_state(self, polygon, typet, tf, polygons):
-        print('adding')
-        self.saved_states.append((polygon,typet, tf, None))
-        print('added')
-        print(self.saved_states)
-        state = (polygon,typet, tf, None)
+        #print('adding')
+        self.saved_states.append((polygon,typet, tf, polygons,"s"))
+        #print('added')
+        #print(self.saved_states)
+        state = (polygon,typet, tf, polygons, "s")
         self.parent.main_shape_info.append(state)
         self.parent.remove_widget(self.parent.children[0])
         btns = ReccomendationButtons()
         self.parent.add_widget(btns)
         if (self.parent.main_shape_info != None and len(self.parent.main_shape_info) >= 1):
-            btns.setup_btns()
+            btns.setup_btns(False)
 
     #handler for back button
     def go_back(self, *args):
-        print(self.parent.parent)
+        #print(self.parent.parent)
         self.parent.parent.back_to_start()
-        print("hello")
+        #print("hello")
 
     def changeColor(self,*args):
-        print("button works")
+        #print("button works")
         self.picker = ColorPicker(pos_hint={'center_x': .5, 'center_y': .5},
                              size_hint = (1, 1))
         self.picker.add_widget(Button(text = 'Select', 
