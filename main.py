@@ -119,7 +119,7 @@ class LoadExistingButton(Button):
 #file dialog prompt to load csv file of existing polygon
 class LoadExistingChooser(FileChooserListView):
     def getpath(self):
-        with open('pathfile.txt', 'r') as f:
+        with open('csvpathfile.txt', 'r') as f:
             data = f.read()
         if (data != None):
             return data
@@ -132,7 +132,7 @@ class LoadExistingChooser(FileChooserListView):
                 global fp
                 #store file path
                 fp = args[0][0]
-                with open('pathfile.txt', 'w') as f:
+                with open('csvpathfile.txt', 'w') as f:
                     data = fp
                     head, tail = os.path.split(data)
                     f.write(head)
@@ -165,7 +165,7 @@ class LoadExistingChooser(FileChooserListView):
 #gile chooser class
 class FileChooser(FileChooserListView):
     def getpath(self):
-        with open('pathfile.txt', 'r') as f:
+        with open('imgpathfile.txt', 'r') as f:
             data = f.read()
         if (data != None):
             return data
@@ -179,7 +179,7 @@ class FileChooser(FileChooserListView):
                 global fp
                 #store file path
                 fp = args[0][0]
-                with open('pathfile.txt', 'w') as f:
+                with open('imgpathfile.txt', 'w') as f:
                     data = fp
                     head, tail = os.path.split(data)
                     f.write(head)
