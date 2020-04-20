@@ -650,8 +650,13 @@ class TessellationWidget(GridLayout):
                 self.rotation_slider.value = float(self.input_box.text)
             elif action[0] == 'scale':
                 self.slide_scale.value = action[1]
-                self.polygons = action[2]
-                self.draw_polygons()
+                self.scale_polygons(0,0)
+            elif action[0] == 'horizontal spacing':
+                self.slide_horizontal.value = action[1]
+                self.adjust_horizontal_spacing(0,0)
+            elif action[0] == 'vertical spacing':
+                self.slide_vertical.value = action[1]
+                self.adjust_vertical_spacing(0,0)
 
     # resets the screen
     def reset(self, instance):
@@ -770,7 +775,8 @@ class TessellationWidget(GridLayout):
 
     # Adjusts horizontal spacing between polygons
     def adjust_horizontal_spacing(self, instance, amount):
-        increment = (self.slide_horizontal.value - 100) / 5
+        increment = (self.slide_horizontal.value - self.xSpacing) / self.xNum
+        self.xSpacing = self.slide_horizontal.value
         poly_count = 0
         temp = []
         for polygon in self.polygons:
@@ -786,10 +792,14 @@ class TessellationWidget(GridLayout):
             poly_count = poly_count + 1
         self.polygons = temp
         self.draw_polygons()
+        if self.slide_horizontal.action_complete == True:
+            self.actions.append(('horizontal spacing', self.slide_horizontal.previous_value))
+            self.slide_horizontal.action_complete = False
             
     # Adjusts vertical spacing between polygons
     def adjust_vertical_spacing(self, instance, amount):
-        increment = (self.slide_horizontal.value - 100) / 5
+        increment = (self.slide_vertical.value - self.ySpacing) / self.yNum
+        self.ySpacing = self.slide_vertical.value
         poly_count = 0
         row_count = 0
         temp = []
@@ -808,6 +818,9 @@ class TessellationWidget(GridLayout):
                 row_count = row_count + 1
         self.polygons = temp
         self.draw_polygons()
+        if self.slide_vertical.action_complete == True:
+            self.actions.append(('vertical spacing', self.slide_vertical.previous_value))
+            self.slide_vertical.action_complete = False
 
     # scales polygons
     def scale_polygons(self, instance, amount):
@@ -821,7 +834,7 @@ class TessellationWidget(GridLayout):
         self.polygons = temp
         self.draw_polygons()
         if self.slide_scale.action_complete == True:
-            self.actions.append(('scale', self.slide_scale.previous_value, self.polygons))
+            self.actions.append(('scale', self.slide_scale.previous_value))
             self.rotation_slider.action_complete = False
 
 
