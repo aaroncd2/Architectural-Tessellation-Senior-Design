@@ -40,6 +40,8 @@ class TessellationWidget(GridLayout):
         self.actions = []
         self.exterior = None
         self.type = None
+        self.stroke_color = Color(1.0,0,0)
+        self.fill_color = Color(0,0,1.0)
         
         # create row for canvas
         self.canvas_widget = CanvasWidget()
@@ -67,7 +69,7 @@ class TessellationWidget(GridLayout):
         # Add horizontal translation slider
         self.h_label = Label(text='Horizontal Spacing', font_size='12dp')
         self.sliders.add_widget(self.h_label)
-        self.slide_horizontal = Slider(min=0, max=200, value=100, value_track = True)
+        self.slide_horizontal = CustomSlider(min=0, max=200, value=100, value_track = True)
         self.xSpacing = 100
         self.slide_horizontal.bind(value = self.adjust_horizontal_spacing)
         self.sliders.add_widget(self.slide_horizontal)
@@ -75,7 +77,7 @@ class TessellationWidget(GridLayout):
         # Add vertical translation slider
         self.v_label = Label(text='Vertical Spacing', font_size='12dp')
         self.sliders.add_widget(self.v_label)
-        self.slide_vertical = Slider(min=0, max=200, value=100, value_track = True)
+        self.slide_vertical = CustomSlider(min=0, max=200, value=100, value_track = True)
         self.ySpacing = 100
         self.slide_vertical.bind(value = self.adjust_vertical_spacing)
         self.sliders.add_widget(self.slide_vertical)
@@ -171,7 +173,6 @@ class TessellationWidget(GridLayout):
         temp = []
         xCount = 1
         yCount = 1
-        self.canvas_widget.canvas.add(Color(1., 0, 0))
 
         while yCount <= self.yNum:
             while xCount <= self.xNum:
@@ -745,9 +746,9 @@ class TessellationWidget(GridLayout):
         indices = tu.make_indices_list(self.polygons[0])
         for polygon in self.polygons:
             mesh_points = tu.make_mesh_list(polygon)
-            self.canvas_widget.lines.add(Color(0,0,1.))
+            self.canvas_widget.lines.add(self.fill_color)
             self.canvas_widget.lines.add(Mesh(vertices=mesh_points, indices=indices, mode='triangle_strip'))
-            self.canvas_widget.lines.add(Color(1., 0, 0))
+            self.canvas_widget.lines.add(self.stroke_color)
             self.canvas_widget.lines.add(Line(points = polygon, width=2.0, close=False))
         self.canvas_widget.canvas.add(self.canvas_widget.lines)
 
@@ -760,6 +761,26 @@ class TessellationWidget(GridLayout):
             self.tile_parallelogram()
         elif self.type == 'hexagon':
             self.tile_hexagon()
+        """
+        poly1 = Polygon(tu.kivy_to_shapely(self.polygons[0]))
+        poly2 = Polygon(tu.kivy_to_shapely(self.polygons[1]))
+        space_between = poly1.bounds[2] - poly2.bounds[0]
+        poly_count = 0
+        temp = []
+        for polygon in self.polygons:
+            count = 0
+            temp_poly = []
+            for p in polygon:
+                if count % 2 == 0:
+                    temp_poly.append(p + (p * (self.slide_horizontal.value / 100)))
+                else:
+                    temp_poly.append(p)
+                count = count + 1
+            temp.append(temp_poly)
+            poly_count = poly_count + 1
+        self.polygons = temp
+        self.draw_polygons()
+        """
             
     # Adjusts vertical spacing between polygons
     def adjust_vertical_spacing(self, instance, amount):
