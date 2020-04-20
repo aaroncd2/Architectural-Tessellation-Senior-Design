@@ -880,11 +880,6 @@ class CustomLayout(BoxLayout):
 
         else:
             pass
-<<<<<<< HEAD
-    
-=======
-
->>>>>>> 6e05004bb707bc724a35a419a1e5fe57f16d6aa3
     def add_saved_state(self, polygon, typet, tf, polygons):
         #print('adding')
         self.saved_states.append((polygon,typet, tf, polygons,"s"))
