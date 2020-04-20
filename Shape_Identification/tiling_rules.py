@@ -13,9 +13,9 @@ from shapely.geometry import Point
 def identify_shape(shape):
     number_sides = __num_sides(shape)
     if (number_sides == 3):
-        return process_triangle(shape)
+        return process_triangle(shape) + process_universal(shape)
     elif (number_sides == 4):
-        return process_quadrilateral(shape)
+        return process_quadrilateral(shape) + process_universal(shape)
     else:
         # generic recommendation
         return process_universal(shape)
