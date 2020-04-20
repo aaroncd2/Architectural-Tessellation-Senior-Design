@@ -415,7 +415,6 @@ class CustomLayout(BoxLayout):
         #Add background color button
         self.background_color_picker_button = Button(text = 'Choose Background',
                                           background_color = (1,1,1,1),
-                                          font_size = 28,
                                           size_hint = (.4,.07),
                                           pos_hint = {'bottom': 0.3})
         self.add_widget(self.back_button)
@@ -614,28 +613,8 @@ class CustomLayout(BoxLayout):
                     btns.setup_btns(False)
 
     def on_window_resize(self, window, width, height):
-        # self.add_widget(self.back_button)
-        # self.back_button.bind(on_press=self.go_back)
-        # self.add_widget(self.color_picker_button)
-        # self.color_picker_button.bind(on_press=self.change_color)
-        # self.add_widget(self.background_color_picker_button)
-        # self.color_picker_button.bind(on_press=self.change_color_background)
-        # self.remove_widget(self.back_button)
-        # self.remove_widget(self.color_picker_button)
-        # self.back_button = Button(text = 'Back',
-        #                                   background_color = (1,1,1,1),
-        #                                   size_hint = (.3,.07),
-        #                                   pos_hint = {'bottom': 0.3})
-        # # Add change color button
-        # color_picker_button = Button(text = 'Choose Color',
-        #                                   background_color = (1,1,1,1),
-        #                                   size_hint = (.3,.07),
-        #                                   pos_hint = {'bottom': 0.3})
-        # self.add_widget(self.back_button)
-        # self.back_button.bind(on_press=self.go_back)
-        # self.add_widget(self.color_picker_button)
-        # self.color_picker_button.bind(on_press=self.changeColor)
-        self.canvas.clear()
+        self.canvas.remove_group('shape')
+        self.canvas.remove(self.shape)
         self.configCoords()
 
         self.define_nodes()
