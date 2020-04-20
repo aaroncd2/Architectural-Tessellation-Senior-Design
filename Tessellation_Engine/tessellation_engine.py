@@ -775,7 +775,7 @@ class TessellationWidget(GridLayout):
 
     # Adjusts horizontal spacing between polygons
     def adjust_horizontal_spacing(self, instance, amount):
-        increment = (self.slide_horizontal.value - self.xSpacing) / self.xNum
+        increment = (self.slide_horizontal.value - self.xSpacing) / (self.xNum / 2)
         self.xSpacing = self.slide_horizontal.value
         poly_count = 0
         temp = []
@@ -798,7 +798,7 @@ class TessellationWidget(GridLayout):
             
     # Adjusts vertical spacing between polygons
     def adjust_vertical_spacing(self, instance, amount):
-        increment = (self.slide_vertical.value - self.ySpacing) / self.yNum
+        increment = (self.slide_vertical.value - self.ySpacing) / (self.yNum / 2)
         self.ySpacing = self.slide_vertical.value
         poly_count = 0
         row_count = 0
