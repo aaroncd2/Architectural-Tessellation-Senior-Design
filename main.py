@@ -33,6 +33,8 @@ import os
 import sys
 from kivy.core.window import Window
 from kivy.uix.colorpicker import ColorPicker
+from kivy.uix.togglebutton import ToggleButton 
+
 
 from kivy.config import Config
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
@@ -391,10 +393,6 @@ class BoxGrid(BoxLayout):
     
     
 
-
-
-
-
 #layout for baseunit and functions
 class CustomLayout(BoxLayout):
     def __init__(self, **kwargs):
@@ -404,7 +402,6 @@ class CustomLayout(BoxLayout):
         Window.bind(on_key_down=self.key_action) #Binds Keyboard for key detection
         Window.bind(on_resize=self.on_window_resize)
         self.saved_states= []
-
         self.back_button = Button(text = 'Back', 
                                           background_color = (1,1,1,1), 
                                           size_hint = (.3,.07), 
@@ -414,13 +411,43 @@ class CustomLayout(BoxLayout):
                                           background_color = (1,1,1,1), 
                                           size_hint = (.3,.07), 
                                           pos_hint = {'bottom': 0.3})
+
+        #Add background color button
+        self.background_color_picker_button = Button(text = 'Choose Background', 
+                                          background_color = (1,1,1,1), 
+                                          font_size = 28,
+                                          size_hint = (.4,.07), 
+                                          pos_hint = {'bottom': 0.3})                             
         self.add_widget(self.back_button)
         self.back_button.bind(on_press=self.go_back)
         self.add_widget(self.color_picker_button)
-        self.color_picker_button.bind(on_press=self.changeColor)
+        self.color_picker_button.bind(on_press=self.change_color)
+        self.add_widget(self.background_color_picker_button)
+        self.color_picker_button.bind(on_press=self.change_color_background)
+
+        #add help button for keyboard commands
+        def open_help(self, *args):
+            self.help.open()
+
+        self.help_label = Label(text = " Delete: Press 'delete'\n Add: Press 'a'\n Reset: Press 'r'", 
+                                font_size = '25sp')
+        self.help = Popup(title = 'Help', 
+                           content = self.help_label, 
+                           pos_hint={'center_x': .5, 'center_y': .5},
+                           size_hint = (.2, .2),
+                           auto_dismiss = True)
+        self.help_button = Button(text = '?', 
+                                   size_hint = (.1, .04),
+                                   background_color = (1,1,1,.3),
+                                   pos_hint = {'top':1})
+        
+        self.help_button.bind(on_press = open_help)
+        self.add_widget(self.help_button)   
 
         self.shape = InstructionGroup()
         self.col = [1,1,1,1]
+        self.col_background = [0,0,0,1]
+        self.fill = [0,0,1,1]
 
         self.c_coords = f_coords
         self.pressed = False
@@ -694,11 +721,14 @@ class CustomLayout(BoxLayout):
 
     def on_touch_down(self, touch):       
         i = 0
-        #print(self.color_picker_button.pos)
         if self.color_picker_button.collide_point(*touch.pos):
-            self.changeColor()
+            self.change_color()
         if self.back_button.collide_point(*touch.pos):
             self.go_back()
+        if self.background_color_picker_button.collide_point(*touch.pos):
+            self.change_color_background()
+        if self.help_button.collide_point(*touch.pos):
+            self.help.open()
         else:
             for lines in self.canvas_edge:
                 x,y = self.canvas_edge[i].points[0], self.canvas_edge[i].points[1]
@@ -850,7 +880,11 @@ class CustomLayout(BoxLayout):
 
         else:
             pass
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> 6e05004bb707bc724a35a419a1e5fe57f16d6aa3
     def add_saved_state(self, polygon, typet, tf, polygons):
         #print('adding')
         self.saved_states.append((polygon,typet, tf, polygons,"s"))
@@ -868,35 +902,105 @@ class CustomLayout(BoxLayout):
     def go_back(self, *args):
         #print(self.parent.parent)
         self.parent.parent.back_to_start()
-        #print("hello")
 
-    def changeColor(self,*args):
-        #print("button works")
+    def change_color(self,*args):
+
+        r,g,b,a = self.col[0], self.col[1], self.col[2], self.col[3]
         self.picker = ColorPicker(pos_hint={'center_x': .5, 'center_y': .5},
-                             size_hint = (1, 1))
+                                color = [r,g,b,a], 
+                                size_hint = (1, 1))
+
         self.picker.add_widget(Button(text = 'Select', 
                                   pos_hint = {'center_x': .76, 'y': -.02}, 
                                   size_hint = (None, None), 
                                   size = (100, 35), 
                                   on_press = self.selected))
+        
+        self.edge_toggle = ToggleButton(text = 'Edge', 
+                                       pos_hint = {'center_x': .55, 'y': -.02}, 
+                                       size_hint = (None, None), 
+                                       size = (100, 35), 
+                                       group = 'color', 
+                                       state = 'down')
+        self.edge_toggle.bind(on_press = self.pressed_toggle_edge)
+        self.picker.add_widget(self.edge_toggle)
+
+        self.fill_toggle = ToggleButton(text = 'Fill', 
+                                            pos_hint = {'center_x': .63, 'y': -.02}, 
+                                            size_hint = (None, None), 
+                                            size = (100, 35), 
+                                            group = 'color')
+        self.fill_toggle.bind(on_press = self.pressed_toggle_fill)
+        self.picker.add_widget(self.fill_toggle)
+
+        self.match_toggle = ToggleButton(text = 'Match', 
+                                            pos_hint = {'x': .8, 'y': -.02}, 
+                                            size_hint = (None, None), 
+                                            size = (100, 35), 
+                                            group = 'match')
+        self.picker.add_widget(self.match_toggle)
+
+
         self.ColPop = Popup(title = "Choose Color", 
                         size_hint = (None, None),
                         content = self.picker,
                         size = (1500, 750),
-                        auto_dismiss = False)
+                        auto_dismiss = True)
 
-        # self.picker.bind(color=self.on_color) 
-        self.ColPop.open()  
+        self.ColPop.open()
+
+    def change_color_background(self,*args):
+
+        r,g,b,a = self.col_background[0], self.col_background[1], self.col_background[2], self.col_background[3]
+        self.picker_background = ColorPicker(pos_hint={'center_x': .5, 'center_y': .5},
+                                color = [r,g,b,a], 
+                                size_hint = (1, 1))
+
+        self.picker_background.add_widget(Button(text = 'Select', 
+                                  pos_hint = {'center_x': .76, 'y': -.02}, 
+                                  size_hint = (None, None), 
+                                  size = (100, 35), 
+                                  on_press = self.background_selected))
+        self.ColPop_background = Popup(title = "Choose Background", 
+                        size_hint = (None, None),
+                        content = self.picker_background,
+                        size = (1500, 750),
+                        auto_dismiss = True)
+
+        self.ColPop_background.open()  
 
     def selected(self, *args):
-        self.ColPop.dismiss() 
-        print(self.picker.color)
-        self.col = self.picker.color
+        self.ColPop.dismiss()
+        
+        if self.match_toggle.state == 'down':
+            self.col = self.picker.color
+            self.fill = self.col
+            r,g,b,a = self.col[0], self.col[1], self.col[2], self.col[3]
+            self.parent.children[1].stroke_color = [r,g,b,a]
+            self.parent.children[1].fill_color = [r,g,b,a]
+        elif self.edge_toggle.state == 'down':
+            self.col = self.picker.color
+            r,g,b,a = self.col[0], self.col[1], self.col[2], self.col[3]
+            self.parent.children[1].stroke_color = [r,g,b,a]
+        elif self.fill_toggle.state == 'down':
+            self.fill = self.picker.color
+            r,g,b,a = self.fill[0], self.fill[1], self.fill[2], self.fill[3]
+            self.parent.children[1].fill_color = [r,g,b,a]
+
+        self.parent.children[1].draw_polygons()
         self.draw()
+        
+    def background_selected(self, *args):
+        self.ColPop_background.dismiss() 
+        self.col_background = self.picker_background.color
+        r,g,b,a = self.col_background[0], self.col_background[1], self.col_background[2], self.col_background[3]
+        Window.clearcolor = (r, g, b, a)
 
-
-      
-            
+    def pressed_toggle_edge(self, *args):
+        self.picker.color = self.col
+        
+    def pressed_toggle_fill(self, *args):
+        self.picker.color = self.fill
 
 #main app class to build the root widget on program start
 class DatoApp(App):
