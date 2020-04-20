@@ -86,6 +86,7 @@ class TessellationWidget(GridLayout):
         self.scale_label = Label(text='Scale', font_size='12dp')
         self.sliders.add_widget(self.scale_label)
         self.slide_scale = CustomSlider(min=0, max=200, value=100, value_track = True)
+        self.scaling = 100
         self.slide_scale.bind(value = self.scale_polygons)
         self.sliders.add_widget(self.slide_scale)
 
@@ -668,6 +669,7 @@ class TessellationWidget(GridLayout):
         self.ySpacing = 100
         if instance != 1:
             self.slide_scale.value = 100
+            self.scaling = 100
         self.base_unit = self.original_base_unit
         self.polygon = self.base_unit
         self.tile_regular_polygon()
@@ -775,7 +777,7 @@ class TessellationWidget(GridLayout):
 
     # Adjusts horizontal spacing between polygons
     def adjust_horizontal_spacing(self, instance, amount):
-        increment = (self.slide_horizontal.value - self.xSpacing) / (self.xNum / 2)
+        increment = (self.slide_horizontal.value - self.xSpacing) / (self.xNum / 4)
         self.xSpacing = self.slide_horizontal.value
         poly_count = 0
         temp = []
@@ -798,7 +800,7 @@ class TessellationWidget(GridLayout):
             
     # Adjusts vertical spacing between polygons
     def adjust_vertical_spacing(self, instance, amount):
-        increment = (self.slide_vertical.value - self.ySpacing) / (self.yNum / 2)
+        increment = (self.slide_vertical.value - self.ySpacing) / (self.yNum / 4)
         self.ySpacing = self.slide_vertical.value
         poly_count = 0
         row_count = 0
@@ -824,7 +826,8 @@ class TessellationWidget(GridLayout):
 
     # scales polygons
     def scale_polygons(self, instance, amount):
-        scale_factor = self.slide_scale.value / 100
+        scale_factor = 1 + ((self.slide_scale.value - self.scaling) / 100)
+        self.scaling = self.slide_scale.value
         temp = []
         for polygon in self.polygons:
             temp_poly = []
