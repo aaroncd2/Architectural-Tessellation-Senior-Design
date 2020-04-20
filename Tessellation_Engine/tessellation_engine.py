@@ -85,7 +85,7 @@ class TessellationWidget(GridLayout):
         # Add scale slider
         self.scale_label = Label(text='Scale', font_size='12dp')
         self.sliders.add_widget(self.scale_label)
-        self.slide_scale = Slider(min=0, max=200, value=100, value_track = True)
+        self.slide_scale = CustomSlider(min=0, max=200, value=100, value_track = True)
         self.slide_scale.bind(value = self.scale_polygons)
         self.sliders.add_widget(self.slide_scale)
 
@@ -556,7 +556,10 @@ class TessellationWidget(GridLayout):
 
     # Rotates each polygon by the degrees specified by the slider
     def rotate_polygon(self, instance, degrees):
-        rotation_amount = self.rotation_slider.value - self.rotation_value
+        if instance == 0:
+            rotation_amount = degrees - self.rotation_slider.value
+        else:
+            rotation_amount = self.rotation_slider.value - self.rotation_value
         self.rotation_value = self.rotation_slider.value
         temp = []
         for polygon in self.polygons:
@@ -567,13 +570,16 @@ class TessellationWidget(GridLayout):
         self.input_box.text = str(round(self.rotation_slider.value, 2))
         self.polygons = temp
         self.draw_polygons()
+        if self.rotation_slider.action_complete == True:
+            self.actions.append(('rotate', self.rotation_slider.previous_value))
+            self.rotation_slider.action_complete = False
 
     # Handles textbox input
     def on_enter(self, value):
         self.rotation_slider.value = float(self.input_box.text)
         if self.rotation_slider.value > 360:
             self.rotation_slider.value = self.rotation_slider.value % 360
-        self.rotate_polygon(self.input_box, float(self.input_box.text))
+        self.rotate_polygon(0, float(self.input_box.text))
 
     def save_state(self, instance):
         print("saving state")
@@ -638,6 +644,14 @@ class TessellationWidget(GridLayout):
                 self.alternate_rows(0)
             elif action[0] == 'alternate cols':
                 self.alternate_cols(0)
+            elif action[0] == 'rotate':
+                self.rotate_polygon(0, action[1])
+                self.input_box.text = str(round(action[1], 2))
+                self.rotation_slider.value = float(self.input_box.text)
+            elif action[0] == 'scale':
+                self.slide_scale.value = action[1]
+                self.polygons = action[2]
+                self.draw_polygons()
 
     # resets the screen
     def reset(self, instance):
@@ -754,17 +768,7 @@ class TessellationWidget(GridLayout):
 
     # Adjusts horizontal spacing between polygons
     def adjust_horizontal_spacing(self, instance, amount):
-        self.xSpacing = self.slide_horizontal.value
-        if self.type == 'regular':
-            self.tile_regular_polygon()
-        elif self.type == 'parallelogram':
-            self.tile_parallelogram()
-        elif self.type == 'hexagon':
-            self.tile_hexagon()
-        """
-        poly1 = Polygon(tu.kivy_to_shapely(self.polygons[0]))
-        poly2 = Polygon(tu.kivy_to_shapely(self.polygons[1]))
-        space_between = poly1.bounds[2] - poly2.bounds[0]
+        increment = (self.slide_horizontal.value - 100) / 5
         poly_count = 0
         temp = []
         for polygon in self.polygons:
@@ -772,7 +776,7 @@ class TessellationWidget(GridLayout):
             temp_poly = []
             for p in polygon:
                 if count % 2 == 0:
-                    temp_poly.append(p + (p * (self.slide_horizontal.value / 100)))
+                    temp_poly.append(p + ((increment * (poly_count % self.xNum))))
                 else:
                     temp_poly.append(p)
                 count = count + 1
@@ -780,31 +784,44 @@ class TessellationWidget(GridLayout):
             poly_count = poly_count + 1
         self.polygons = temp
         self.draw_polygons()
-        """
             
     # Adjusts vertical spacing between polygons
     def adjust_vertical_spacing(self, instance, amount):
-        self.ySpacing = self.slide_vertical.value
-        if self.type == 'regular':
-            self.tile_regular_polygon()
-        elif self.type == 'parallelogram':
-            self.tile_parallelogram()
-        elif self.type == 'hexagon':
-            self.tile_hexagon()
+        increment = (self.slide_horizontal.value - 100) / 5
+        poly_count = 0
+        row_count = 0
+        temp = []
+        for polygon in self.polygons:
+            count = 0
+            temp_poly = []
+            for p in polygon:
+                if count % 2 == 0:
+                    temp_poly.append(p)
+                else:
+                    temp_poly.append(p + (increment * row_count))
+                count = count + 1
+            temp.append(temp_poly)
+            poly_count = poly_count + 1
+            if poly_count % self.xNum == 0:
+                row_count = row_count + 1
+        self.polygons = temp
+        self.draw_polygons()
 
+    # scales polygons
     def scale_polygons(self, instance, amount):
         scale_factor = self.slide_scale.value / 100
         temp = []
-        for p in self.base_unit.exterior.coords:
-            temp.append((p[0] * scale_factor, p[1] * scale_factor))
-        self.polygon = Polygon(temp)
-        self.polygon = affinity.rotate(self.polygon, self.rotation_slider.value)
-        if self.type == 'regular':
-            self.tile_regular_polygon()
-        elif self.type == 'parallelogram':
-            self.tile_parallelogram()
-        elif self.type == 'hexagon':
-            self.tile_hexagon()
+        for polygon in self.polygons:
+            temp_poly = []
+            for p in polygon:
+                temp_poly.append(p * scale_factor)
+            temp.append(temp_poly)
+        self.polygons = temp
+        self.draw_polygons()
+        if self.slide_scale.action_complete == True:
+            self.actions.append(('scale', self.slide_scale.previous_value, self.polygons))
+            self.rotation_slider.action_complete = False
+
 
     # displays the next recommendation to the screen
     def draw_recommendation(self, index):
@@ -824,14 +841,6 @@ class TessellationWidget(GridLayout):
         elif self.type == 'hexagon':
             self.tile_hexagon()
             self.rec_type.text = 'Hexagon'
-
-    # determines if a coordinate in a shape is (maxX, maxY)
-    def max_x_is_max_y(self, polygon):
-        bounds = polygon.bounds
-        for p in polygon.exterior.coords:
-            if (p[0] == bounds[2] and p[1] == bounds[3]) or (p[0] == bounds[0] and p[1] == bounds[3]):
-                return True
-        return False
 
     #scales tiling before drawing to ensure it fits on window
     def scale_to_fit_window(self):
