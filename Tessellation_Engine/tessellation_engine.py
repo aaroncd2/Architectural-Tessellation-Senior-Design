@@ -40,8 +40,8 @@ class TessellationWidget(GridLayout):
         self.actions = []
         self.exterior = None
         self.type = None
-        self.stroke_color = Color(1.0,0,0)
-        self.fill_color = Color(0,0,1.0)
+        self.stroke_color = [255,255,255,1]
+        self.fill_color = [0,0,1,1]
         
         # create row for canvas
         self.canvas_widget = CanvasWidget()
@@ -760,9 +760,11 @@ class TessellationWidget(GridLayout):
         indices = tu.make_indices_list(self.polygons[0])
         for polygon in self.polygons:
             mesh_points = tu.make_mesh_list(polygon)
-            self.canvas_widget.lines.add(self.fill_color)
+            r,g,b,a = self.fill_color[0], self.fill_color[1], self.fill_color[2], self.fill_color[3]
+            self.canvas_widget.lines.add(Color(r,g,b,a))
             self.canvas_widget.lines.add(Mesh(vertices=mesh_points, indices=indices, mode='triangle_strip'))
-            self.canvas_widget.lines.add(self.stroke_color)
+            r,g,b,a = self.stroke_color[0], self.stroke_color[1], self.stroke_color[2], self.stroke_color[3]
+            self.canvas_widget.lines.add(Color(r,g,b,a))
             self.canvas_widget.lines.add(Line(points = polygon, width=2.0, close=False))
         self.canvas_widget.canvas.add(self.canvas_widget.lines)
 
