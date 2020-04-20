@@ -40,6 +40,7 @@ class TessellationWidget(GridLayout):
         self.actions = []
         self.exterior = None
         self.type = None
+        self.saved_type = None
         self.stroke_color = [255,255,255,1]
         self.fill_color = [0,0,1,1]
         
@@ -50,7 +51,7 @@ class TessellationWidget(GridLayout):
         self.add_widget(imageRow)
 
         self.controls = BoxLayout(orientation='horizontal', size_hint=(1,.30))
-        self.buttons = GridLayout(rows=5, cols=2)
+        self.buttons = GridLayout(rows=4, cols=3)
         self.sliders = GridLayout(rows=4, cols=2)
 
         # Add slider and label to widget
@@ -101,6 +102,11 @@ class TessellationWidget(GridLayout):
         self.export_button = Button(text = 'Export', background_color = (1,1,1,1), font_size='10dp')
         self.buttons.add_widget(self.export_button)
         self.export_button.bind(on_press=self.export_tiling)
+
+        # Add freeform button
+        self.freeform_button = Button(text = 'Toggle Freeform', background_color = (1,1,1,1), font_size='10dp')
+        self.buttons.add_widget(self.freeform_button)
+        self.freeform_button.bind(on_press=self.make_freeform)
 
         # Add flip horizontal button
         self.horizontal_button = Button(text = 'Flip Horizontal', background_color = (1,1,1,1), font_size='10dp')
@@ -589,6 +595,27 @@ class TessellationWidget(GridLayout):
         self.parent.children[2].add_saved_state(self.polygon, self.type, True, self.polygons)
         #self.parent.children[0].add_saved_session_btn(self.polygon, self.polygons, self.type)
 
+
+    #makes the tiling freeform
+    def make_freeform(self, instance):
+        if self.type != 'regular':
+            self.saved_type = self.type
+            self.type = 'regular'
+            self.polygon = Polygon(tu.kivy_to_shapely(self.polygons[0]))
+            self.tile_regular_polygon()
+            self.rec_type.text = 'Freeform'
+        else:
+            if self.saved_type != None:
+                self.polygon = tu.make_positive(self.rec_shape[0])
+                self.type = self.saved_type
+                if self.type == 'regular':
+                    self.tile_regular_polygon()
+                elif self.type == 'parallelogram':
+                    self.tile_parallelogram()
+                    self.rec_type.text = 'Parallelogram'
+                elif self.type == 'hexagon':
+                    self.tile_hexagon()
+                    self.rec_type.text = 'Hexagon'
 
 
     # flips a polygon horizontally across its center
