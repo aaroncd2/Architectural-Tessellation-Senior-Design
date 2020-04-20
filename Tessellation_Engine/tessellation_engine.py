@@ -23,6 +23,7 @@ import pandas as pd # for export
 import numpy as np # for math
 from Tessellation_Engine import tessellation_utilities as tu #for utility functions
 from Tessellation_Engine.save_dialog import SaveDialog
+from Tessellation_Engine.custom_slider import CustomSlider
 
 ### START TESSELLATION ENGINE ###
 class CanvasWidget(RelativeLayout):
@@ -51,7 +52,7 @@ class TessellationWidget(GridLayout):
         self.sliders = GridLayout(rows=4, cols=2)
 
         # Add slider and label to widget
-        self.s = Slider(min=0, max=360, value=0, value_track = True)
+        self.rotation_slider = CustomSlider(min=0, max=360, value=0, value_track = True)
         self.rotation_value = 0
         self.label_box = BoxLayout(orientation='horizontal', size_hint=(1,1))
         self.input_box = TextInput(text='0', input_filter='float', multiline=False, font_size='12dp')
@@ -60,8 +61,8 @@ class TessellationWidget(GridLayout):
         self.label_box.add_widget(self.label)
         self.label_box.add_widget(self.input_box)
         self.sliders.add_widget(self.label_box) 
-        self.sliders.add_widget(self.s)
-        self.s.bind(value=self.rotate_polygon)
+        self.sliders.add_widget(self.rotation_slider)
+        self.rotation_slider.bind(value=self.rotate_polygon)
 
         # Add horizontal translation slider
         self.h_label = Label(text='Horizontal Spacing', font_size='12dp')
@@ -312,7 +313,7 @@ class TessellationWidget(GridLayout):
                                 py = (p[1] + (yInc2 * xCount) - (yInc * yCount)) * scale_factor
                     temp.append((px,py))
                 temp_poly = Polygon(temp)
-                temp_poly = affinity.rotate(temp_poly, self.s.value)
+                temp_poly = affinity.rotate(temp_poly, self.rotation_slider.value)
                 self.polygons.append(tu.shapely_to_kivy(temp_poly))
                 temp = None
                 xCount = xCount + 1
@@ -544,7 +545,7 @@ class TessellationWidget(GridLayout):
                                         py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) * scale_factor
                     temp.append((px,py))
                 temp_poly = Polygon(temp)
-                temp_poly = affinity.rotate(temp_poly, self.s.value)
+                temp_poly = affinity.rotate(temp_poly, self.rotation_slider.value)
                 self.polygons.append(tu.shapely_to_kivy(temp_poly))
                 temp = None
                 xCount = xCount + 1
@@ -554,26 +555,23 @@ class TessellationWidget(GridLayout):
 
     # Rotates each polygon by the degrees specified by the slider
     def rotate_polygon(self, instance, degrees):
-        self.polygon = affinity.rotate(self.base_unit, degrees)
-        scale_factor = self.slide_scale.value / 100
+        rotation_amount = self.rotation_slider.value - self.rotation_value
+        self.rotation_value = self.rotation_slider.value
         temp = []
-        for p in self.polygon.exterior.coords:
-            temp.append((p[0] * scale_factor, p[1] * scale_factor))
-        self.polygon = Polygon(temp)
-        if self.type == 'regular':
-            self.tile_regular_polygon()
-        elif self.type == 'parallelogram':
-            self.tile_parallelogram()
-        elif self.type == 'hexagon':
-            self.tile_hexagon()
-        self.label.text = 'Rotation:'
-        self.input_box.text = str(round(self.s.value, 2))
+        for polygon in self.polygons:
+            temp_poly = Polygon(tu.kivy_to_shapely(polygon))
+            temp_poly = affinity.rotate(temp_poly, rotation_amount)
+            temp_poly = tu.shapely_to_kivy(temp_poly)
+            temp.append(temp_poly)
+        self.input_box.text = str(round(self.rotation_slider.value, 2))
+        self.polygons = temp
+        self.draw_polygons()
 
     # Handles textbox input
     def on_enter(self, value):
-        self.s.value = float(self.input_box.text)
-        if self.s.value > 360:
-            self.s.value = self.s.value % 360
+        self.rotation_slider.value = float(self.input_box.text)
+        if self.rotation_slider.value > 360:
+            self.rotation_slider.value = self.rotation_slider.value % 360
         self.rotate_polygon(self.input_box, float(self.input_box.text))
 
     def save_state(self, instance):
@@ -642,6 +640,8 @@ class TessellationWidget(GridLayout):
 
     # resets the screen
     def reset(self, instance):
+        self.rotation_slider.value = 0
+        self.rotation_value = 0
         self.slide_horizontal.value = 100
         self.xSpacing = 100
         self.slide_vertical.value = 100
@@ -653,7 +653,6 @@ class TessellationWidget(GridLayout):
         self.tile_regular_polygon()
         self.type = 'regular'
         self.rec_type.text = 'Freeform'
-        self.s.value = 0
 
     # Flips alternating rows across their center vertically
     def alternate_rows(self, instance):
@@ -778,7 +777,7 @@ class TessellationWidget(GridLayout):
         for p in self.base_unit.exterior.coords:
             temp.append((p[0] * scale_factor, p[1] * scale_factor))
         self.polygon = Polygon(temp)
-        self.polygon = affinity.rotate(self.polygon, self.s.value)
+        self.polygon = affinity.rotate(self.polygon, self.rotation_slider.value)
         if self.type == 'regular':
             self.tile_regular_polygon()
         elif self.type == 'parallelogram':
