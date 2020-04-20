@@ -4,7 +4,7 @@ from Tessellation_Engine import tessellation_engine as te
 from Tessellation_Engine.tessellation_engine import TessellationWidget
 from Tessellation_Engine.tessellation_engine import CanvasWidget
 from Shape_Identification import tiling_rules as tr
-import kivy 
+import kivy
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.graphics import Color, Rectangle, Line, Ellipse
@@ -33,7 +33,7 @@ import os
 import sys
 from kivy.core.window import Window
 from kivy.uix.colorpicker import ColorPicker
-from kivy.uix.togglebutton import ToggleButton 
+from kivy.uix.togglebutton import ToggleButton
 
 
 from kivy.config import Config
@@ -171,7 +171,7 @@ class FileChooser(FileChooserListView):
         #print(self.rootpath)
     def selected(self,filename,*args):
             if (filename == True):
-                
+
                 global fp
                 #store file path
                 fp = args[0][0]
@@ -179,7 +179,7 @@ class FileChooser(FileChooserListView):
                     data = fp
                     head, tail = os.path.split(data)
                     f.write(head)
-                    
+
                 #print(fp)
                 #use file path to process as image in imageprocessing.py
                 global f_coords
@@ -197,8 +197,8 @@ class ReccomendationButton(Button):
     def __init__(self, **kwargs):
         super(Button, self).__init__(**kwargs)
         #self.size = 175, 145
-        
-        
+
+
         self.background_color = [.3, .3, 0.3, .75]
         self.pressed=False
         self.index = None
@@ -206,7 +206,7 @@ class ReccomendationButton(Button):
             with self.canvas.after:
                 Line(points = the_poly)
             with self.canvas.before:
-                Line(points = the_poly) 
+                Line(points = the_poly)
 
     def on_press(self, **kwargs):
         #print(self.index)
@@ -221,9 +221,9 @@ class ReccomendationButton(Button):
 class ReccomendationButtons(FloatLayout):
     def __init__(self, **kwargs):
         super(FloatLayout, self).__init__(**kwargs)
-        self.size_hint= None, None 
+        self.size_hint= None, None
         #self.saved_states = []
-        
+
     def press_helper_func(self,eleref):
         print(eleref)
         for btn in self.reccrows.children:
@@ -235,10 +235,10 @@ class ReccomendationButtons(FloatLayout):
                 else:
                     btn.background_color =[1, .3, .4, .85]
         #print(self.reccrows.children)
-    
+
     def setup_btns(self, is_resize):
-        
-        
+
+
         #print(self.parent.main_shape_info)
         self.btns_info = self.parent.main_shape_info
         self.numreccs = len(self.btns_info)
@@ -249,7 +249,7 @@ class ReccomendationButtons(FloatLayout):
         self.reccrows.size_hint = None, None
         global the_poly
         the_poly = self.make_positive(self.btns_info[0][0])
-        
+
         poly = Polygon(the_poly)
         sizeX = Window.size[0] * (.14)
         sizeY = Window.size[1] / self.numreccs
@@ -260,12 +260,12 @@ class ReccomendationButtons(FloatLayout):
         center = (poly.centroid.coords[0])
         xoff = (sizeX/2) - center[0]
         Yoff = (sizeY/2) - center[1]
-        
+
         if xscale > yscale:
             the_poly = affinity.scale(the_poly, xfact= xscale, yfact= yscale)
         else:
             the_poly = affinity.scale(the_poly, xfact= xscale, yfact= xscale)
-        
+
         the_poly = affinity.translate(the_poly, xoff= xoff, yoff=Yoff)
 
         the_poly = self.shapely_to_kivy(the_poly)
@@ -275,7 +275,7 @@ class ReccomendationButtons(FloatLayout):
         self.reccrows.size = (Window.size[0] * (.14)), Window.size[1]
         u = self.numreccs
         for k in range(0, self.numreccs):
-            
+
             u = u - 1
             if (k != 0):
                 the_poly = self.make_positive(self.btns_info[k][0])
@@ -291,24 +291,24 @@ class ReccomendationButtons(FloatLayout):
                 the_poly = None
             temp = ReccomendationButton()
             the_poly = None
-            
+
             temp.index = u
-            
+
             colorcheck = self.btns_info[u]
             if len(colorcheck) == 5:
                 if colorcheck[4] == "s":
                     temp.background_normal= ''
                     temp.background_color =[1, .3, .4, .85]
-            self.reccrows.add_widget(temp)   
+            self.reccrows.add_widget(temp)
             #temp.add_widget(Label(text="testt",valign='bottom'), index=0)
         self.add_widget(self.reccrows, index=1)
         # # for k in range(0, self.numreccs):
         #      label = Label(text="hello")
         #      self.add_widget(label)
-        
 
-        
-    
+
+
+
     # def add_saved_session_btn(self,polygon,polygon_tiling, tiling_type):
     #     print(polygon)
     #     print(polygon_tiling)
@@ -361,7 +361,7 @@ class ReccomendationButtons(FloatLayout):
 # class SavedTilingButton(Button):
 #     def __init__(self, **kwargs):
 #         super(Button, self).__init__(**kwargs)
-#         self.polygon = None 
+#         self.polygon = None
 #         self.polygon_tiling = None
 #         self.tiling_type = None
 #     def on_press(self, **kwargs):
@@ -379,7 +379,7 @@ class BoxGrid(BoxLayout):
     def __init__(self, **kwargs):
         super(BoxGrid, self).__init__(**kwargs)
         self.b_coords = f_coords
-        
+
         custlay = CustomLayout()
         tessel = TessellationWidget()
         self.add_widget(custlay)
@@ -390,8 +390,8 @@ class BoxGrid(BoxLayout):
         self.add_widget(self.btn)
         if (self.main_shape_info != None and len(self.main_shape_info) > 1):
             self.btn.setup_btns(False)
-    
-    
+
+
 
 #layout for baseunit and functions
 class CustomLayout(BoxLayout):
@@ -402,22 +402,22 @@ class CustomLayout(BoxLayout):
         Window.bind(on_key_down=self.key_action) #Binds Keyboard for key detection
         Window.bind(on_resize=self.on_window_resize)
         self.saved_states= []
-        self.back_button = Button(text = 'Back', 
-                                          background_color = (1,1,1,1), 
-                                          size_hint = (.3,.07), 
+        self.back_button = Button(text = 'Back',
+                                          background_color = (1,1,1,1),
+                                          size_hint = (.3,.07),
                                           pos_hint = {'bottom': 0.3})
         # Add change color button
-        self.color_picker_button = Button(text = 'Choose Color', 
-                                          background_color = (1,1,1,1), 
-                                          size_hint = (.3,.07), 
+        self.color_picker_button = Button(text = 'Choose Color',
+                                          background_color = (1,1,1,1),
+                                          size_hint = (.3,.07),
                                           pos_hint = {'bottom': 0.3})
 
         #Add background color button
-        self.background_color_picker_button = Button(text = 'Choose Background', 
-                                          background_color = (1,1,1,1), 
+        self.background_color_picker_button = Button(text = 'Choose Background',
+                                          background_color = (1,1,1,1),
                                           font_size = 28,
-                                          size_hint = (.4,.07), 
-                                          pos_hint = {'bottom': 0.3})                             
+                                          size_hint = (.4,.07),
+                                          pos_hint = {'bottom': 0.3})
         self.add_widget(self.back_button)
         self.back_button.bind(on_press=self.go_back)
         self.add_widget(self.color_picker_button)
@@ -429,20 +429,20 @@ class CustomLayout(BoxLayout):
         def open_help(self, *args):
             self.help.open()
 
-        self.help_label = Label(text = " Delete: Press 'delete'\n Add: Press 'a'\n Reset: Press 'r'", 
+        self.help_label = Label(text = " Delete: Press 'delete'\n Add: Press 'a'\n Reset: Press 'r'",
                                 font_size = '25sp')
-        self.help = Popup(title = 'Help', 
-                           content = self.help_label, 
+        self.help = Popup(title = 'Help',
+                           content = self.help_label,
                            pos_hint={'center_x': .5, 'center_y': .5},
                            size_hint = (.2, .2),
                            auto_dismiss = True)
-        self.help_button = Button(text = '?', 
+        self.help_button = Button(text = '?',
                                    size_hint = (.1, .04),
                                    background_color = (1,1,1,.3),
                                    pos_hint = {'top':1})
-        
+
         self.help_button.bind(on_press = open_help)
-        self.add_widget(self.help_button)   
+        self.add_widget(self.help_button)
 
         self.shape = InstructionGroup()
         self.col = [1,1,1,1]
@@ -452,8 +452,8 @@ class CustomLayout(BoxLayout):
         self.c_coords = f_coords
         self.pressed = False
         self.index = -1
-        self.edge = -1 
-        
+        self.edge = -1
+
         self.canvas_edge = {}
         self.canvas_nodes = {}
         self.nodesize = [20, 20]
@@ -472,7 +472,7 @@ class CustomLayout(BoxLayout):
         for points in self.c_coords:
             self.canvas.add(self.canvas_nodes[i])
             i = i + 1
-        
+
         self.define_edge()
 
         i = 0
@@ -500,7 +500,7 @@ class CustomLayout(BoxLayout):
             poly = affinity.scale(poly, xfact= self.xscale, yfact= self.xscale)
         self.c_coords = list(poly.exterior.coords)
         self.c_coords.pop(-1)
-        
+
         temp2 = []
         for x in self.c_coords:
             temp = []
@@ -530,7 +530,7 @@ class CustomLayout(BoxLayout):
             poly = affinity.scale(poly, xfact= self.xscale, yfact= self.xscale)
         self.c_coords = list(poly.exterior.coords)
         self.c_coords.pop(-1)
-        
+
         temp2 = []
         for x in self.c_coords:
             temp = []
@@ -539,9 +539,9 @@ class CustomLayout(BoxLayout):
             temp2.append(tuple(temp))
         self.c_coords = temp2
         self.orgi_coords = self.c_coords
-        
+
     def key_action(self, *args):
-       
+
         key_pressed = list(args)
         #print(key_pressed)
 
@@ -574,16 +574,16 @@ class CustomLayout(BoxLayout):
                 #print(self.highlight.points)
                 self.c_coords.insert((self.index+1)%len(self.canvas_nodes), tuple(mid))
                 self.draw()
-                
+
             except:
                 print(' Point selected')
             self.pressed = False
-        
+
         #Reset when pressing r
         elif key_pressed[2] == 21:
             self.c_coords = self.orgi_coords
             self.draw()
-                
+
         poly = []
         i = 0
         for xy in self.canvas_nodes:
@@ -614,35 +614,37 @@ class CustomLayout(BoxLayout):
                     btns.setup_btns(False)
 
     def on_window_resize(self, window, width, height):
-        self.remove_widget(self.back_button)
-        self.remove_widget(self.color_picker_button)
-        self.back_button = Button(text = 'Back', 
-                                          background_color = (1,1,1,1), 
-                                          size_hint = (.3,.07), 
-                                          pos_hint = {'bottom': 0.3})
-        # Add change color button
-        self.color_picker_button = Button(text = 'Choose Color', 
-                                          background_color = (1,1,1,1), 
-                                          size_hint = (.3,.07), 
-                                          pos_hint = {'bottom': 0.3})
-        self.add_widget(self.back_button)
-        self.back_button.bind(on_press=self.go_back)
-        self.add_widget(self.color_picker_button)
-        self.color_picker_button.bind(on_press=self.changeColor)
+        # self.add_widget(self.back_button)
+        # self.back_button.bind(on_press=self.go_back)
+        # self.add_widget(self.color_picker_button)
+        # self.color_picker_button.bind(on_press=self.change_color)
+        # self.add_widget(self.background_color_picker_button)
+        # self.color_picker_button.bind(on_press=self.change_color_background)
+        # self.remove_widget(self.back_button)
+        # self.remove_widget(self.color_picker_button)
+        # self.back_button = Button(text = 'Back',
+        #                                   background_color = (1,1,1,1),
+        #                                   size_hint = (.3,.07),
+        #                                   pos_hint = {'bottom': 0.3})
+        # # Add change color button
+        # color_picker_button = Button(text = 'Choose Color',
+        #                                   background_color = (1,1,1,1),
+        #                                   size_hint = (.3,.07),
+        #                                   pos_hint = {'bottom': 0.3})
+        # self.add_widget(self.back_button)
+        # self.back_button.bind(on_press=self.go_back)
+        # self.add_widget(self.color_picker_button)
+        # self.color_picker_button.bind(on_press=self.changeColor)
         self.canvas.clear()
         self.configCoords()
 
-        #declare a canvas
-        with self.canvas.after:
-            pass
-        
         self.define_nodes()
 
         i = 0
         for points in self.c_coords:
             self.canvas.add(self.canvas_nodes[i])
             i = i + 1
-        
+
         self.define_edge()
 
         i = 0
@@ -651,7 +653,7 @@ class CustomLayout(BoxLayout):
             i = i + 1
         self.parent.remove_widget(self.parent.children[0])
         btns = ReccomendationButtons()
-        self.parent.add_widget(btns)   
+        self.parent.add_widget(btns)
         if (self.parent.main_shape_info != None and len(self.parent.main_shape_info) >= 1):
             btns.setup_btns(False)
 
@@ -670,14 +672,14 @@ class CustomLayout(BoxLayout):
         i = 0
         for i in range(len(self.c_coords)):
             self.canvas.add(self.canvas_edge[i])
-            i = i + 1        
-    
+            i = i + 1
+
     def define_nodes(self):
 
         self.canvas_nodes.clear()
-        
+
         """define all the node canvas elements as a list"""
-       
+
         i = 0
         for points in self.c_coords:
             x,y = points
@@ -687,7 +689,7 @@ class CustomLayout(BoxLayout):
                 group = 'shape',
                 )
             i = i + 1
-            
+
     def define_edge(self):
         """define an edge canvas elements"""
         self.canvas_edge.clear()
@@ -719,7 +721,7 @@ class CustomLayout(BoxLayout):
                 )
             i = i + 1
 
-    def on_touch_down(self, touch):       
+    def on_touch_down(self, touch):
         i = 0
         if self.color_picker_button.collide_point(*touch.pos):
             self.change_color()
@@ -738,12 +740,12 @@ class CustomLayout(BoxLayout):
                 c = list(touch.pos)
                 if angle(a,b,c) and not self.pressed:
                     points = [a,b]
-                    
+
                     self.shape.add(Color(1,0,0, .5))
                     self.canvas.add(self.shape)
                     self.highlight = Line(
-                        points = points, 
-                        width = 5, 
+                        points = points,
+                        width = 5,
                         group = 'shape'
                         )
                     self.canvas.add(self.highlight)
@@ -756,12 +758,12 @@ class CustomLayout(BoxLayout):
                         self.pressed = False
                         self.canvas.children.remove(self.highlight)
                 i = i + 1
-            
+
             for key, value in self.canvas_nodes.items():
                 if (value.pos[0] - self.nodesize[0]) <= touch.pos[0] <= (value.pos[0] + self.nodesize[0]):
-                    if (value.pos[1] - self.nodesize[1]) <= touch.pos[1] <= (value.pos[1] + self.nodesize[1]):                    
+                    if (value.pos[1] - self.nodesize[1]) <= touch.pos[1] <= (value.pos[1] + self.nodesize[1]):
                         touch.grab(self)
-                        self.grabbed = self.canvas_nodes[key]       
+                        self.grabbed = self.canvas_nodes[key]
                         self.shape.add(Color(1,0,0, .5))
                         self.canvas.add(self.shape)
                         self.highlight = Ellipse(
@@ -781,7 +783,7 @@ class CustomLayout(BoxLayout):
                             except:
                                 pass
                         return True
-            
+
     def on_touch_move(self, touch):
         self.pressed = False
         if touch.grab_current is self:
@@ -821,8 +823,8 @@ class CustomLayout(BoxLayout):
 
         else:
             pass
-    
-    def on_touch_up(self, touch):    
+
+    def on_touch_up(self, touch):
         temp = []
         i = 0
         for i in range(len(self.c_coords)):
@@ -850,7 +852,7 @@ class CustomLayout(BoxLayout):
             self.parent.children[1].polygon = newply
             self.parent.children[1].base_unit = newply
             #self.parent.children[1].get_new_recommendations()
-            #print(self.parent.children[1].polygon)  
+            #print(self.parent.children[1].polygon)
             self.parent.children[1].tile_regular_polygon()
             #print("parker")
             #print(self.parent.children[0])
@@ -869,7 +871,7 @@ class CustomLayout(BoxLayout):
                 self.parent.add_widget(btns)
                 if (new_shape_info != None and len(new_shape_info) >= 1):
                     btns.setup_btns(False)
-            
+
 
 
             # self.main_shape_info = tessel.shape_info
@@ -902,41 +904,41 @@ class CustomLayout(BoxLayout):
 
         r,g,b,a = self.col[0], self.col[1], self.col[2], self.col[3]
         self.picker = ColorPicker(pos_hint={'center_x': .5, 'center_y': .5},
-                                color = [r,g,b,a], 
+                                color = [r,g,b,a],
                                 size_hint = (1, 1))
 
-        self.picker.add_widget(Button(text = 'Select', 
-                                  pos_hint = {'center_x': .76, 'y': -.02}, 
-                                  size_hint = (None, None), 
-                                  size = (100, 35), 
+        self.picker.add_widget(Button(text = 'Select',
+                                  pos_hint = {'center_x': .76, 'y': -.02},
+                                  size_hint = (None, None),
+                                  size = (100, 35),
                                   on_press = self.selected))
-        
-        self.edge_toggle = ToggleButton(text = 'Edge', 
-                                       pos_hint = {'center_x': .55, 'y': -.02}, 
-                                       size_hint = (None, None), 
-                                       size = (100, 35), 
-                                       group = 'color', 
+
+        self.edge_toggle = ToggleButton(text = 'Edge',
+                                       pos_hint = {'center_x': .55, 'y': -.02},
+                                       size_hint = (None, None),
+                                       size = (100, 35),
+                                       group = 'color',
                                        state = 'down')
         self.edge_toggle.bind(on_press = self.pressed_toggle_edge)
         self.picker.add_widget(self.edge_toggle)
 
-        self.fill_toggle = ToggleButton(text = 'Fill', 
-                                            pos_hint = {'center_x': .63, 'y': -.02}, 
-                                            size_hint = (None, None), 
-                                            size = (100, 35), 
+        self.fill_toggle = ToggleButton(text = 'Fill',
+                                            pos_hint = {'center_x': .63, 'y': -.02},
+                                            size_hint = (None, None),
+                                            size = (100, 35),
                                             group = 'color')
         self.fill_toggle.bind(on_press = self.pressed_toggle_fill)
         self.picker.add_widget(self.fill_toggle)
 
-        self.match_toggle = ToggleButton(text = 'Match', 
-                                            pos_hint = {'x': .8, 'y': -.02}, 
-                                            size_hint = (None, None), 
-                                            size = (100, 35), 
+        self.match_toggle = ToggleButton(text = 'Match',
+                                            pos_hint = {'x': .8, 'y': -.02},
+                                            size_hint = (None, None),
+                                            size = (100, 35),
                                             group = 'match')
         self.picker.add_widget(self.match_toggle)
 
 
-        self.ColPop = Popup(title = "Choose Color", 
+        self.ColPop = Popup(title = "Choose Color",
                         size_hint = (None, None),
                         content = self.picker,
                         size = (1500, 750),
@@ -948,25 +950,25 @@ class CustomLayout(BoxLayout):
 
         r,g,b,a = self.col_background[0], self.col_background[1], self.col_background[2], self.col_background[3]
         self.picker_background = ColorPicker(pos_hint={'center_x': .5, 'center_y': .5},
-                                color = [r,g,b,a], 
+                                color = [r,g,b,a],
                                 size_hint = (1, 1))
 
-        self.picker_background.add_widget(Button(text = 'Select', 
-                                  pos_hint = {'center_x': .76, 'y': -.02}, 
-                                  size_hint = (None, None), 
-                                  size = (100, 35), 
+        self.picker_background.add_widget(Button(text = 'Select',
+                                  pos_hint = {'center_x': .76, 'y': -.02},
+                                  size_hint = (None, None),
+                                  size = (100, 35),
                                   on_press = self.background_selected))
-        self.ColPop_background = Popup(title = "Choose Background", 
+        self.ColPop_background = Popup(title = "Choose Background",
                         size_hint = (None, None),
                         content = self.picker_background,
                         size = (1500, 750),
                         auto_dismiss = True)
 
-        self.ColPop_background.open()  
+        self.ColPop_background.open()
 
     def selected(self, *args):
         self.ColPop.dismiss()
-        
+
         if self.match_toggle.state == 'down':
             self.col = self.picker.color
             self.fill = self.col
@@ -984,16 +986,16 @@ class CustomLayout(BoxLayout):
 
         self.parent.children[1].draw_polygons()
         self.draw()
-        
+
     def background_selected(self, *args):
-        self.ColPop_background.dismiss() 
+        self.ColPop_background.dismiss()
         self.col_background = self.picker_background.color
         r,g,b,a = self.col_background[0], self.col_background[1], self.col_background[2], self.col_background[3]
         Window.clearcolor = (r, g, b, a)
 
     def pressed_toggle_edge(self, *args):
         self.picker.color = self.col
-        
+
     def pressed_toggle_fill(self, *args):
         self.picker.color = self.fill
 
@@ -1005,5 +1007,5 @@ class DatoApp(App):
 if __name__ == '__main__':
     Window.fullscreen = False
     DatoApp().run()
-   
-   
+
+
