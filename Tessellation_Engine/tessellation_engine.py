@@ -791,12 +791,17 @@ class TessellationWidget(GridLayout):
     def draw_polygons(self):
         self.scale_to_fit_window()
         self.canvas_widget.lines.clear()
-        indices = tu.make_indices_list(self.polygons[0])
         for polygon in self.polygons:
             mesh_points = tu.make_mesh_list(polygon)
             r,g,b,a = self.fill_color[0], self.fill_color[1], self.fill_color[2], self.fill_color[3]
             self.canvas_widget.lines.add(Color(r,g,b,a))
-            self.canvas_widget.lines.add(Mesh(vertices=mesh_points, indices=indices, mode='triangle_strip'))
+            for vertices, indices in mesh_points.meshes:
+                self.canvas_widget.lines.add(Mesh(
+                    vertices=vertices,
+                    indices=indices,
+                    mode="triangle_fan"
+                ))
+            #self.canvas_widget.lines.add(Mesh(vertices=mesh_points[0], indices=mesh_points[1], mode='triangle_strip'))
             r,g,b,a = self.stroke_color[0], self.stroke_color[1], self.stroke_color[2], self.stroke_color[3]
             self.canvas_widget.lines.add(Color(r,g,b,a))
             self.canvas_widget.lines.add(Line(points = polygon, width=2.0, close=False))

@@ -4,6 +4,9 @@ Set of backend utilities for manipulating Polygon objects and coordinate lists f
 """
 
 from shapely.geometry import Polygon
+from shapely.geometry import MultiPoint
+from shapely.ops import triangulate
+from kivy.graphics.tesselator import Tesselator
 
 # Takes a Shapely Polygon object and converts it to an array format for display
 # on a Kivy canvas 
@@ -52,34 +55,12 @@ def make_positive(polygon):
 
 # creates a list of points for drawing mesh
 def make_mesh_list(polygon):
-    shapely_poly = Polygon(kivy_to_shapely(polygon))
-    bounds = shapely_poly.bounds
-    centerX = bounds[0] + ((bounds[2] - bounds[0]) / 2.0)
-    centerY = bounds[1] + ((bounds[3] - bounds[1]) / 2.0)
-    mesh_points = []
-    count = 0
-    while count < len(polygon):
-        mesh_points.append(polygon[count])
-        mesh_points.append(polygon[count+1])
-        mesh_points.append(0)
-        mesh_points.append(0)
-        mesh_points.append(centerX)
-        mesh_points.append(centerY)
-        mesh_points.append(0)
-        mesh_points.append(0)
-        count = count + 2
-    return mesh_points
+    tess = Tesselator()
+    tess.add_contour(polygon)
+    tess.tesselate()
+    return tess
 
-# creates a list of indices in the form [0,1,2,...,# of polygons] for drawing mesh
-def make_indices_list(polygon):
-    indices = []
-    count = 0
-    while count < len(polygon):
-        indices.append(count)
-        indices.append(count + 1)
-        count = count + 2
-    return indices
-
+# determines whether a polygon is convex or not
 def is_convex(shape):
     coords = list(shape.exterior.coords)
     positive_z_coords = list()
@@ -98,12 +79,12 @@ def is_convex(shape):
     if len(positive_z_coords) > 0 and len(negative_z_coords) > 0:
         # the shape is concave
         if len(positive_z_coords) > len(negative_z_coords):
-            return False
+            return False, negative_z_coords
         else:
-            return False
+            return False, positive_z_coords
     else:
         # the shape is convex
-        return True
+        return True, list()
 
 def compute_z_cross_product(first_coord, second_coord, third_coord):
     dx1 = second_coord[0] - first_coord[0]
