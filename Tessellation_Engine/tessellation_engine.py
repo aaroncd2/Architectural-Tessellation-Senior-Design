@@ -694,6 +694,7 @@ class TessellationWidget(GridLayout):
         self.xSpacing = 100
         self.slide_vertical.value = 100
         self.ySpacing = 100
+        self.saved_type = None
         if instance != 1:
             self.slide_scale.value = 100
             self.scaling = 100
@@ -792,16 +793,15 @@ class TessellationWidget(GridLayout):
         self.scale_to_fit_window()
         self.canvas_widget.lines.clear()
         for polygon in self.polygons:
-            mesh_points = tu.make_mesh_list(polygon)
             r,g,b,a = self.fill_color[0], self.fill_color[1], self.fill_color[2], self.fill_color[3]
             self.canvas_widget.lines.add(Color(r,g,b,a))
-            for vertices, indices in mesh_points.meshes:
-                self.canvas_widget.lines.add(Mesh(
-                    vertices=vertices,
-                    indices=indices,
-                    mode="triangle_fan"
-                ))
-            #self.canvas_widget.lines.add(Mesh(vertices=mesh_points[0], indices=mesh_points[1], mode='triangle_strip'))
+            if self.type == 'parallelogram' or self.saved_type == 'parallelogram':
+                mesh_points = tu.make_convex_mesh_list(polygon)
+                self.canvas_widget.lines.add(Mesh(vertices=mesh_points[0], indices=mesh_points[1], mode="triangle_strip"))
+            else:
+                mesh_points = tu.make_mesh_list(polygon)
+                for vertices, indices in mesh_points.meshes:
+                    self.canvas_widget.lines.add(Mesh(vertices=vertices, indices=indices, mode="triangle_fan"))
             r,g,b,a = self.stroke_color[0], self.stroke_color[1], self.stroke_color[2], self.stroke_color[3]
             self.canvas_widget.lines.add(Color(r,g,b,a))
             self.canvas_widget.lines.add(Line(points = polygon, width=2.0, close=False))

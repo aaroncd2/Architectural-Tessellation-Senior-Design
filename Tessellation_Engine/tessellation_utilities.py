@@ -53,12 +53,42 @@ def make_positive(polygon):
     else:
         return polygon
 
-# creates a list of points for drawing mesh
+# creates a list of points for drawing mesh using kivy's tessellator
 def make_mesh_list(polygon):
     tess = Tesselator()
     tess.add_contour(polygon)
     tess.tesselate()
     return tess
+
+def make_convex_mesh_list(polygon):
+    shapely_poly = Polygon(kivy_to_shapely(polygon))
+    center = shapely_poly.centroid
+    bounds = shapely_poly.bounds
+    centerX = bounds[0] + ((bounds[2] - bounds[0]) / 2.0)
+    centerY = bounds[1] + ((bounds[3] - bounds[1]) / 2.0)
+    mesh_points = []
+    count = 0
+    while count < len(polygon):
+        mesh_points.append(polygon[count])
+        mesh_points.append(polygon[count+1])
+        mesh_points.append(0)
+        mesh_points.append(0)
+        mesh_points.append(centerX)
+        mesh_points.append(centerY)
+        mesh_points.append(0)
+        mesh_points.append(0)
+        count = count + 2
+    indices = make_indices_list(mesh_points)
+    return mesh_points, indices
+
+# creates a list of indices in the form [0,1,2,...,# of points] for drawing mesh
+def make_indices_list(mesh_points):
+    indices = []
+    count = 0
+    while count < (len(mesh_points) / 4):
+        indices.append(count)
+        count = count + 1
+    return indices
 
 # determines whether a polygon is convex or not
 def is_convex(shape):
