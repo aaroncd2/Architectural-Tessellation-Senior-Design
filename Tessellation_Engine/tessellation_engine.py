@@ -770,7 +770,17 @@ class TessellationWidget(GridLayout):
     # Exports the currently displayed polygons to a CSV file
     def export_tiling(self, instance):
         points = {}
+        # save type
         points['type'] = self.type
+        xs = []
+        ys = []
+        # save base unit coords
+        for p in self.base_unit.exterior.coords:
+            xs.append(p[0])
+            ys.append(p[1])
+        points['base unit xs'] = xs
+        points['base unit ys'] = ys
+        # save tiling coords
         num = 1
         for poly in self.polygons:
             xs = []
