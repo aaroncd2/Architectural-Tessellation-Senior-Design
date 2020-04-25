@@ -788,9 +788,12 @@ class TessellationWidget(RelativeLayout):
         xs = []
         ys = []
         # save base unit coords
-        for p in self.parent.children[1].c_coords:
+        for p in self.parent.children[2].c_coords:
             xs.append(p[0])
             ys.append(p[1])
+        while len(xs) < len(self.polygons[0]) / 2:
+            xs.append('None')
+            ys.append('None')
         points['base unit xs'] = xs
         points['base unit ys'] = ys
         # save tiling coords
