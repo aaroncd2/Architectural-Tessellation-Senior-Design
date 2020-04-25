@@ -788,7 +788,7 @@ class TessellationWidget(RelativeLayout):
         xs = []
         ys = []
         # save base unit coords
-        for p in self.base_unit.exterior.coords:
+        for p in self.parent.children[1].c_coords:
             xs.append(p[0])
             ys.append(p[1])
         points['base unit xs'] = xs
