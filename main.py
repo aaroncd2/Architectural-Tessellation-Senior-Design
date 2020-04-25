@@ -56,6 +56,7 @@ class RootWidget(BoxLayout):
     def __init__(self, **kwargs):
         super(RootWidget, self).__init__(**kwargs)
         global size
+        
         size = Window.size
         self.main_menu = MainMenuWidget()
         self.add_widget(self.main_menu)
@@ -86,8 +87,7 @@ class RootWidget(BoxLayout):
 class MainMenuWidget(GridLayout):
     def __init__(self, **kwargs):
         super(MainMenuWidget, self).__init__(**kwargs)
-        global is_load_csv
-        is_load_csv = False
+        
         self.cols=2
         self.rows=2
         self.add_widget(Label(text="Welcome To DATO"))
@@ -172,70 +172,72 @@ class LoadExistingChooser(FileChooserListView):
                         else:
                             coo.append(float(row[1]))
                             coo.append(float(row[2]))
-                            
-                            csvtessellcoords[0].append(row[3])
-                            csvtessellcoords[0].append(row[4])
-                            csvtessellcoords[1].append(row[5])
-                            csvtessellcoords[1].append(row[6])
-                            csvtessellcoords[2].append(row[7])
-                            csvtessellcoords[2].append(row[8])
-                            csvtessellcoords[3].append(row[9])
-                            csvtessellcoords[3].append(row[10])
-                            csvtessellcoords[4].append(row[11])
-                            csvtessellcoords[4].append(row[12])
-                            csvtessellcoords[5].append(row[13])
-                            csvtessellcoords[5].append(row[14])
-                            csvtessellcoords[6].append(row[15])
-                            csvtessellcoords[6].append(row[16])
-                            csvtessellcoords[7].append(row[17])
-                            csvtessellcoords[7].append(row[18])
-                            csvtessellcoords[8].append(row[19])
-                            csvtessellcoords[8].append(row[20]) 
-                            csvtessellcoords[9].append(row[21])
-                            csvtessellcoords[9].append(row[22]) 
-                            csvtessellcoords[10].append(row[23])
-                            csvtessellcoords[10].append(row[24])
-                            csvtessellcoords[11].append(row[25])
-                            csvtessellcoords[11].append(row[26]) 
-                            csvtessellcoords[12].append(row[27])
-                            csvtessellcoords[12].append(row[28])
-                            csvtessellcoords[13].append(row[29])
-                            csvtessellcoords[13].append(row[30])
-                            csvtessellcoords[14].append(row[31])
-                            csvtessellcoords[14].append(row[32])
-                            csvtessellcoords[15].append(row[33])
-                            csvtessellcoords[15].append(row[34])
-                            csvtessellcoords[16].append(row[35])
-                            csvtessellcoords[16].append(row[36])
-                            csvtessellcoords[17].append(row[37])
-                            csvtessellcoords[17].append(row[38])
-                            csvtessellcoords[18].append(row[39])
-                            csvtessellcoords[18].append(row[40])
-                            csvtessellcoords[19].append(row[41])
-                            csvtessellcoords[19].append(row[42])
-                            csvtessellcoords[20].append(row[43])
-                            csvtessellcoords[20].append(row[44])
-                            csvtessellcoords[21].append(row[45])
-                            csvtessellcoords[21].append(row[46]) 
-                            csvtessellcoords[22].append(row[47])
-                            csvtessellcoords[22].append(row[48]) 
-                            csvtessellcoords[23].append(row[49])
-                            csvtessellcoords[23].append(row[50])
-                            csvtessellcoords[24].append(row[51])
-                            csvtessellcoords[24].append(row[52]) 
-                            
-                        
+
+                            csvtessellcoords[0].append(float(row[3]))
+                            csvtessellcoords[0].append(float(row[4]))
+                            csvtessellcoords[1].append(float(row[5]))
+                            csvtessellcoords[1].append(float(row[6]))
+                            csvtessellcoords[2].append(float(row[7]))
+                            csvtessellcoords[2].append(float(row[8]))
+                            csvtessellcoords[3].append(float(row[9]))
+                            csvtessellcoords[3].append(float(row[10]))
+                            csvtessellcoords[4].append(float(row[11]))
+                            csvtessellcoords[4].append(float(row[12]))
+                            csvtessellcoords[5].append(float(row[13]))
+                            csvtessellcoords[5].append(float(row[14]))
+                            csvtessellcoords[6].append(float(row[15]))
+                            csvtessellcoords[6].append(float(row[16]))
+                            csvtessellcoords[7].append(float(row[17]))
+                            csvtessellcoords[7].append(float(row[18]))
+                            csvtessellcoords[8].append(float(row[19]))
+                            csvtessellcoords[8].append(float(row[20])) 
+                            csvtessellcoords[9].append(float(row[21]))
+                            csvtessellcoords[9].append(float(row[22])) 
+                            csvtessellcoords[10].append(float(row[23]))
+                            csvtessellcoords[10].append(float(row[24]))
+                            csvtessellcoords[11].append(float(row[25]))
+                            csvtessellcoords[11].append(float(row[26])) 
+                            csvtessellcoords[12].append(float(row[27]))
+                            csvtessellcoords[12].append(float(row[28]))
+                            csvtessellcoords[13].append(float(row[29]))
+                            csvtessellcoords[13].append(float(row[30]))
+                            csvtessellcoords[14].append(float(row[31]))
+                            csvtessellcoords[14].append(float(row[32]))
+                            csvtessellcoords[15].append(float(row[33]))
+                            csvtessellcoords[15].append(float(row[34]))
+                            csvtessellcoords[16].append(float(row[35]))
+                            csvtessellcoords[16].append(float(row[36]))
+                            csvtessellcoords[17].append(float(row[37]))
+                            csvtessellcoords[17].append(float(row[38]))
+                            csvtessellcoords[18].append(float(row[39]))
+                            csvtessellcoords[18].append(float(row[40]))
+                            csvtessellcoords[19].append(float(row[41]))
+                            csvtessellcoords[19].append(float(row[42]))
+                            csvtessellcoords[20].append(float(row[43]))
+                            csvtessellcoords[20].append(float(row[44]))
+                            csvtessellcoords[21].append(float(row[45]))
+                            csvtessellcoords[21].append(float(row[46])) 
+                            csvtessellcoords[22].append(float(row[47]))
+                            csvtessellcoords[22].append(float(row[48])) 
+                            csvtessellcoords[23].append(float(row[49]))
+                            csvtessellcoords[23].append(float(row[50]))
+                            csvtessellcoords[24].append(float(row[51]))
+                            csvtessellcoords[24].append(float(row[52])) 
                             line_count += 1
                             #print(f'Processed {line_count} lines.')
-                print(csvtessellcoords)
                 global f_coords
                 points = list(zip(coo[::2],coo[1::2]))
+                print(points)
+                print(coo)
                 poly = Polygon(points)
                 f_coords = poly.exterior.coords
                 #f_coords = sm.shape_model(coo)
                 #print(f_coords)
                 global loaded_csv_tessel
+                #global is_load_csv
+                global is_load_csv
                 loaded_csv_tessel = csvtessellcoords
+                #print(loaded_csv_tessel[0][0])
                 is_load_csv = True
                 b_grid = BoxGrid()
                 self.parent.add_widget(b_grid)
@@ -269,6 +271,8 @@ class FileChooser(FileChooserListView):
                 #print(fp)
                 #use file path to process as image in imageprocessing.py
                 global f_coords
+                global is_load_csv
+                is_load_csv = False
                 coo = ip.processImage(fp)
                 #print(coo)
                 f_coords = sm.shape_model(coo)
@@ -312,7 +316,7 @@ class ReccomendationButtons(FloatLayout):
         #self.saved_states = []
 
     def press_helper_func(self,eleref):
-        print(eleref)
+        #print(eleref)
         for btn in self.reccrows.children:
             if btn != eleref:
                 print(self.btns_info[btn.index])
@@ -395,31 +399,6 @@ class ReccomendationButtons(FloatLayout):
 
 
 
-
-    # def add_saved_session_btn(self,polygon,polygon_tiling, tiling_type):
-    #     print(polygon)
-    #     print(polygon_tiling)
-    #     print(tiling_type)
-    #     print("adding saved state btn to reccrows")
-    #     saved_tiling_btn_var = SavedTilingButton(text = "savedtilegenerated")
-    #     saved_tiling_btn_var.polygon = polygon
-    #     saved_tiling_btn_var.polygon_tiling = polygon_tiling
-    #     saved_tiling_btn_var.tiling_type = tiling_type
-    #     print(saved_tiling_btn_var.polygon)
-    #     print(saved_tiling_btn_var.polygon_tiling)
-    #     print(saved_tiling_btn_var.tiling_type)
-    #     #self.saved_states.append([polygon, polygon_tiling, tiling_type])
-    #     print("saving states ...")
-    #     print(self.saved_states)
-    #     print("states saved ...")
-    #     self.numreccs = self.numreccs+1
-    #     self.reccrows.rows =self.numreccs
-    #     self.remove_widget(self.reccrows)
-    #     self.reccrows.add_widget(saved_tiling_btn_var)
-    #     self.add_widget(self.reccrows)
-
-        #self.reccrows= GridLayout(rows=self.numreccs , cols=1)
-
     def shapely_to_kivy(self, polygon):
         kivy_points = []
         for p in polygon.exterior.coords:
@@ -445,21 +424,7 @@ class ReccomendationButtons(FloatLayout):
         else:
             return polygon
 
-# class SavedTilingButton(Button):
-#     def __init__(self, **kwargs):
-#         super(Button, self).__init__(**kwargs)
-#         self.polygon = None
-#         self.polygon_tiling = None
-#         self.tiling_type = None
-#     def on_press(self, **kwargs):
-#         self.parent.parent.parent.children[1].polygon = self.polygon
-#         self.parent.parent.parent.children[1].polygons = self.polygon_tiling
-#         self.parent.parent.parent.children[1].type = self.tiling_type
-#         print("on press afterwards in te:")
-#         print(self.parent.parent.parent.children[1].polygon)
-#         print(self.parent.parent.parent.children[1].polygons)
-#         print(self.parent.parent.parent.children[1].type)
-#         self.parent.parent.parent.children[1].draw_polygons()
+
 
 #layout class
 class BoxGrid(BoxLayout):
@@ -472,7 +437,8 @@ class BoxGrid(BoxLayout):
         self.add_widget(custlay)
         self.add_widget(tessel)
         if is_load_csv == True:
-            self.children[1].polygons = loaded_csv_tessel
+            print("changing self.polygons")
+            self.children[0].polygons = loaded_csv_tessel
         tessel.display_initial_tiling(is_load_csv)
         self.main_shape_info = tessel.shape_info
         self.btn = ReccomendationButtons()
@@ -899,6 +865,7 @@ class CustomLayout(BoxLayout):
             temp.append(self.canvas_nodes[i].pos)
             i = i + 1
         self.c_coords = temp
+        print(self.c_coords)
 
         if touch.grab_current is self:
             touch.ungrab(self)
