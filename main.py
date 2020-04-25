@@ -86,6 +86,8 @@ class RootWidget(BoxLayout):
 class MainMenuWidget(GridLayout):
     def __init__(self, **kwargs):
         super(MainMenuWidget, self).__init__(**kwargs)
+        global is_load_csv
+        is_load_csv = False
         self.cols=2
         self.rows=2
         self.add_widget(Label(text="Welcome To DATO"))
@@ -134,6 +136,32 @@ class LoadExistingChooser(FileChooserListView):
                     f.write(head)
                 #print(fp)
                 coo = []
+                csvtessellcoords =[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
+                # shape1 =[]
+                # shape2 =[]
+                # shape3 =[]
+                # shape4 =[]
+                # shape5 =[]
+                # shape6
+                # shape7
+                # shape8
+                # shape9
+                # shape10
+                # shape11
+                # shape12
+                # shape13
+                # shape14
+                # shape15
+                # shape16
+                # shape17
+                # shape3
+                # shape4
+                # shape5
+                # shape1
+                # shape2
+                # shape3
+                # shape4
+                # shape5
                 with open(fp) as csv_file:
                     csv_reader = csv.reader(csv_file, delimiter=',')
                     line_count = 0
@@ -142,21 +170,79 @@ class LoadExistingChooser(FileChooserListView):
                             #print(f'Column names are {", ".join(row)}')
                             line_count += 1
                         else:
-                            coo.append(float(row[0]))
                             coo.append(float(row[1]))
-                            #print(row)
+                            coo.append(float(row[2]))
+                            
+                            csvtessellcoords[0].append(row[3])
+                            csvtessellcoords[0].append(row[4])
+                            csvtessellcoords[1].append(row[5])
+                            csvtessellcoords[1].append(row[6])
+                            csvtessellcoords[2].append(row[7])
+                            csvtessellcoords[2].append(row[8])
+                            csvtessellcoords[3].append(row[9])
+                            csvtessellcoords[3].append(row[10])
+                            csvtessellcoords[4].append(row[11])
+                            csvtessellcoords[4].append(row[12])
+                            csvtessellcoords[5].append(row[13])
+                            csvtessellcoords[5].append(row[14])
+                            csvtessellcoords[6].append(row[15])
+                            csvtessellcoords[6].append(row[16])
+                            csvtessellcoords[7].append(row[17])
+                            csvtessellcoords[7].append(row[18])
+                            csvtessellcoords[8].append(row[19])
+                            csvtessellcoords[8].append(row[20]) 
+                            csvtessellcoords[9].append(row[21])
+                            csvtessellcoords[9].append(row[22]) 
+                            csvtessellcoords[10].append(row[23])
+                            csvtessellcoords[10].append(row[24])
+                            csvtessellcoords[11].append(row[25])
+                            csvtessellcoords[11].append(row[26]) 
+                            csvtessellcoords[12].append(row[27])
+                            csvtessellcoords[12].append(row[28])
+                            csvtessellcoords[13].append(row[29])
+                            csvtessellcoords[13].append(row[30])
+                            csvtessellcoords[14].append(row[31])
+                            csvtessellcoords[14].append(row[32])
+                            csvtessellcoords[15].append(row[33])
+                            csvtessellcoords[15].append(row[34])
+                            csvtessellcoords[16].append(row[35])
+                            csvtessellcoords[16].append(row[36])
+                            csvtessellcoords[17].append(row[37])
+                            csvtessellcoords[17].append(row[38])
+                            csvtessellcoords[18].append(row[39])
+                            csvtessellcoords[18].append(row[40])
+                            csvtessellcoords[19].append(row[41])
+                            csvtessellcoords[19].append(row[42])
+                            csvtessellcoords[20].append(row[43])
+                            csvtessellcoords[20].append(row[44])
+                            csvtessellcoords[21].append(row[45])
+                            csvtessellcoords[21].append(row[46]) 
+                            csvtessellcoords[22].append(row[47])
+                            csvtessellcoords[22].append(row[48]) 
+                            csvtessellcoords[23].append(row[49])
+                            csvtessellcoords[23].append(row[50])
+                            csvtessellcoords[24].append(row[51])
+                            csvtessellcoords[24].append(row[52]) 
+                            
+                        
                             line_count += 1
                             #print(f'Processed {line_count} lines.')
-                #print(coo)
+                print(csvtessellcoords)
                 global f_coords
                 points = list(zip(coo[::2],coo[1::2]))
                 poly = Polygon(points)
                 f_coords = poly.exterior.coords
                 #f_coords = sm.shape_model(coo)
                 #print(f_coords)
+                global loaded_csv_tessel
+                loaded_csv_tessel = csvtessellcoords
+                is_load_csv = True
                 b_grid = BoxGrid()
                 self.parent.add_widget(b_grid)
                 self.parent.remove_widget(self)
+
+
+
 
 #gile chooser class
 class FileChooser(FileChooserListView):
@@ -189,6 +275,7 @@ class FileChooser(FileChooserListView):
                 #print(f_coords)
                 b_grid = BoxGrid()
                 self.parent.add_widget(b_grid)
+                
                 self.parent.remove_widget(self)
             else:
                 self.ids.image.source = filename[0]
@@ -379,12 +466,14 @@ class BoxGrid(BoxLayout):
     def __init__(self, **kwargs):
         super(BoxGrid, self).__init__(**kwargs)
         self.b_coords = f_coords
-
+        
         custlay = CustomLayout()
         tessel = TessellationWidget()
         self.add_widget(custlay)
         self.add_widget(tessel)
-        tessel.display_initial_tiling()
+        if is_load_csv == True:
+            self.children[1].polygons = loaded_csv_tessel
+        tessel.display_initial_tiling(is_load_csv)
         self.main_shape_info = tessel.shape_info
         self.btn = ReccomendationButtons()
         self.add_widget(self.btn)

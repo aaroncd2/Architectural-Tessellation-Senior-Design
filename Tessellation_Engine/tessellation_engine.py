@@ -149,7 +149,7 @@ class TessellationWidget(GridLayout):
         self.buttons.add_widget(self.rec_type)
 
     # Display initial tiling
-    def display_initial_tiling(self):
+    def display_initial_tiling(self,tf):
         self.xNum = 5
         self.yNum = 5
         points = self.parent.b_coords
@@ -157,14 +157,18 @@ class TessellationWidget(GridLayout):
         self.base_unit = self.polygon
         self.original_base_unit = self.polygon
         self.shape_info = tr.identify_shape(self.base_unit)
-        if self.type == None:
-            self.type = 'regular'
-        if self.type == 'regular':
-            self.tile_regular_polygon()
-        elif self.type == 'parallelogram':
-            self.tile_parallelogram()
-        elif self.type == 'hexagon':
-            self.tile_hexagon()
+        if tf == False:
+            if self.type == None:
+                self.type = 'regular'
+            if self.type == 'regular':
+                self.tile_regular_polygon()
+            elif self.type == 'parallelogram':
+                self.tile_parallelogram()
+            elif self.type == 'hexagon':
+                self.tile_hexagon()
+        else:
+            
+            self.draw_polygons()
 
     def set_coords(self, num):
         self.points = num
