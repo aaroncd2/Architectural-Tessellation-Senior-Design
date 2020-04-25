@@ -31,11 +31,11 @@ class CanvasWidget(RelativeLayout):
         super(CanvasWidget, self).__init__(**kwargs)
         self.lines = InstructionGroup()
         
-class TessellationWidget(GridLayout):
+class TessellationWidget(RelativeLayout):
     def __init__(self, **kwargs):
         super(TessellationWidget, self).__init__(**kwargs)
-        self.cols = 1
-        self.rows = 3
+        #self.cols = 1
+        #self.rows = 3
         self.polygons = []
         self.actions = []
         self.exterior = None
@@ -44,109 +44,115 @@ class TessellationWidget(GridLayout):
         self.stroke_color = [255,255,255,1]
         self.fill_color = [0,0,1,1]
         
+        self.topRow = RelativeLayout(pos_hint={'x':0, 'y':0.95}, size_hint=(1,.05))
+        # Add save state btn
+        self.save_state_button = Button(text = 'Save State', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':0, 'y':0}, size_hint=(.25,1))
+        self.topRow.add_widget(self.save_state_button)
+        self.save_state_button.bind(on_press=self.save_state)
+        # Add export button
+        self.export_button = Button(text = 'Export', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':.25, 'y':0}, size_hint=(.25,1))
+        self.topRow.add_widget(self.export_button)
+        self.export_button.bind(on_press=self.export_tiling)
+        # Add undo button
+        self.undo_button = Button(text = 'Undo', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':.5, 'y':0}, size_hint=(.25,1))
+        self.topRow.add_widget(self.undo_button)
+        self.undo_button.bind(on_press=self.undo)
+        # Add reset button
+        self.reset_button = Button(text = 'Reset', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':.75, 'y':0}, size_hint=(.25,1))
+        self.topRow.add_widget(self.reset_button)
+        self.reset_button.bind(on_press=self.reset)
+        self.add_widget(self.topRow)
+
+
         # create row for canvas
         self.canvas_widget = CanvasWidget()
-        imageRow = BoxLayout(orientation='horizontal', padding=0, spacing=0)
+        imageRow = RelativeLayout(pos_hint={'x':0, 'y':0.30}, size_hint=(1,.65))
         imageRow.add_widget(self.canvas_widget)
         self.add_widget(imageRow)
-
-        self.controls = BoxLayout(orientation='horizontal', size_hint=(1,.30))
-        self.buttons = GridLayout(rows=4, cols=3)
-        self.sliders = GridLayout(rows=4, cols=2)
-
+        
+        self.sliders = RelativeLayout(pos_hint={'x':0, 'y':0}, size_hint=(.8,.30))
         # Add slider and label to widget
+        self.rotation_box = BoxLayout(orientation='horizontal', pos_hint={'x':0, 'y':.75}, size_hint=(1,.25))
+        self.rotation_label_box = BoxLayout(orientation='horizontal')
         self.rotation_slider = CustomSlider(min=0, max=360, value=0, value_track = True)
+        self.rotation_slider.bind(value=self.rotate_polygon)
         self.rotation_value = 0
-        self.label_box = BoxLayout(orientation='horizontal', size_hint=(1,1))
-        self.input_box = TextInput(text='0', input_filter='float', multiline=False, font_size='12dp')
+        self.input_box = TextInput(text='0', input_filter='float', multiline=False, font_size='12dp', size_hint=(.95,.75))
         self.input_box.bind(on_text_validate=self.on_enter)
         self.label = Label(text ='Rotation:', font_size='12dp')
-        self.label_box.add_widget(self.label)
-        self.label_box.add_widget(self.input_box)
-        self.sliders.add_widget(self.label_box) 
-        self.sliders.add_widget(self.rotation_slider)
-        self.rotation_slider.bind(value=self.rotate_polygon)
-
-        # Add horizontal translation slider
-        self.h_label = Label(text='Horizontal Spacing', font_size='12dp')
-        self.sliders.add_widget(self.h_label)
-        self.slide_horizontal = CustomSlider(min=0, max=200, value=100, value_track = True)
-        self.xSpacing = 100
-        self.slide_horizontal.bind(value = self.adjust_horizontal_spacing)
-        self.sliders.add_widget(self.slide_horizontal)
-
-        # Add vertical translation slider
-        self.v_label = Label(text='Vertical Spacing', font_size='12dp')
-        self.sliders.add_widget(self.v_label)
-        self.slide_vertical = CustomSlider(min=0, max=200, value=100, value_track = True)
-        self.ySpacing = 100
-        self.slide_vertical.bind(value = self.adjust_vertical_spacing)
-        self.sliders.add_widget(self.slide_vertical)
+        self.rotation_label_box.add_widget(self.label)
+        self.rotation_label_box.add_widget(self.input_box)
+        self.rotation_box.add_widget(self.rotation_label_box)
+        self.rotation_box.add_widget(self.rotation_slider)
+        self.sliders.add_widget(self.rotation_box)
 
         # Add scale slider
+        self.scale_box = BoxLayout(orientation='horizontal', pos_hint={'x':0, 'y':0}, size_hint=(1,.25))
         self.scale_label = Label(text='Scale', font_size='12dp')
-        self.sliders.add_widget(self.scale_label)
+        self.scale_box.add_widget(self.scale_label)
         self.slide_scale = CustomSlider(min=0, max=200, value=100, value_track = True)
         self.scaling = 100
         self.slide_scale.bind(value = self.scale_polygons)
-        self.sliders.add_widget(self.slide_scale)
+        self.scale_box.add_widget(self.slide_scale)
+        self.sliders.add_widget(self.scale_box)
 
-        self.controls.add_widget(self.sliders)
+        # Add horizontal translation slider
+        self.horizontal_box = BoxLayout(orientation='horizontal', pos_hint={'x':0, 'y':.5}, size_hint=(1,.25))
+        self.h_label = Label(text='Horizontal Spacing', font_size='12dp')
+        self.horizontal_box.add_widget(self.h_label)
+        self.slide_horizontal = CustomSlider(min=0, max=200, value=100, value_track = True)
+        self.xSpacing = 100
+        self.slide_horizontal.bind(value = self.adjust_horizontal_spacing)
+        self.horizontal_box.add_widget(self.slide_horizontal)
+        self.sliders.add_widget(self.horizontal_box)
 
-        # Add save state btn
-        self.save_state_button = Button(text = 'Save State', background_color = (1,1,1,1), font_size='10dp')
-        self.buttons.add_widget(self.save_state_button)
-        self.save_state_button.bind(on_press=self.save_state)
+        # Add vertical translation slider
+        self.vertical_box = BoxLayout(orientation='horizontal', pos_hint={'x':0, 'y':.25}, size_hint=(1,.25))
+        self.v_label = Label(text='Vertical Spacing', font_size='12dp')
+        self.vertical_box.add_widget(self.v_label)
+        self.slide_vertical = CustomSlider(min=0, max=200, value=100, value_track = True)
+        self.ySpacing = 100
+        self.slide_vertical.bind(value = self.adjust_vertical_spacing)
+        self.vertical_box.add_widget(self.slide_vertical)
+        self.sliders.add_widget(self.vertical_box)
+        self.add_widget(self.sliders)
 
-        # Add export button
-        self.export_button = Button(text = 'Export', background_color = (1,1,1,1), font_size='10dp')
-        self.buttons.add_widget(self.export_button)
-        self.export_button.bind(on_press=self.export_tiling)
+        self.labels = RelativeLayout(pos_hint={'x':.8, 'y':0}, size_hint=(.2,.30))
+        # Add tiling type label
+        self.label_box = BoxLayout(orientation='vertical', pos_hint={'x':0, 'y':0}, size_hint=(1,1))
+        self.rec_label = Label(text='Tessellation Type:', font_size='10dp')
+        self.label_box.add_widget(self.rec_label)
+        self.rec_type = Label(text='Freeform', font_size='10dp')
+        self.label_box.add_widget(self.rec_type)
+        self.labels.add_widget(self.label_box)
+        self.add_widget(self.labels)
 
+        self.buttons = RelativeLayout(pos_hint={'x':.8, 'y':.3}, size_hint=(.2,.50))
         # Add freeform button
-        self.freeform_button = Button(text = 'Toggle Freeform', background_color = (1,1,1,1), font_size='10dp')
+        self.freeform_button = Button(text = 'Toggle Freeform', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':0, 'y':0}, size_hint=(1,.2))
         self.buttons.add_widget(self.freeform_button)
         self.freeform_button.bind(on_press=self.make_freeform)
 
         # Add flip horizontal button
-        self.horizontal_button = Button(text = 'Flip Horizontal', background_color = (1,1,1,1), font_size='10dp')
+        self.horizontal_button = Button(text = 'Flip Horizontal', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':0, 'y':.2}, size_hint=(1,.2))
         self.buttons.add_widget(self.horizontal_button)
         self.horizontal_button.bind(on_press=self.flip_horizontal)
 
         # Add flip vertical button
-        self.vertical_button = Button(text = 'Flip Vertical', background_color = (1,1,1,1), font_size='10dp')
+        self.vertical_button = Button(text = 'Flip Vertical', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':0, 'y':.4}, size_hint=(1,.2))
         self.buttons.add_widget(self.vertical_button)
         self.vertical_button.bind(on_press=self.flip_vertical)
 
         # Add alternate row button
-        self.alternate_row_button = Button(text = 'Alternate Rows', background_color = (1,1,1,1), font_size='10dp')
+        self.alternate_row_button = Button(text = 'Alternate Rows', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':0, 'y':.6}, size_hint=(1,.2))
         self.buttons.add_widget(self.alternate_row_button)
         self.alternate_row_button.bind(on_press=self.alternate_rows)
 
         # Add alternate column button
-        self.alternate_col_button = Button(text = 'Alternate Cols', background_color = (1,1,1,1), font_size='10dp')
+        self.alternate_col_button = Button(text = 'Alternate Columns', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':0, 'y':.8}, size_hint=(1,.2))
         self.buttons.add_widget(self.alternate_col_button)
         self.alternate_col_button.bind(on_press=self.alternate_cols)
-
-        # Add undo button
-        self.undo_button = Button(text = 'Undo', background_color = (1,1,1,1), font_size='10dp')
-        self.buttons.add_widget(self.undo_button)
-        self.undo_button.bind(on_press=self.undo)
-
-        # Add reset button
-        self.reset_button = Button(text = 'Reset', background_color = (1,1,1,1), font_size='10dp')
-        self.buttons.add_widget(self.reset_button)
-        self.reset_button.bind(on_press=self.reset)
-
-        # Add control row
-        self.controls.add_widget(self.buttons)
-        self.add_widget(self.controls)
-
-        # Add tiling type label
-        self.rec_label = Label(text='Tessellation Type:', font_size='10dp')
-        self.buttons.add_widget(self.rec_label)
-        self.rec_type = Label(text='Freeform', font_size='10dp')
-        self.buttons.add_widget(self.rec_type)
+        self.add_widget(self.buttons)
 
     # Display initial tiling
     def display_initial_tiling(self,tf):
@@ -924,8 +930,8 @@ class TessellationWidget(GridLayout):
     #scales tiling before drawing to ensure it fits on window
     def scale_to_fit_window(self):
         size = Window.size
-        max_width = size[0] / 2
-        max_height = size[1] - self.controls.height
+        max_width = size[0] / 2 - self.buttons.width
+        max_height = size[1] - self.sliders.height - self.topRow.height
 
         max_x = self.polygons[0][0]
         min_x = self.polygons[0][0]
@@ -964,11 +970,11 @@ class TessellationWidget(GridLayout):
         yOff = 0
         if min_x < 0:
             xOff = min_x * -1
-        elif max_x > (size[0] / 2):
+        elif max_x > (size[0] / 2) - self.buttons.width:
             xOff = min_x * -1
         if min_y < 0:
             yOff = min_y * -1
-        elif max_y > (size[1] - self.controls.height):
+        elif max_y > (size[1] - self.sliders.height - self.topRow.height):
             yOff = min_y * -1
         self.fit_to_screen(xOff, yOff, scale_factor)
 
