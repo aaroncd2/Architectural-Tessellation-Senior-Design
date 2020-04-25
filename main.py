@@ -170,8 +170,10 @@ class LoadExistingChooser(FileChooserListView):
                             #print(f'Column names are {", ".join(row)}')
                             line_count += 1
                         else:
-                            coo.append(float(row[1]))
-                            coo.append(float(row[2]))
+                            print(row[1])
+                            if (row[1] != "None"):
+                                coo.append(float(row[1]))
+                                coo.append(float(row[2]))
 
                             csvtessellcoords[0].append(float(row[3]))
                             csvtessellcoords[0].append(float(row[4]))
