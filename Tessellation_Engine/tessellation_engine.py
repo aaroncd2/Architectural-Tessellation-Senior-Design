@@ -71,6 +71,9 @@ class TessellationWidget(RelativeLayout):
         self.add_widget(imageRow)
         
         self.sliders = RelativeLayout(pos_hint={'x':0, 'y':0}, size_hint=(.8,.30))
+        with self.sliders.canvas.before:
+            Color(.5,.5,.5,1)
+            Rectangle(size=self.sliders.size, pos=self.sliders.pos)
         # Add slider and label to widget
         self.rotation_box = BoxLayout(orientation='horizontal', pos_hint={'x':0, 'y':.75}, size_hint=(1,.25))
         self.rotation_label_box = BoxLayout(orientation='horizontal')
@@ -785,7 +788,7 @@ class TessellationWidget(RelativeLayout):
         xs = []
         ys = []
         # save base unit coords
-        for p in self.base_unit.exterior.coords:
+        for p in self.parent.children[1].c_coords:
             xs.append(p[0])
             ys.append(p[1])
         points['base unit xs'] = xs
@@ -970,7 +973,7 @@ class TessellationWidget(RelativeLayout):
         yOff = 0
         if min_x < 0:
             xOff = min_x * -1
-        elif max_x > (size[0] / 2) - self.buttons.width:
+        elif max_x > (size[0] / 2) - (self.buttons.width * 2):
             xOff = min_x * -1
         if min_y < 0:
             yOff = min_y * -1
