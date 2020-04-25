@@ -128,6 +128,7 @@ class LoadExistingChooser(FileChooserListView):
     def selected(self,filename,*args):
             if (filename == True):
                 global fp
+                global loaded_type
                 #store file path
                 fp = args[0][0]
                 with open('csvpathfile.txt', 'w') as f:
@@ -170,7 +171,7 @@ class LoadExistingChooser(FileChooserListView):
                             #print(f'Column names are {", ".join(row)}')
                             line_count += 1
                         else:
-                            print(row[1])
+                            loaded_type = row[0]
                             if (row[1] != "None"):
                                 coo.append(float(row[1]))
                                 coo.append(float(row[2]))
@@ -441,7 +442,10 @@ class BoxGrid(BoxLayout):
         if is_load_csv == True:
             print("changing self.polygons")
             self.children[0].polygons = loaded_csv_tessel
+            print("changing type of tessel")
+            self.children[0].type = loaded_type
         tessel.display_initial_tiling(is_load_csv)
+        tessel.change_rec_label_text()
         self.main_shape_info = tessel.shape_info
         self.btn = ReccomendationButtons()
         self.add_widget(self.btn)

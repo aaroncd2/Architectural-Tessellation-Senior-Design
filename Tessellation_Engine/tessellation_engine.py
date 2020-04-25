@@ -119,6 +119,8 @@ class TessellationWidget(RelativeLayout):
         self.vertical_box.add_widget(self.slide_vertical)
         self.sliders.add_widget(self.vertical_box)
         self.add_widget(self.sliders)
+        
+
 
         self.labels = RelativeLayout(pos_hint={'x':.8, 'y':0}, size_hint=(.2,.30))
         # Add tiling type label
@@ -156,6 +158,13 @@ class TessellationWidget(RelativeLayout):
         self.buttons.add_widget(self.alternate_col_button)
         self.alternate_col_button.bind(on_press=self.alternate_cols)
         self.add_widget(self.buttons)
+
+    def change_rec_label_text(self):
+        if self.type == None:
+            self.rec_type.text = "Freeform"
+        else:
+            self.rec_type.text = self.type
+
 
     # Display initial tiling
     def display_initial_tiling(self,tf):
