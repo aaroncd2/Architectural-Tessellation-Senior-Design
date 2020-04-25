@@ -71,9 +71,6 @@ class TessellationWidget(RelativeLayout):
         self.add_widget(imageRow)
         
         self.sliders = RelativeLayout(pos_hint={'x':0, 'y':0}, size_hint=(.8,.30))
-        with self.sliders.canvas.before:
-            Color(.5,.5,.5,1)
-            Rectangle(size=self.sliders.size, pos=self.sliders.pos)
         # Add slider and label to widget
         self.rotation_box = BoxLayout(orientation='horizontal', pos_hint={'x':0, 'y':.75}, size_hint=(1,.25))
         self.rotation_label_box = BoxLayout(orientation='horizontal')
@@ -792,6 +789,7 @@ class TessellationWidget(RelativeLayout):
     # Exports the currently displayed polygons to a CSV file
     def export_tiling(self, instance):
         points = {}
+        raw = {}
         # save type
         points['type'] = self.type
         xs = []
@@ -819,8 +817,11 @@ class TessellationWidget(RelativeLayout):
                 count = count + 1
             points['x' + str(num)] = xs
             points['y' + str(num)] = ys
+            raw['x' + str(num)] = xs
+            raw['y' + str(num)] = ys
             num += 1
         self.df = pd.DataFrame(points)
+        self.raw_df = pd.DataFrame(raw)
         SaveDialog(self).open()
 
     # Draws an array of polygons to the canvas

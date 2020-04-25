@@ -15,6 +15,7 @@ class SaveDialog(Popup):
         
         self.my_widget = my_widget
         self.data = self.my_widget.df
+        self.raw_data = self.my_widget.raw_df
 
         self.title = 'Save Your Tiling'
         self.content = GridLayout(rows=4, cols=1)
@@ -47,6 +48,8 @@ class SaveDialog(Popup):
         if self.input_box.text != '':
             file_name = self.file_browser.path + '\\' + self.input_box.text + '.csv'
             self.data.to_csv(file_name, index=None)
+            file_name = self.file_browser.path + '\\' + self.input_box.text + '_raw.csv'
+            self.raw_data.to_csv(file_name, index=None)
             self.dismiss()
         else:
             self.error_message.text = 'PLEASE ENTER A NAME FOR YOUR FILE'
