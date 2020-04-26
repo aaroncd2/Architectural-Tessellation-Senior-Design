@@ -1053,13 +1053,13 @@ class CustomLayout(BoxLayout):
 
         self.picker_background.add_widget(Button(text = 'Select',
                                   pos_hint = {'center_x': .76, 'y': -.02},
-                                  size_hint = (None, None),
-                                  size = (100, 35),
+                                  size_hint = (.08, .08),
+                                #   size = (100, 35),
                                   on_press = self.background_selected))
         self.ColPop_background = Popup(title = "Choose Background",
-                        size_hint = (None, None),
+                        size_hint = (.5, .5),
                         content = self.picker_background,
-                        size = (1500, 750),
+                        # size = (1500, 750),
                         auto_dismiss = True)
 
         self.ColPop_background.open()
