@@ -98,12 +98,21 @@ def process_quadrilateral(shape):
         first_rec_exterior_coords.append(first_rec_coords[5])
         first_rec_exterior_coords.append(first_rec_coords[0])
         recommendations.append((Polygon(first_rec_coords), "hexagon", True, Polygon(first_rec_exterior_coords)))
-        # second recommendation, only if the quad's shorter sides are next to each other
+        # second recommendation, only if the quad's shorter sides are next to each other and if the exterior parallelogram can
+        # be created without an extraneous lines coming out of the shape
         side2_length = ((second_rec_coords[2][1] - second_rec_coords[1][1])**2 + (second_rec_coords[2][0] - second_rec_coords[1][0])**2)**0.5
         side3_length = ((second_rec_coords[3][1] - second_rec_coords[2][1])**2 + (second_rec_coords[3][0] - second_rec_coords[2][0])**2)**0.5
         side4_length = ((second_rec_coords[4][1] - second_rec_coords[3][1])**2 + (second_rec_coords[4][0] - second_rec_coords[3][0])**2)**0.5
         second_max_length = max(side2_length, side3_length, side4_length) 
+        slope_1 = (second_rec_coords[1][1] - second_rec_coords[0][1]) / (second_rec_coords[1][0] - second_rec_coords[0][0])
+        slope_2 = (second_rec_coords[2][1] - second_rec_coords[1][1]) / (second_rec_coords[2][0] - second_rec_coords[1][0])
+        slope_3 = (second_rec_coords[3][1] - second_rec_coords[2][1]) / (second_rec_coords[3][0] - second_rec_coords[2][0])
+        slope_4 = (second_rec_coords[4][1] - second_rec_coords[3][1]) / (second_rec_coords[4][0] - second_rec_coords[3][0])
+        slope_list = [slope_1, slope_2, slope_3, slope_4]
+        slope_list.sort()
         if second_max_length == side2_length:
+            # checking slopes for case with max side1 and max side2
+            if slope
             second_rec_coords.append((second_rec_coords[0][0] - second_to_first_vertex_len_x, second_rec_coords[0][1] - second_to_first_vertex_len_y))
             second_rec_coords.append(second_rec_coords[2])
             second_rec_coords.append(second_rec_coords[3])
@@ -113,7 +122,7 @@ def process_quadrilateral(shape):
             second_rec_exterior_coords.append(second_rec_coords[2])
             second_rec_exterior_coords.append(second_rec_coords[5])
             second_rec_exterior_coords.append(second_rec_coords[0])
-            # recommendations.append((Polygon(second_rec_coords), "parallelogram", True, Polygon(second_rec_exterior_coords)))
+            recommendations.append((Polygon(second_rec_coords), "parallelogram", True, Polygon(second_rec_exterior_coords)))
         elif second_max_length == side4_length:
             zeroth_to_first_vertex_len_x = second_rec_coords[1][0] - second_rec_coords[0][0]
             zeroth_to_first_vertex_len_y = second_rec_coords[1][1] - second_rec_coords[0][1]
@@ -126,7 +135,7 @@ def process_quadrilateral(shape):
             second_rec_exterior_coords.append(second_rec_coords[6])
             second_rec_exterior_coords.append(second_rec_coords[5])
             second_rec_exterior_coords.append(second_rec_coords[0])
-            # recommendations.append((Polygon(second_rec_coords), "parallelogram", True, Polygon(second_rec_exterior_coords)))
+            recommendations.append((Polygon(second_rec_coords), "parallelogram", True, Polygon(second_rec_exterior_coords)))
         return recommendations
     else:
         # the given shape is a concave quad
