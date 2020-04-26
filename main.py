@@ -470,14 +470,14 @@ class CustomLayout(BoxLayout):
         # Add change color button
         self.color_picker_button = Button(text = 'Choose Color',
                                           background_color = (1,1,1,1),
-                                          size_hint = (.3,.07),
+                                          size_hint = (.35,.07),
                                           pos_hint = {'bottom': 0.3})
 
         #Add background color button
         self.background_color_picker_button = Button(text = 'Choose Background',
-                                          background_color = (1,1,1,1),
-                                          size_hint = (.4,.07),
-                                          pos_hint = {'bottom': 0.3})
+                                                     background_color = (1,1,1,1),
+                                                     size_hint = (.45,.07),
+                                                     pos_hint = {'bottom': 0.3})
         self.add_widget(self.back_button)
         self.back_button.bind(on_press=self.go_back)
         self.add_widget(self.color_picker_button)
@@ -489,12 +489,12 @@ class CustomLayout(BoxLayout):
         def open_help(self, *args):
             self.help.open()
 
-        self.help_label = Label(text = " Delete: Press 'delete'\n Add: Press 'a'\n Reset: Press 'r'",
-                                font_size = '25sp')
+        self.help_label = Label(text = " Click on edge/vertex to select\n To delete edge/vertex: Press 'delete'/'backspace\n To add a vertex: Press 'a'\n To reset: Press 'r'",
+                                font_size = '20sp')
         self.help = Popup(title = 'Help',
                            content = self.help_label,
                            pos_hint={'center_x': .5, 'center_y': .5},
-                           size_hint = (.2, .2),
+                           size_hint = (.4, .4),
                            auto_dismiss = True)
         self.help_button = Button(text = '?',
                                    size_hint = (.1, .04),
