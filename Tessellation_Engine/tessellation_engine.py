@@ -24,6 +24,7 @@ import numpy as np # for math
 from Tessellation_Engine import tessellation_utilities as tu #for utility functions
 from Tessellation_Engine.save_dialog import SaveDialog
 from Tessellation_Engine.custom_slider import CustomSlider
+from Tessellation_Engine.help_dialog import HelpDialog
 
 ### START TESSELLATION ENGINE ###
 class CanvasWidget(RelativeLayout):
@@ -46,21 +47,25 @@ class TessellationWidget(RelativeLayout):
         
         self.topRow = RelativeLayout(pos_hint={'x':0, 'y':0.95}, size_hint=(1,.05))
         # Add save state btn
-        self.save_state_button = Button(text = 'Save State', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':0, 'y':0}, size_hint=(.25,1))
+        self.save_state_button = Button(text = 'Save State', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':0, 'y':0}, size_hint=(.20,1))
         self.topRow.add_widget(self.save_state_button)
         self.save_state_button.bind(on_press=self.save_state)
         # Add export button
-        self.export_button = Button(text = 'Export', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':.25, 'y':0}, size_hint=(.25,1))
+        self.export_button = Button(text = 'Export', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':.20, 'y':0}, size_hint=(.20,1))
         self.topRow.add_widget(self.export_button)
         self.export_button.bind(on_press=self.export_tiling)
         # Add undo button
-        self.undo_button = Button(text = 'Undo', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':.5, 'y':0}, size_hint=(.25,1))
+        self.undo_button = Button(text = 'Undo', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':.40, 'y':0}, size_hint=(.20,1))
         self.topRow.add_widget(self.undo_button)
         self.undo_button.bind(on_press=self.undo)
         # Add reset button
-        self.reset_button = Button(text = 'Reset', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':.75, 'y':0}, size_hint=(.25,1))
+        self.reset_button = Button(text = 'Reset', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':.60, 'y':0}, size_hint=(.20,1))
         self.topRow.add_widget(self.reset_button)
         self.reset_button.bind(on_press=self.reset)
+        # Add help button
+        self.help_button = Button(text = 'Help/Controls', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':.80, 'y':0}, size_hint=(.20,1))
+        self.topRow.add_widget(self.help_button)
+        self.help_button.bind(on_press=self.show_help)
         self.add_widget(self.topRow)
 
 
@@ -918,6 +923,10 @@ class TessellationWidget(RelativeLayout):
         self.raw_df = pd.DataFrame(raw)
         SaveDialog(self).open()
 
+    # opens the help popup to display controls and information
+    def show_help(self, instance):
+        HelpDialog().open()
+
     # Draws an array of polygons to the canvas
     def draw_polygons(self):
         self.scale_to_fit_window()
@@ -1073,7 +1082,7 @@ class TessellationWidget(RelativeLayout):
     #scales tiling before drawing to ensure it fits on window
     def scale_to_fit_window(self):
         size = Window.size
-        max_width = size[0] / 2 - (size[0] * .2)
+        max_width = size[0] / 2 - (size[0] * .15)
         max_height = size[1] - self.sliders.height - self.topRow.height
 
         max_x = self.polygons[0][0]
@@ -1113,7 +1122,7 @@ class TessellationWidget(RelativeLayout):
         yOff = 0
         if min_x < 0:
             xOff = min_x * -1
-        elif max_x > (size[0] / 2) - (size[0] * .2):
+        elif max_x > (size[0] / 2) - (size[0] * .15):
             xOff = min_x * -1
         if min_y < 0:
             yOff = min_y * -1
