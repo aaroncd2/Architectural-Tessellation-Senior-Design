@@ -1083,7 +1083,7 @@ class TessellationWidget(RelativeLayout):
     def scale_to_fit_window(self):
         size = Window.size
         max_width = size[0] / 2 - (size[0] * .15)
-        max_height = size[1] - self.sliders.height - self.topRow.height
+        max_height = size[1] - (size[1] * .35)
 
         max_x = self.polygons[0][0]
         min_x = self.polygons[0][0]
@@ -1126,7 +1126,7 @@ class TessellationWidget(RelativeLayout):
             xOff = min_x * -1
         if min_y < 0:
             yOff = min_y * -1
-        elif max_y > (size[1] - self.sliders.height - self.topRow.height):
+        elif max_y > (size[1] - (size[1] * .35)):
             yOff = min_y * -1
         self.fit_to_screen(xOff, yOff, scale_factor)
 
