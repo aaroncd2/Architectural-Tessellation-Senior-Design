@@ -90,8 +90,8 @@ class TessellationWidget(RelativeLayout):
         self.scale_box = BoxLayout(orientation='horizontal', pos_hint={'x':0, 'y':0}, size_hint=(1,.25))
         self.scale_label = Label(text='Scale', font_size='12dp')
         self.scale_box.add_widget(self.scale_label)
-        self.slide_scale = CustomSlider(min=0, max=200, value=100, value_track = True)
-        self.scaling = 100
+        self.slide_scale = CustomSlider(min=-50, max=50, value=0, value_track = True)
+        self.scaling = 0
         self.slide_scale.bind(value = self.scale_polygons)
         self.scale_box.add_widget(self.slide_scale)
         self.sliders.add_widget(self.scale_box)
@@ -182,6 +182,7 @@ class TessellationWidget(RelativeLayout):
         else:
             
             self.draw_polygons()
+        self.unscaled_polygons = self.polygons
 
     def set_coords(self, num):
         self.points = num
@@ -217,11 +218,12 @@ class TessellationWidget(RelativeLayout):
 
         self.polygons = polygons
         self.draw_polygons()
+        self.unscaled_polygons = self.polygons
 
     # tiles a parallelogram
     def tile_parallelogram(self):
         # calculate increment between shapes
-        scale_factor = self.slide_scale.value / 100
+        scale_factor = self.slide_scale.value
         shape = self.polygon
         exterior = tu.make_positive(self.rec_shape[3])
         self.exterior = exterior
@@ -296,46 +298,46 @@ class TessellationWidget(RelativeLayout):
                 temp = []
                 for p in shape.exterior.coords:
                     if xInc2 == 0 and yInc2 == 0:
-                        px = (p[0] + (xInc * xCount)) * scale_factor
-                        py = (p[1] + (yInc * yCount)) * scale_factor
+                        px = (p[0] + (xInc * xCount)) + scale_factor
+                        py = (p[1] + (yInc * yCount)) + scale_factor
                     elif pointsRight:
                         if hasDoubleMax:
                             if pointsUp:
                                 #print("RIGHT DMAX UP")
-                                px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
-                                py = (p[1] + (yInc2 * xCount) + (yInc * yCount)) * scale_factor
+                                px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
+                                py = (p[1] + (yInc2 * xCount) + (yInc * yCount)) + scale_factor
                             else:
                                 #print("RIGHT DMAX DOWN")
-                                px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
-                                py = (p[1] + (yInc * xCount) + (yInc2 * yCount)) * scale_factor
+                                px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
+                                py = (p[1] + (yInc * xCount) + (yInc2 * yCount)) + scale_factor
                         else:
                             if pointsUp:
                                 #print("RIGHT UP")
-                                px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
-                                py = (p[1] + (yInc * xCount) - (yInc2 * yCount)) * scale_factor
+                                px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
+                                py = (p[1] + (yInc * xCount) - (yInc2 * yCount)) + scale_factor
                             else:
                                 #print("RIGHT DOWN")
-                                px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
-                                py = (p[1] - (yInc2 * xCount) + (yInc * yCount)) * scale_factor
+                                px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
+                                py = (p[1] - (yInc2 * xCount) + (yInc * yCount)) + scale_factor
                     else:
                         if hasDoubleMax:
                             if pointsUp:
                                 #print("LEFT DMAX DOWN")
-                                px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
-                                py = (p[1] - (yInc2 * xCount) - (yInc * yCount)) * scale_factor
+                                px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
+                                py = (p[1] - (yInc2 * xCount) - (yInc * yCount)) + scale_factor
                             else:
                                 #print("LEFT DMAX UP")
-                                px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
-                                py = (p[1] - (yInc2 * xCount) - (yInc * yCount)) * scale_factor
+                                px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
+                                py = (p[1] - (yInc2 * xCount) - (yInc * yCount)) + scale_factor
                         else:
                             if pointsUp:
                                 #print("LEFT UP")
-                                px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
-                                py = (p[1] + (yInc2 * xCount) - (yInc * yCount)) * scale_factor
+                                px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
+                                py = (p[1] + (yInc2 * xCount) - (yInc * yCount)) + scale_factor
                             else:
                                 #print("LEFT DOWN")
-                                px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
-                                py = (p[1] + (yInc2 * xCount) - (yInc * yCount)) * scale_factor
+                                px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
+                                py = (p[1] + (yInc2 * xCount) - (yInc * yCount)) + scale_factor
                     temp.append((px,py))
                 temp_poly = Polygon(temp)
                 temp_poly = affinity.rotate(temp_poly, self.rotation_slider.value)
@@ -345,11 +347,12 @@ class TessellationWidget(RelativeLayout):
             xCount = 1
             yCount = yCount + 1
         self.draw_polygons()
+        self.unscaled_polygons = self.polygons
 
     # tiles a hexagon (with 3 sets of parallel edges)
     def tile_hexagon(self):
         # calculate increment between shapes
-        scale_factor = self.slide_scale.value / 100
+        scale_factor = self.slide_scale.value
         shape = self.polygon
         exterior = tu.make_positive(self.rec_shape[3])
         self.exterior = exterior
@@ -472,102 +475,102 @@ class TessellationWidget(RelativeLayout):
                                 if tiltsRight:
                                     #print("RIGHT + UP | UP + RIGHT")
                                     if isRightHorizontal:
-                                        px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
-                                        py = (p[1] + (yInc * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
+                                        px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
+                                        py = (p[1] + (yInc * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
                                     else:
                                         px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
-                                        py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
+                                        py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
                                 else:
                                     #print("RIGHT + UP | UP + LEFT")
-                                    px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
-                                    py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) * scale_factor
+                                    px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
+                                    py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) + scale_factor
                             else:
                                 if tiltsRight:
                                     #print("RIGHT + UP | DOWN + RIGHT")
-                                    px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
-                                    py = (p[1] + (yInc * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
+                                    px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
+                                    py = (p[1] + (yInc * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
                                 else:
                                     #print("RIGHT + UP | DOWN + LEFT")
                                     if hasDoubleMax:
-                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
-                                        py = (p[1] + (yInc * xCount) + (yInc2 * yCount)) * scale_factor
+                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
+                                        py = (p[1] + (yInc * xCount) + (yInc2 * yCount)) + scale_factor
                                     else:
-                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
-                                        py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) * scale_factor
+                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
+                                        py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) + scale_factor
                         else:
                             if tiltsUp:
                                 if tiltsRight:
                                     #print("RIGHT + DOWN | UP + RIGHT")
-                                    px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
-                                    py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
+                                    px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
+                                    py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
                                 else:
                                     #print("RIGHT + DOWN | UP + LEFT")
                                     if isRightHorizontal:
-                                        px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
-                                        py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) * scale_factor
+                                        px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
+                                        py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) + scale_factor
                                     else:
-                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
-                                        py = (p[1] - (yInc * xCount) - ((yInc - yInc2) * yCount)) * scale_factor
+                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
+                                        py = (p[1] - (yInc * xCount) - ((yInc - yInc2) * yCount)) + scale_factor
                             else:
                                 if tiltsRight:
                                     #print("RIGHT + DOWN | DOWN + RIGHT")
-                                    px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
-                                    py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
+                                    px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
+                                    py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
                                 else:
                                     #print("RIGHT + DOWN | DOWN + LEFT")
-                                    px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
-                                    py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) * scale_factor
+                                    px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
+                                    py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) + scale_factor
                     else:
                         if pointsUp:
                             if tiltsUp:
                                 if tiltsRight:
                                     #print("LEFT + UP | UP + RIGHT")
-                                    px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
-                                    py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
+                                    px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
+                                    py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
                                 else:
                                     #print("LEFT + UP | UP + LEFT")
-                                    px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
-                                    py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
+                                    px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
+                                    py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
                             else:
                                 if tiltsRight:
                                     #print("LEFT + UP | DOWN + RIGHT")
                                     if isLeftHorizontal:
-                                        px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
-                                        py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
+                                        px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
+                                        py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
                                     else:
-                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
-                                        py = (p[1] + (yInc * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
+                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
+                                        py = (p[1] + (yInc * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
                                 else:
                                     #print("LEFT + UP | DOWN + LEFT")
-                                    px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
-                                    py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) * scale_factor
+                                    px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
+                                    py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) + scale_factor
                         else:
                             if tiltsUp:
                                 if tiltsRight:
                                     #print("LEFT + DOWN | UP + RIGHT")
                                     if hasDoubleMax:
-                                        px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
-                                        py = (p[1] - (yInc2 * xCount) - (yInc * yCount)) * scale_factor
+                                        px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
+                                        py = (p[1] - (yInc2 * xCount) - (yInc * yCount)) + scale_factor
                                     else:
-                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
-                                        py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
+                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
+                                        py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
                                 else:
                                     #print("LEFT + DOWN | UP + LEFT")
-                                    px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
-                                    py = (p[1] - (yInc * xCount) - ((yInc - yInc2) * yCount)) * scale_factor 
+                                    px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
+                                    py = (p[1] - (yInc * xCount) - ((yInc - yInc2) * yCount)) + scale_factor 
                             else:
                                 if tiltsRight:
                                     #print("LEFT + DOWN | DOWN + RIGHT")
-                                    px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
-                                    py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) * scale_factor
+                                    px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
+                                    py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
                                 else:
                                     #print("LEFT + DOWN | DOWN + LEFT")
                                     if isLeftHorizontal:
-                                        px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) * scale_factor
-                                        py = (p[1] - (yInc * xCount) - ((yInc - yInc2) * yCount)) * scale_factor
+                                        px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
+                                        py = (p[1] - (yInc * xCount) - ((yInc - yInc2) * yCount)) + scale_factor
                                     else:
                                         px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
-                                        py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) * scale_factor
+                                        py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) + scale_factor
                     temp.append((px,py))
                 temp_poly = Polygon(temp)
                 temp_poly = affinity.rotate(temp_poly, self.rotation_slider.value)
@@ -577,6 +580,7 @@ class TessellationWidget(RelativeLayout):
             xCount = 1
             yCount = yCount + 1
         self.draw_polygons()
+        self.unscaled_polygons = self.polygons
 
     # Rotates each polygon by the degrees specified by the slider
     def rotate_polygon(self, instance, degrees):
@@ -586,13 +590,20 @@ class TessellationWidget(RelativeLayout):
             rotation_amount = self.rotation_slider.value - self.rotation_value
         self.rotation_value = self.rotation_slider.value
         temp = []
+        temp_unscaled = []
         for polygon in self.polygons:
             temp_poly = Polygon(tu.kivy_to_shapely(polygon))
             temp_poly = affinity.rotate(temp_poly, rotation_amount)
             temp_poly = tu.shapely_to_kivy(temp_poly)
             temp.append(temp_poly)
+        for unscaled_polygon in self.unscaled_polygons:
+            temp_poly = Polygon(tu.kivy_to_shapely(unscaled_polygon))
+            temp_poly = affinity.rotate(temp_poly, rotation_amount)
+            temp_poly = tu.shapely_to_kivy(temp_poly)
+            temp_unscaled.append(temp_poly)
         self.input_box.text = str(round(self.rotation_slider.value, 2))
         self.polygons = temp
+        self.unscaled_polygons = temp_unscaled
         self.draw_polygons()
         if self.rotation_slider.action_complete == True:
             self.actions.append(('rotate', self.rotation_slider.previous_value))
@@ -655,6 +666,22 @@ class TessellationWidget(RelativeLayout):
             polygons.append(temp)
         self.polygons = polygons
         self.draw_polygons()
+        # Update unscaled polygons
+        polygons = []
+        for polygon in self.unscaled_polygons:
+            shapely_poly = Polygon(tu.kivy_to_shapely(polygon))
+            bounds = shapely_poly.bounds
+            temp = []
+            centerX = bounds[0] + ((bounds[2] - bounds[0]) / 2.0)
+            count = 0
+            for p in polygon:
+                if count % 2 == 0:
+                    temp.append((2 * centerX) - p)
+                else:
+                    temp.append(p)
+                count = count + 1
+            polygons.append(temp)
+        self.unscaled_polygons = polygons
 
     # flips a polygon vertically across its center
     def flip_vertical(self, instance):
@@ -676,6 +703,22 @@ class TessellationWidget(RelativeLayout):
             polygons.append(temp)
         self.polygons = polygons
         self.draw_polygons()
+        # update unscaled polygons
+        polygons = []
+        for polygon in self.unscaled_polygons:
+            shapely_poly = Polygon(tu.kivy_to_shapely(polygon))
+            bounds = shapely_poly.bounds
+            temp = []
+            centerY = bounds[1] + ((bounds[3] - bounds[1]) / 2.0)
+            count = 0
+            for p in polygon:
+                if count % 2 == 0:
+                    temp.append(p)
+                else:
+                    temp.append((2 * centerY) - p)
+                count = count + 1
+            polygons.append(temp)
+        self.unscaled_polygons = polygons
 
     # undoes last action performed by user
     def undo(self, instance):
@@ -713,8 +756,8 @@ class TessellationWidget(RelativeLayout):
         self.ySpacing = 0
         self.saved_type = None
         if instance != 1:
-            self.slide_scale.value = 100
-            self.scaling = 100
+            self.slide_scale.value = 0
+            self.scaling = 0
         self.base_unit = self.original_base_unit
         self.polygon = self.base_unit
         self.tile_regular_polygon()
@@ -752,6 +795,33 @@ class TessellationWidget(RelativeLayout):
                     flip = True
         self.polygons = polygons
         self.draw_polygons()
+        # Update unscaled polygons
+        polygons = []
+        poly_count = 0
+        flip = False
+        for polygon in self.unscaled_polygons:
+            if flip == True:
+                shapely_poly = Polygon(tu.kivy_to_shapely(polygon))
+                bounds = shapely_poly.bounds
+                temp = []
+                centerY = bounds[1] + ((bounds[3] - bounds[1]) / 2.0)
+                count = 0
+                for p in polygon:
+                    if count % 2 == 0:
+                        temp.append(p)
+                    else:
+                        temp.append((2 * centerY) - p)
+                    count = count + 1
+            else:
+                temp = polygon
+            polygons.append(temp)
+            poly_count = poly_count + 1
+            if poly_count % self.xNum == 0:
+                if flip:
+                    flip = False
+                else:
+                    flip = True
+        self.unscaled_polygons = polygons
 
     # flips alternating columns across their center horizontally
     def alternate_cols(self, instance):
@@ -783,6 +853,32 @@ class TessellationWidget(RelativeLayout):
                 flip = False
         self.polygons = polygons
         self.draw_polygons()
+        # Update unscaled polygons
+        polygons = []
+        poly_count = 0
+        flip = False
+        for polygon in self.unscaled_polygons:
+            if flip == True:
+                shapely_poly = Polygon(tu.kivy_to_shapely(polygon))
+                bounds = shapely_poly.bounds
+                temp = []
+                centerX = bounds[0] + ((bounds[2] - bounds[0]) / 2.0)
+                count = 0
+                for p in polygon:
+                    if count % 2 == 0:
+                        temp.append((2 * centerX) - p)
+                    else:
+                        temp.append(p)
+                    count = count + 1
+                flip = False
+            else:
+                temp = polygon
+                flip = True
+            polygons.append(temp)
+            poly_count = poly_count + 1
+            if poly_count % self.xNum == 0:
+                flip = False
+        self.unscaled_polygons = polygons
 
     # Exports the currently displayed polygons to a CSV file
     def export_tiling(self, instance):
@@ -863,6 +959,21 @@ class TessellationWidget(RelativeLayout):
         if self.slide_horizontal.action_complete == True:
             self.actions.append(('horizontal spacing', self.slide_horizontal.previous_value))
             self.slide_horizontal.action_complete = False
+        # Update unscaled polygons
+        poly_count = 0
+        temp = []
+        for polygon in self.unscaled_polygons:
+            count = 0
+            temp_poly = []
+            for p in polygon:
+                if count % 2 == 0:
+                    temp_poly.append(p + ((increment * (poly_count % self.xNum))))
+                else:
+                    temp_poly.append(p)
+                count = count + 1
+            temp.append(temp_poly)
+            poly_count = poly_count + 1
+        self.unscaled_polygons = temp
             
     # Adjusts vertical spacing between polygons
     def adjust_vertical_spacing(self, instance, amount):
@@ -889,13 +1000,31 @@ class TessellationWidget(RelativeLayout):
         if self.slide_vertical.action_complete == True:
             self.actions.append(('vertical spacing', self.slide_vertical.previous_value))
             self.slide_vertical.action_complete = False
+        #Update unscaled polygons
+        poly_count = 0
+        row_count = 0
+        temp = []
+        for polygon in self.unscaled_polygons:
+            count = 0
+            temp_poly = []
+            for p in polygon:
+                if count % 2 == 0:
+                    temp_poly.append(p)
+                else:
+                    temp_poly.append(p + (increment * row_count))
+                count = count + 1
+            temp.append(temp_poly)
+            poly_count = poly_count + 1
+            if poly_count % self.xNum == 0:
+                row_count = row_count + 1
+        self.unscaled_polygons = temp
 
     # scales polygons
     def scale_polygons(self, instance, amount):
-        scale_factor = 1 + ((self.slide_scale.value - self.scaling) / 100)
+        scale_factor = 1 + (self.slide_scale.value / 100)
         self.scaling = self.slide_scale.value
         temp = []
-        for polygon in self.polygons:
+        for polygon in self.unscaled_polygons:
             temp_poly = []
             for p in polygon:
                 temp_poly.append(p * scale_factor)
