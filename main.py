@@ -1003,7 +1003,7 @@ class CustomLayout(BoxLayout):
         r,g,b,a = self.col[0], self.col[1], self.col[2], self.col[3]
         self.picker = ColorPicker(pos_hint={'center_x': .5, 'center_y': .5},
                                 color = [r,g,b,a],
-                                size_hint = (1, 1))
+                                size_hint = (1,1))
 
         self.picker.add_widget(Button(text = 'Select',
                                   pos_hint = {'center_x': .76, 'y': -.02},
@@ -1037,9 +1037,9 @@ class CustomLayout(BoxLayout):
 
 
         self.ColPop = Popup(title = "Choose Color",
-                        size_hint = (None, None),
+                        size_hint = (.50, .50),
                         content = self.picker,
-                        size = (1500, 750),
+                        # size = (1500, 750),
                         auto_dismiss = True)
 
         self.ColPop.open()
