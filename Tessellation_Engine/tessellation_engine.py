@@ -100,8 +100,8 @@ class TessellationWidget(RelativeLayout):
         self.horizontal_box = BoxLayout(orientation='horizontal', pos_hint={'x':0, 'y':.5}, size_hint=(1,.25))
         self.h_label = Label(text='Horizontal Spacing', font_size='12dp')
         self.horizontal_box.add_widget(self.h_label)
-        self.slide_horizontal = CustomSlider(min=0, max=200, value=100, value_track = True)
-        self.xSpacing = 100
+        self.slide_horizontal = CustomSlider(min=-30, max=30, value=0, value_track = True)
+        self.xSpacing = 0
         self.slide_horizontal.bind(value = self.adjust_horizontal_spacing)
         self.horizontal_box.add_widget(self.slide_horizontal)
         self.sliders.add_widget(self.horizontal_box)
@@ -110,14 +110,12 @@ class TessellationWidget(RelativeLayout):
         self.vertical_box = BoxLayout(orientation='horizontal', pos_hint={'x':0, 'y':.25}, size_hint=(1,.25))
         self.v_label = Label(text='Vertical Spacing', font_size='12dp')
         self.vertical_box.add_widget(self.v_label)
-        self.slide_vertical = CustomSlider(min=0, max=200, value=100, value_track = True)
-        self.ySpacing = 100
+        self.slide_vertical = CustomSlider(min=-30, max=30, value=0, value_track = True)
+        self.ySpacing = 0
         self.slide_vertical.bind(value = self.adjust_vertical_spacing)
         self.vertical_box.add_widget(self.slide_vertical)
         self.sliders.add_widget(self.vertical_box)
         self.add_widget(self.sliders)
-        
-
 
         self.labels = RelativeLayout(pos_hint={'x':.8, 'y':0}, size_hint=(.2,.30))
         # Add tiling type label
@@ -192,8 +190,8 @@ class TessellationWidget(RelativeLayout):
     def tile_regular_polygon(self):
         polygon = tu.shapely_to_kivy(self.polygon)
         bounds = self.polygon.bounds
-        xInc = abs(bounds[2] - bounds[0]) * (self.xSpacing / 100)
-        yInc = abs(bounds[3] - bounds[1]) * (self.ySpacing / 100)
+        xInc = abs(bounds[2] - bounds[0]) + (self.xSpacing)
+        yInc = abs(bounds[3] - bounds[1]) + (self.ySpacing)
 
         polygons = []
         temp = []
@@ -253,10 +251,10 @@ class TessellationWidget(RelativeLayout):
                     yInc = max(exterior.exterior.coords[count + 1][1], exterior.exterior.coords[count - 1][1]) - bounds[1]
                     yInc2 = min(exterior.exterior.coords[count + 1][1], exterior.exterior.coords[count - 1][1]) - bounds[1]
             count = count + 1
-        xInc = xInc * (self.xSpacing / 100)
-        yInc = yInc * (self.ySpacing / 100)
-        xInc2 = xInc2 * (self.xSpacing / 100)
-        yInc2 = yInc2 * (self.ySpacing / 100)
+        xInc = xInc + (self.xSpacing)
+        yInc = yInc + (self.ySpacing)
+        xInc2 = xInc2 + (self.xSpacing)
+        yInc2 = yInc2 + (self.ySpacing)
     
         # determine direction of parallelogram
         pLeft = None 
@@ -381,10 +379,10 @@ class TessellationWidget(RelativeLayout):
                     yInc = max(exterior.exterior.coords[count + 1][1], exterior.exterior.coords[count - 1][1]) - bounds[1]
                     yInc2 = min(exterior.exterior.coords[count + 1][1], exterior.exterior.coords[count - 1][1]) - bounds[1]
             count = count + 1
-        xInc = xInc * (self.xSpacing / 100)
-        yInc = yInc * (self.ySpacing / 100)
-        xInc2 = xInc2 * (self.xSpacing / 100)
-        yInc2 = yInc2 * (self.ySpacing / 100)
+        xInc = xInc + (self.xSpacing)
+        yInc = yInc + (self.ySpacing)
+        xInc2 = xInc2 + (self.xSpacing)
+        yInc2 = yInc2 + (self.ySpacing)
     
         # determine direction of hexagon
         pointsUp = False
@@ -709,10 +707,10 @@ class TessellationWidget(RelativeLayout):
     def reset(self, instance):
         self.rotation_slider.value = 0
         self.rotation_value = 0
-        self.slide_horizontal.value = 100
-        self.xSpacing = 100
-        self.slide_vertical.value = 100
-        self.ySpacing = 100
+        self.slide_horizontal.value = 0
+        self.xSpacing = 0
+        self.slide_vertical.value = 0
+        self.ySpacing = 0
         self.saved_type = None
         if instance != 1:
             self.slide_scale.value = 100
@@ -845,7 +843,7 @@ class TessellationWidget(RelativeLayout):
 
     # Adjusts horizontal spacing between polygons
     def adjust_horizontal_spacing(self, instance, amount):
-        increment = (self.slide_horizontal.value - self.xSpacing) / (self.xNum / 4)
+        increment = (self.slide_horizontal.value - self.xSpacing)
         self.xSpacing = self.slide_horizontal.value
         poly_count = 0
         temp = []
@@ -868,7 +866,7 @@ class TessellationWidget(RelativeLayout):
             
     # Adjusts vertical spacing between polygons
     def adjust_vertical_spacing(self, instance, amount):
-        increment = (self.slide_vertical.value - self.ySpacing) / (self.yNum / 4)
+        increment = (self.slide_vertical.value - self.ySpacing)
         self.ySpacing = self.slide_vertical.value
         poly_count = 0
         row_count = 0
@@ -946,7 +944,7 @@ class TessellationWidget(RelativeLayout):
     #scales tiling before drawing to ensure it fits on window
     def scale_to_fit_window(self):
         size = Window.size
-        max_width = size[0] / 2 - self.buttons.width
+        max_width = size[0] / 2 - (size[0] * .2)
         max_height = size[1] - self.sliders.height - self.topRow.height
 
         max_x = self.polygons[0][0]
@@ -986,7 +984,7 @@ class TessellationWidget(RelativeLayout):
         yOff = 0
         if min_x < 0:
             xOff = min_x * -1
-        elif max_x > (size[0] / 2) - (self.buttons.width * 2):
+        elif max_x > (size[0] / 2) - (size[0] * .2):
             xOff = min_x * -1
         if min_y < 0:
             yOff = min_y * -1
