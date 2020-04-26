@@ -1007,14 +1007,14 @@ class CustomLayout(BoxLayout):
 
         self.picker.add_widget(Button(text = 'Select',
                                   pos_hint = {'center_x': .76, 'y': -.02},
-                                  size_hint = (None, None),
-                                  size = (100, 35),
+                                  size_hint = (.08, .08),
+                                #   size = (100, 35),
                                   on_press = self.selected))
 
         self.edge_toggle = ToggleButton(text = 'Edge',
                                        pos_hint = {'center_x': .55, 'y': -.02},
-                                       size_hint = (None, None),
-                                       size = (100, 35),
+                                       size_hint = (.08, .08),
+                                    #    size = (100, 35),
                                        group = 'color',
                                        state = 'down')
         self.edge_toggle.bind(on_press = self.pressed_toggle_edge)
@@ -1022,16 +1022,16 @@ class CustomLayout(BoxLayout):
 
         self.fill_toggle = ToggleButton(text = 'Fill',
                                             pos_hint = {'center_x': .63, 'y': -.02},
-                                            size_hint = (None, None),
-                                            size = (100, 35),
+                                            size_hint = (.08, .08),
+                                            # size = (100, 35),
                                             group = 'color')
         self.fill_toggle.bind(on_press = self.pressed_toggle_fill)
         self.picker.add_widget(self.fill_toggle)
 
         self.match_toggle = ToggleButton(text = 'Match',
                                             pos_hint = {'x': .8, 'y': -.02},
-                                            size_hint = (None, None),
-                                            size = (100, 35),
+                                            size_hint = (.08, .08),
+                                            # size = (100, 35),
                                             group = 'match')
         self.picker.add_widget(self.match_toggle)
 
