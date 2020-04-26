@@ -625,6 +625,34 @@ class CustomLayout(BoxLayout):
                 self.c_coords.remove(self.canvas_nodes[self.index].pos)
 
             self.draw()
+            poly = []
+            i = 0
+            for xy in self.canvas_nodes:
+                poly.append(self.canvas_nodes[i].pos)
+                i = i + 1
+
+            newply = Polygon(poly)
+            newply = affinity.translate(newply, xoff= -size[0]/2.95, yoff= -size[1]/4)
+            if self.xscale > self.yscale:
+                newply = affinity.scale(newply, xfact= 1/self.yscale, yfact= 1/self.yscale)
+            else:
+                newply = affinity.scale(newply, xfact= 1/self.xscale, yfact= 1/self.xscale)
+            self.parent.children[1].original_base_unit = newply
+            self.parent.children[1].polygon = newply
+            self.parent.children[1].reset(0)
+            #self.parent.children[1].tile_regular_polygon()
+
+            if (self.parent.children[0] != None):
+                    new_shape_info = tr.identify_shape(newply)
+                    self.parent.main_shape_info = new_shape_info
+                    self.parent.children[1].shape_info = new_shape_info
+                    for state in self.saved_states:
+                        new_shape_info.append(state)
+                    self.parent.remove_widget(self.parent.children[0])
+                    btns = ReccomendationButtons()
+                    self.parent.add_widget(btns)
+                    if (new_shape_info != None and len(new_shape_info) >= 1):
+                        btns.setup_btns(False)
 
         #Add when pressing a
         elif key_pressed[2] == 4 and self.pressed:
@@ -639,39 +667,68 @@ class CustomLayout(BoxLayout):
                 print(' Point selected')
             self.pressed = False
 
+            poly = []
+            i = 0
+            for xy in self.canvas_nodes:
+                poly.append(self.canvas_nodes[i].pos)
+                i = i + 1
+
+            newply = Polygon(poly)
+            newply = affinity.translate(newply, xoff= -size[0]/2.95, yoff= -size[1]/4)
+            if self.xscale > self.yscale:
+                newply = affinity.scale(newply, xfact= 1/self.yscale, yfact= 1/self.yscale)
+            else:
+                newply = affinity.scale(newply, xfact= 1/self.xscale, yfact= 1/self.xscale)
+            self.parent.children[1].original_base_unit = newply
+            self.parent.children[1].polygon = newply
+            self.parent.children[1].reset(0)
+            #self.parent.children[1].tile_regular_polygon()
+
+            if (self.parent.children[0] != None):
+                    new_shape_info = tr.identify_shape(newply)
+                    self.parent.main_shape_info = new_shape_info
+                    self.parent.children[1].shape_info = new_shape_info
+                    for state in self.saved_states:
+                        new_shape_info.append(state)
+                    self.parent.remove_widget(self.parent.children[0])
+                    btns = ReccomendationButtons()
+                    self.parent.add_widget(btns)
+                    if (new_shape_info != None and len(new_shape_info) >= 1):
+                        btns.setup_btns(False)
+
         #Reset when pressing r
         elif key_pressed[2] == 21:
             self.c_coords = self.orgi_coords
             self.draw()
 
-        poly = []
-        i = 0
-        for xy in self.canvas_nodes:
-            poly.append(self.canvas_nodes[i].pos)
-            i = i + 1
+            poly = []
+            i = 0
+            for xy in self.canvas_nodes:
+                poly.append(self.canvas_nodes[i].pos)
+                i = i + 1
 
-        newply = Polygon(poly)
-        newply = affinity.translate(newply, xoff= -size[0]/2.95, yoff= -size[1]/4)
-        if self.xscale > self.yscale:
-            newply = affinity.scale(newply, xfact= 1/self.yscale, yfact= 1/self.yscale)
-        else:
-            newply = affinity.scale(newply, xfact= 1/self.xscale, yfact= 1/self.xscale)
-        self.parent.children[1].original_base_unit = newply
-        self.parent.children[1].polygon = newply
-        self.parent.children[1].reset(0)
-        #self.parent.children[1].tile_regular_polygon()
+            newply = Polygon(poly)
+            newply = affinity.translate(newply, xoff= -size[0]/2.95, yoff= -size[1]/4)
+            if self.xscale > self.yscale:
+                newply = affinity.scale(newply, xfact= 1/self.yscale, yfact= 1/self.yscale)
+            else:
+                newply = affinity.scale(newply, xfact= 1/self.xscale, yfact= 1/self.xscale)
+            self.parent.children[1].original_base_unit = newply
+            self.parent.children[1].polygon = newply
+            self.parent.children[1].reset(0)
+            #self.parent.children[1].tile_regular_polygon()
 
-        if (self.parent.children[0] != None):
-                new_shape_info = tr.identify_shape(newply)
-                self.parent.main_shape_info = new_shape_info
-                self.parent.children[1].shape_info = new_shape_info
-                for state in self.saved_states:
-                    new_shape_info.append(state)
-                self.parent.remove_widget(self.parent.children[0])
-                btns = ReccomendationButtons()
-                self.parent.add_widget(btns)
-                if (new_shape_info != None and len(new_shape_info) >= 1):
-                    btns.setup_btns(False)
+            if (self.parent.children[0] != None):
+                    new_shape_info = tr.identify_shape(newply)
+                    self.parent.main_shape_info = new_shape_info
+                    self.parent.children[1].shape_info = new_shape_info
+                    for state in self.saved_states:
+                        new_shape_info.append(state)
+                    self.parent.remove_widget(self.parent.children[0])
+                    btns = ReccomendationButtons()
+                    self.parent.add_widget(btns)
+                    if (new_shape_info != None and len(new_shape_info) >= 1):
+                        btns.setup_btns(False)
 
     def on_window_resize(self, window, width, height):
         self.canvas.remove_group('shape')
