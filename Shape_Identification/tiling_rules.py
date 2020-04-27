@@ -117,9 +117,10 @@ def process_quadrilateral(shape):
         # check to make sure slope difference is large enough for slopes 1 and 3
         slope_threshold = 0.1
         if slope_1 > 0:
-            slopes_1_and_3_valid = slope_1 - slope_3 > slope_threshold
+            slopes_1_and_3_valid = abs(slope_1 - slope_3) > slope_threshold
         else:
-            slopes_1_and_3_valid = slope_3 - slope_1 > slope_threshold
+            slopes_1_and_3_valid = abs(slope_3 - slope_1) > slope_threshold
+        print('slopes 1 and 3 valid is', slopes_1_and_3_valid)
         if slopes_1_and_3_valid:
             if second_max_length == side2_length:
                 # check to make sure slope difference is large enough for slopes 2 and 4
@@ -127,7 +128,8 @@ def process_quadrilateral(shape):
                     slopes_2_and_4_valid = slope_2 - slope_4 > slope_threshold
                 else:
                     slopes_2_and_4_valid = slope_4 - slope_2 > slope_threshold
-                if True:
+                print('slopes 2 and 4 valid is', slopes_2_and_4_valid)
+                if slopes_2_and_4_valid:
                     second_rec_coords.append((second_rec_coords[0][0] - second_to_first_vertex_len_x, second_rec_coords[0][1] - second_to_first_vertex_len_y))
                     second_rec_coords.append(second_rec_coords[2])
                     second_rec_coords.append(second_rec_coords[3])
@@ -144,7 +146,8 @@ def process_quadrilateral(shape):
                     slopes_2_and_4_valid = slope_4 - slope_2 > slope_threshold
                 else:
                     slopes_2_and_4_valid = slope_2 - slope_4 > slope_threshold
-                if True:
+                print('slopes 2 and 4 valid is', slopes_2_and_4_valid)
+                if slopes_2_and_4_valid:
                     zeroth_to_first_vertex_len_x = second_rec_coords[1][0] - second_rec_coords[0][0]
                     zeroth_to_first_vertex_len_y = second_rec_coords[1][1] - second_rec_coords[0][1]
                     second_rec_coords.append(second_rec_coords[3])
