@@ -1111,6 +1111,11 @@ class CustomLayout(BoxLayout):
             self.fill = self.picker.color
             r,g,b,a = self.fill[0], self.fill[1], self.fill[2], self.fill[3]
             self.parent.children[1].fill_color = [r,g,b,a]
+        elif self.fill_toggle != 'down' and self.edge_toggle != 'down':
+            self.col = self.picker.color
+            r,g,b,a = self.col[0], self.col[1], self.col[2], self.col[3]
+            self.parent.children[1].stroke_color = [r,g,b,a]
+
 
         self.parent.children[1].draw_polygons()
         self.draw()
