@@ -44,12 +44,6 @@ class TessellationWidget(RelativeLayout):
         self.saved_type = None
         self.stroke_color = [255,255,255,1]
         self.fill_color = [0,0,1,1]
-
-        width = Window.size[0] - self.width
-        height = Window.size[1] * .3
-        with self.canvas.before:
-            Color(.5,.5,.5,1)
-            Rectangle(pos_hint={'x':0, 'y':0}, size=(width, height))
         
         self.topRow = RelativeLayout(pos_hint={'x':0, 'y':0.95}, size_hint=(1,.05))
         # Add save state btn
