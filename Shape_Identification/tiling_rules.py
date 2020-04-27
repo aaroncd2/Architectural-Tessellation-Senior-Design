@@ -111,42 +111,52 @@ def process_quadrilateral(shape):
         slope_3 = (second_rec_coords[3][1] - second_rec_coords[2][1]) / (second_rec_coords[3][0] - second_rec_coords[2][0])
         slope_4 = (second_rec_coords[4][1] - second_rec_coords[3][1]) / (second_rec_coords[4][0] - second_rec_coords[3][0])
         slope_list = [slope_1, slope_2, slope_3, slope_4]
-        # print statement for debugging
-        for i in range(0, len(second_rec_coords)):
-            print('coord [', i, '] = ', second_rec_coords[i])
-        for i in range(0, len(second_rec_coords) - 1):
-            print('slope ', i, ' = ', slope_list[i])
-        slope_list.sort()
-        slope_threshold = 0.2
-        # check to make sure slope difference is large enough
-        if abs(slope_1 - slope_3) >  slope_threshold and abs(slope_2 - slope_4) > slope_threshold:
+        for i in range (0, len(slope_list)):
+            print('coord ', i, ': ', second_rec_coords[i])
+            print('slope ', i, ': ', slope_list[i])
+        # check to make sure slope difference is large enough for slopes 1 and 3
+        slope_threshold = 0.1
+        if slope_1 > 0:
+            slopes_1_and_3_valid = slope_1 - slope_3 > slope_threshold
+        else:
+            slopes_1_and_3_valid = slope_3 - slope_1 > slope_threshold
+        if slopes_1_and_3_valid:
             if second_max_length == side2_length:
-                print('second max length is side 2')
-                second_rec_coords.append((second_rec_coords[0][0] - second_to_first_vertex_len_x, second_rec_coords[0][1] - second_to_first_vertex_len_y))
-                second_rec_coords.append(second_rec_coords[2])
-                second_rec_coords.append(second_rec_coords[3])
-                second_rec_exterior_coords = list()
-                second_rec_exterior_coords.append(second_rec_coords[0])
-                second_rec_exterior_coords.append(second_rec_coords[1])
-                second_rec_exterior_coords.append(second_rec_coords[2])
-                second_rec_exterior_coords.append(second_rec_coords[5])
-                second_rec_exterior_coords.append(second_rec_coords[0])
-                recommendations.append((Polygon(second_rec_coords), "parallelogram", True, Polygon(second_rec_exterior_coords)))
+                # check to make sure slope difference is large enough for slopes 2 and 4
+                if slope_2 > 0:
+                    slopes_2_and_4_valid = slope_2 - slope_4 > slope_threshold
+                else:
+                    slopes_2_and_4_valid = slope_4 - slope_2 > slope_threshold
+                if True:
+                    second_rec_coords.append((second_rec_coords[0][0] - second_to_first_vertex_len_x, second_rec_coords[0][1] - second_to_first_vertex_len_y))
+                    second_rec_coords.append(second_rec_coords[2])
+                    second_rec_coords.append(second_rec_coords[3])
+                    second_rec_exterior_coords = list()
+                    second_rec_exterior_coords.append(second_rec_coords[0])
+                    second_rec_exterior_coords.append(second_rec_coords[1])
+                    second_rec_exterior_coords.append(second_rec_coords[2])
+                    second_rec_exterior_coords.append(second_rec_coords[5])
+                    second_rec_exterior_coords.append(second_rec_coords[0])
+                    recommendations.append((Polygon(second_rec_coords), "parallelogram", True, Polygon(second_rec_exterior_coords)))
             elif second_max_length == side4_length:
-                print('second max length is side 4')
-                # check to make sure slope difference is large enought
-                zeroth_to_first_vertex_len_x = second_rec_coords[1][0] - second_rec_coords[0][0]
-                zeroth_to_first_vertex_len_y = second_rec_coords[1][1] - second_rec_coords[0][1]
-                second_rec_coords.append(second_rec_coords[3])
-                second_rec_coords.append((second_rec_coords[3][0] + zeroth_to_first_vertex_len_x, second_rec_coords[3][1] + zeroth_to_first_vertex_len_y))
-                second_rec_coords.append(second_rec_coords[1])
-                second_rec_exterior_coords = list()
-                second_rec_exterior_coords.append(second_rec_coords[0])
-                second_rec_exterior_coords.append(second_rec_coords[1])
-                second_rec_exterior_coords.append(second_rec_coords[6])
-                second_rec_exterior_coords.append(second_rec_coords[5])
-                second_rec_exterior_coords.append(second_rec_coords[0])
-                recommendations.append((Polygon(second_rec_coords), "parallelogram", True, Polygon(second_rec_exterior_coords)))
+                # check to make sure slope difference is large enough for slopes 2 and 4
+                if slope_2 > 0:
+                    slopes_2_and_4_valid = slope_4 - slope_2 > slope_threshold
+                else:
+                    slopes_2_and_4_valid = slope_2 - slope_4 > slope_threshold
+                if True:
+                    zeroth_to_first_vertex_len_x = second_rec_coords[1][0] - second_rec_coords[0][0]
+                    zeroth_to_first_vertex_len_y = second_rec_coords[1][1] - second_rec_coords[0][1]
+                    second_rec_coords.append(second_rec_coords[3])
+                    second_rec_coords.append((second_rec_coords[3][0] + zeroth_to_first_vertex_len_x, second_rec_coords[3][1] + zeroth_to_first_vertex_len_y))
+                    second_rec_coords.append(second_rec_coords[1])
+                    second_rec_exterior_coords = list()
+                    second_rec_exterior_coords.append(second_rec_coords[0])
+                    second_rec_exterior_coords.append(second_rec_coords[1])
+                    second_rec_exterior_coords.append(second_rec_coords[6])
+                    second_rec_exterior_coords.append(second_rec_coords[5])
+                    second_rec_exterior_coords.append(second_rec_coords[0])
+                    recommendations.append((Polygon(second_rec_coords), "parallelogram", True, Polygon(second_rec_exterior_coords)))
         return recommendations
     else:
         # the given shape is a concave quad
