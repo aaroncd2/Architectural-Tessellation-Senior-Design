@@ -18,6 +18,7 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
 from kivy.uix.image import Image
 from kivy.uix.boxlayout import BoxLayout
+from kivy.clock import Clock
 from shapely.geometry import Polygon, Point
 from shapely import affinity
 import matplotlib.pyplot as plt # for display
@@ -83,6 +84,11 @@ class RootWidget(BoxLayout):
         self.main_menu = MainMenuWidget()
         self.add_widget(self.main_menu)
 
+class Tooltip(Label):
+    pass
+
+
+
 #widget for main menu 'splash screen'
 class MainMenuWidget(GridLayout):
     def __init__(self, **kwargs):
@@ -106,6 +112,11 @@ class FileDiagButton(Button):
         self.parent.parent.run_file_diag()
 
 
+#class for tooltip btns
+# class ToolBtn(Button):
+#     def __init__(self, **kwargs):
+       
+
 
 class LoadExistingButton(Button):
     def __init__(self, **kwargs):
@@ -113,6 +124,7 @@ class LoadExistingButton(Button):
         self.text = "Load Existing CSV"
     def on_press(self, **kwargs):
         self.parent.parent.load_existing()
+    
 
 #file dialog prompt to load csv file of existing polygon
 class LoadExistingChooser(FileChooserListView):
@@ -135,34 +147,8 @@ class LoadExistingChooser(FileChooserListView):
                     data = fp
                     head, tail = os.path.split(data)
                     f.write(head)
-                #print(fp)
                 coo = []
                 csvtessellcoords =[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
-                # shape1 =[]
-                # shape2 =[]
-                # shape3 =[]
-                # shape4 =[]
-                # shape5 =[]
-                # shape6
-                # shape7
-                # shape8
-                # shape9
-                # shape10
-                # shape11
-                # shape12
-                # shape13
-                # shape14
-                # shape15
-                # shape16
-                # shape17
-                # shape3
-                # shape4
-                # shape5
-                # shape1
-                # shape2
-                # shape3
-                # shape4
-                # shape5
                 with open(fp) as csv_file:
                     csv_reader = csv.reader(csv_file, delimiter=',')
                     line_count = 0
@@ -287,11 +273,15 @@ class FileChooser(FileChooserListView):
             else:
                 self.ids.image.source = filename[0]
 
+
 class ReccomendationButton(Button):
     def __init__(self, **kwargs):
+        self.tooltip = Tooltip()
+        self.tooltext=''
+        self.tooltip.text = self.tooltext
+        Window.bind(mouse_pos=self.on_mouse_pos)
         super(Button, self).__init__(**kwargs)
         #self.size = 175, 145
-
 
         self.background_color = [.3, .3, 0.3, .75]
         self.pressed=False
@@ -301,6 +291,19 @@ class ReccomendationButton(Button):
                 Line(points = the_poly)
             with self.canvas.before:
                 Line(points = the_poly)
+    def on_mouse_pos(self, *args):
+        if not self.get_root_window():
+            return
+        pos = args[1]
+        self.tooltip.pos = pos
+        Clock.unschedule(self.display_tooltip)
+        self.close_tooltip()
+        if self.collide_point(*self.to_widget(*pos)):
+            Clock.schedule_once(self.display_tooltip,1)
+    def close_tooltip(self,*args):
+        Window.remove_widget(self.tooltip)
+    def display_tooltip(self,*args):
+        Window.add_widget(self.tooltip)
 
     def on_press(self, **kwargs):
         #print(self.index)
@@ -384,6 +387,10 @@ class ReccomendationButtons(FloatLayout):
             else:
                 the_poly = None
             temp = ReccomendationButton()
+            if str(self.btns_info[u][1]) == "regular":
+                temp.tooltip.text = "Freeform"
+            else:
+                temp.tooltip.text = str(self.btns_info[u][1])
             the_poly = None
 
             temp.index = u
