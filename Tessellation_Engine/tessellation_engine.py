@@ -159,9 +159,10 @@ class TessellationWidget(RelativeLayout):
         self.alternate_col_button.bind(on_press=self.alternate_cols)
         self.add_widget(self.buttons)
 
+    # fires anytime the size of window changes
     def on_window_resize(self):
         for child in self.topRow.children:
-            self.resize_element(child, .5)
+            self.resize_element(child, .45)
         for child in self.buttons.children: 
             self.resize_element(child, .9)
         self.resize_element(self.rec_label, .9)
@@ -171,6 +172,7 @@ class TessellationWidget(RelativeLayout):
         self.resize_element(self.v_label, .5)
         self.resize_element(self.scale_label, .15)
 
+    # resizes texture_size of elements to fit buttons
     def resize_element(self, element, amount):
         element.texture_size[0] = element.size[0] * amount
 
