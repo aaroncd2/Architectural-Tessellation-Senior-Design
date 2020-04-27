@@ -469,6 +469,9 @@ class CustomLayout(BoxLayout):
 
         Window.bind(on_key_down=self.key_action) #Binds Keyboard for key detection
         Window.bind(on_resize=self.on_window_resize)
+        Window.bind(on_minimize=self.on_window_min_max)
+        Window.bind(on_maximize=self.on_window_min_max)
+        Window.bind(on_restore=self.on_window_min_max)
         self.saved_states= []
         self.back_button = Button(text = 'Back',
                                           background_color = (1,1,1,1),
@@ -760,6 +763,10 @@ class CustomLayout(BoxLayout):
         self.parent.add_widget(btns)
         if (self.parent.main_shape_info != None and len(self.parent.main_shape_info) >= 1):
             btns.setup_btns(False)
+        self.parent.children[1].on_window_resize()
+
+    def on_window_min_max(self, window):
+        self.parent.children[1].on_window_resize()
 
     def draw(self):
         r,g,b,a = self.col[0], self.col[1], self.col[2], self.col[3]
