@@ -24,6 +24,7 @@ import numpy as np # for math
 from Tessellation_Engine import tessellation_utilities as tu #for utility functions
 from Tessellation_Engine.save_dialog import SaveDialog
 from Tessellation_Engine.custom_slider import CustomSlider
+from Tessellation_Engine.help_dialog import HelpDialog
 
 ### START TESSELLATION ENGINE ###
 class CanvasWidget(RelativeLayout):
@@ -46,21 +47,25 @@ class TessellationWidget(RelativeLayout):
         
         self.topRow = RelativeLayout(pos_hint={'x':0, 'y':0.95}, size_hint=(1,.05))
         # Add save state btn
-        self.save_state_button = Button(text = 'Save State', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':0, 'y':0}, size_hint=(.25,1))
+        self.save_state_button = Button(text = 'Save State', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':0, 'y':0}, size_hint=(.20,1))
         self.topRow.add_widget(self.save_state_button)
         self.save_state_button.bind(on_press=self.save_state)
         # Add export button
-        self.export_button = Button(text = 'Export', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':.25, 'y':0}, size_hint=(.25,1))
+        self.export_button = Button(text = 'Export', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':.20, 'y':0}, size_hint=(.20,1))
         self.topRow.add_widget(self.export_button)
         self.export_button.bind(on_press=self.export_tiling)
         # Add undo button
-        self.undo_button = Button(text = 'Undo', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':.5, 'y':0}, size_hint=(.25,1))
+        self.undo_button = Button(text = 'Undo', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':.40, 'y':0}, size_hint=(.20,1))
         self.topRow.add_widget(self.undo_button)
         self.undo_button.bind(on_press=self.undo)
         # Add reset button
-        self.reset_button = Button(text = 'Reset', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':.75, 'y':0}, size_hint=(.25,1))
+        self.reset_button = Button(text = 'Reset', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':.60, 'y':0}, size_hint=(.20,1))
         self.topRow.add_widget(self.reset_button)
         self.reset_button.bind(on_press=self.reset)
+        # Add help button
+        self.help_button = Button(text = 'Help/Controls', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':.80, 'y':0}, size_hint=(.20,1))
+        self.topRow.add_widget(self.help_button)
+        self.help_button.bind(on_press=self.show_help)
         self.add_widget(self.topRow)
 
 
@@ -77,9 +82,9 @@ class TessellationWidget(RelativeLayout):
         self.rotation_slider = CustomSlider(min=0, max=360, value=0, value_track = True)
         self.rotation_slider.bind(value=self.rotate_polygon)
         self.rotation_value = 0
-        self.input_box = TextInput(text='0', input_filter='float', multiline=False, font_size='12dp', size_hint=(.95,.75))
+        self.input_box = TextInput(text='0', input_filter='float', multiline=False, font_size='10dp', size_hint=(.95,.75))
         self.input_box.bind(on_text_validate=self.on_enter)
-        self.label = Label(text ='Rotation:', font_size='12dp')
+        self.label = Label(text ='Rotation:', font_size='10dp')
         self.rotation_label_box.add_widget(self.label)
         self.rotation_label_box.add_widget(self.input_box)
         self.rotation_box.add_widget(self.rotation_label_box)
@@ -88,7 +93,7 @@ class TessellationWidget(RelativeLayout):
 
         # Add scale slider
         self.scale_box = BoxLayout(orientation='horizontal', pos_hint={'x':0, 'y':0}, size_hint=(1,.25))
-        self.scale_label = Label(text='Scale', font_size='12dp')
+        self.scale_label = Label(text='Scale', font_size='10dp')
         self.scale_box.add_widget(self.scale_label)
         self.slide_scale = CustomSlider(min=-50, max=50, value=0, value_track = True)
         self.scaling = 0
@@ -98,7 +103,7 @@ class TessellationWidget(RelativeLayout):
 
         # Add horizontal translation slider
         self.horizontal_box = BoxLayout(orientation='horizontal', pos_hint={'x':0, 'y':.5}, size_hint=(1,.25))
-        self.h_label = Label(text='Horizontal Spacing', font_size='12dp')
+        self.h_label = Label(text='Horizontal Spacing', font_size='10dp')
         self.horizontal_box.add_widget(self.h_label)
         self.slide_horizontal = CustomSlider(min=-30, max=30, value=0, value_track = True)
         self.xSpacing = 0
@@ -108,7 +113,7 @@ class TessellationWidget(RelativeLayout):
 
         # Add vertical translation slider
         self.vertical_box = BoxLayout(orientation='horizontal', pos_hint={'x':0, 'y':.25}, size_hint=(1,.25))
-        self.v_label = Label(text='Vertical Spacing', font_size='12dp')
+        self.v_label = Label(text='Vertical Spacing', font_size='10dp')
         self.vertical_box.add_widget(self.v_label)
         self.slide_vertical = CustomSlider(min=-30, max=30, value=0, value_track = True)
         self.ySpacing = 0
@@ -617,12 +622,7 @@ class TessellationWidget(RelativeLayout):
         self.rotate_polygon(0, float(self.input_box.text))
 
     def save_state(self, instance):
-        print("saving state")
-        #self.shape_info.append((self.polygon,self.type, True , self.polygons))
-    
         self.parent.children[2].add_saved_state(self.polygon, self.type, True, self.polygons)
-        #self.parent.children[0].add_saved_session_btn(self.polygon, self.polygons, self.type)
-
 
     #makes the tiling freeform
     def make_freeform(self, instance):
@@ -918,6 +918,10 @@ class TessellationWidget(RelativeLayout):
         self.raw_df = pd.DataFrame(raw)
         SaveDialog(self).open()
 
+    # opens the help popup to display controls and information
+    def show_help(self, instance):
+        HelpDialog().open()
+
     # Draws an array of polygons to the canvas
     def draw_polygons(self):
         self.scale_to_fit_window()
@@ -1043,8 +1047,6 @@ class TessellationWidget(RelativeLayout):
         print(self.shape_info)
         if len(self.rec_shape) == 5:
             if self.rec_shape[4] == "s":
-                #self.polygon = self.rec_shape[0]
-                #self.parent.children[2].config_from_shapely_poly(self.rec_shape[0])
                 self.base_unit = tu.make_positive(self.rec_shape[0])
                 self.polygon = tu.make_positive(self.rec_shape[0])
                 self.polygons = self.rec_shape[3]
@@ -1073,8 +1075,8 @@ class TessellationWidget(RelativeLayout):
     #scales tiling before drawing to ensure it fits on window
     def scale_to_fit_window(self):
         size = Window.size
-        max_width = size[0] / 2 - (size[0] * .2)
-        max_height = size[1] - self.sliders.height - self.topRow.height
+        max_width = size[0] / 2 - (size[0] * .15)
+        max_height = size[1] - (size[1] * .35)
 
         max_x = self.polygons[0][0]
         min_x = self.polygons[0][0]
@@ -1113,11 +1115,11 @@ class TessellationWidget(RelativeLayout):
         yOff = 0
         if min_x < 0:
             xOff = min_x * -1
-        elif max_x > (size[0] / 2) - (size[0] * .2):
+        elif max_x > (size[0] / 2) - (size[0] * .15):
             xOff = min_x * -1
         if min_y < 0:
             yOff = min_y * -1
-        elif max_y > (size[1] - self.sliders.height - self.topRow.height):
+        elif max_y > (size[1] - (size[1] * .35)):
             yOff = min_y * -1
         self.fit_to_screen(xOff, yOff, scale_factor)
 
@@ -1130,10 +1132,8 @@ class TessellationWidget(RelativeLayout):
             for p in polygon:
                 if count % 2 == 0:
                     temp_poly.append((p * scale_factor) + xOff)
-                    #temp_poly.append((p * scale_factor))
                 else:
                     temp_poly.append((p * scale_factor) + yOff)
-                    #temp_poly.append((p * scale_factor))
                 count += 1
             temp_polygons.append(temp_poly)
         self.polygons = temp_polygons
