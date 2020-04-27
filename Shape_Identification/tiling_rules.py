@@ -69,7 +69,7 @@ def process_quadrilateral(shape):
         # zeroth and first coordinates
         if max_length == side1_length:
             rotations = 0
-        if max_length == side2_length:
+        elif max_length == side2_length:
             rotations = 1
         elif max_length == side3_length:
             rotations = 2
@@ -114,34 +114,39 @@ def process_quadrilateral(shape):
         # print statement for debugging
         for i in range(0, len(second_rec_coords)):
             print('coord [', i, '] = ', second_rec_coords[i])
+        for i in range(0, len(second_rec_coords) - 1):
+            print('slope ', i, ' = ', slope_list[i])
         slope_list.sort()
-        if second_max_length == side2_length:
-            print('second max length is side 2')
-            # checking slopes for case with max side1 and max side2
-            second_rec_coords.append((second_rec_coords[0][0] - second_to_first_vertex_len_x, second_rec_coords[0][1] - second_to_first_vertex_len_y))
-            second_rec_coords.append(second_rec_coords[2])
-            second_rec_coords.append(second_rec_coords[3])
-            second_rec_exterior_coords = list()
-            second_rec_exterior_coords.append(second_rec_coords[0])
-            second_rec_exterior_coords.append(second_rec_coords[1])
-            second_rec_exterior_coords.append(second_rec_coords[2])
-            second_rec_exterior_coords.append(second_rec_coords[5])
-            second_rec_exterior_coords.append(second_rec_coords[0])
-            recommendations.append((Polygon(second_rec_coords), "parallelogram", True, Polygon(second_rec_exterior_coords)))
-        elif second_max_length == side4_length:
-            print('second max length is side 4')
-            zeroth_to_first_vertex_len_x = second_rec_coords[1][0] - second_rec_coords[0][0]
-            zeroth_to_first_vertex_len_y = second_rec_coords[1][1] - second_rec_coords[0][1]
-            second_rec_coords.append(second_rec_coords[3])
-            second_rec_coords.append((second_rec_coords[3][0] + zeroth_to_first_vertex_len_x, second_rec_coords[3][1] + zeroth_to_first_vertex_len_y))
-            second_rec_coords.append(second_rec_coords[1])
-            second_rec_exterior_coords = list()
-            second_rec_exterior_coords.append(second_rec_coords[0])
-            second_rec_exterior_coords.append(second_rec_coords[1])
-            second_rec_exterior_coords.append(second_rec_coords[6])
-            second_rec_exterior_coords.append(second_rec_coords[5])
-            second_rec_exterior_coords.append(second_rec_coords[0])
-            recommendations.append((Polygon(second_rec_coords), "parallelogram", True, Polygon(second_rec_exterior_coords)))
+        slope_threshold = 0.2
+        # check to make sure slope difference is large enough
+        if abs(slope_1 - slope_3) >  slope_threshold and abs(slope_2 - slope_4) > slope_threshold:
+            if second_max_length == side2_length:
+                print('second max length is side 2')
+                second_rec_coords.append((second_rec_coords[0][0] - second_to_first_vertex_len_x, second_rec_coords[0][1] - second_to_first_vertex_len_y))
+                second_rec_coords.append(second_rec_coords[2])
+                second_rec_coords.append(second_rec_coords[3])
+                second_rec_exterior_coords = list()
+                second_rec_exterior_coords.append(second_rec_coords[0])
+                second_rec_exterior_coords.append(second_rec_coords[1])
+                second_rec_exterior_coords.append(second_rec_coords[2])
+                second_rec_exterior_coords.append(second_rec_coords[5])
+                second_rec_exterior_coords.append(second_rec_coords[0])
+                recommendations.append((Polygon(second_rec_coords), "parallelogram", True, Polygon(second_rec_exterior_coords)))
+            elif second_max_length == side4_length:
+                print('second max length is side 4')
+                # check to make sure slope difference is large enought
+                zeroth_to_first_vertex_len_x = second_rec_coords[1][0] - second_rec_coords[0][0]
+                zeroth_to_first_vertex_len_y = second_rec_coords[1][1] - second_rec_coords[0][1]
+                second_rec_coords.append(second_rec_coords[3])
+                second_rec_coords.append((second_rec_coords[3][0] + zeroth_to_first_vertex_len_x, second_rec_coords[3][1] + zeroth_to_first_vertex_len_y))
+                second_rec_coords.append(second_rec_coords[1])
+                second_rec_exterior_coords = list()
+                second_rec_exterior_coords.append(second_rec_coords[0])
+                second_rec_exterior_coords.append(second_rec_coords[1])
+                second_rec_exterior_coords.append(second_rec_coords[6])
+                second_rec_exterior_coords.append(second_rec_coords[5])
+                second_rec_exterior_coords.append(second_rec_coords[0])
+                recommendations.append((Polygon(second_rec_coords), "parallelogram", True, Polygon(second_rec_exterior_coords)))
         return recommendations
     else:
         # the given shape is a concave quad
