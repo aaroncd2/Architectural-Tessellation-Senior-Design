@@ -9,6 +9,7 @@ from kivy.uix.widget import Widget
 from kivy.uix.textinput import TextInput
 from kivy.graphics import *
 from kivy.graphics.vertex_instructions import Mesh
+from kivy.clock import Clock
 from kivy.core.window import Window
 
 import sys
@@ -31,7 +32,31 @@ class CanvasWidget(RelativeLayout):
     def __init__(self, **kwargs):
         super(CanvasWidget, self).__init__(**kwargs)
         self.lines = InstructionGroup()
-        
+
+class Tooltip(Label):
+    pass
+
+class ToolBtn(Button):
+    def __init__(self,**kwargs):
+        self.tooltip = Tooltip()
+        self.tooltext=''
+        self.tooltip.text = self.tooltext
+        Window.bind(mouse_pos=self.on_mouse_pos)
+        super(Button, self).__init__(**kwargs)
+    def on_mouse_pos(self, *args):
+        if not self.get_root_window():
+            return
+        pos = args[1]
+        self.tooltip.pos = pos
+        Clock.unschedule(self.display_tooltip)
+        self.close_tooltip()
+        if self.collide_point(*self.to_widget(*pos)):
+            Clock.schedule_once(self.display_tooltip,1)
+    def close_tooltip(self,*args):
+        Window.remove_widget(self.tooltip)
+    def display_tooltip(self,*args):
+        Window.add_widget(self.tooltip)
+
 class TessellationWidget(RelativeLayout):
     def __init__(self, **kwargs):
         super(TessellationWidget, self).__init__(**kwargs)
@@ -47,23 +72,28 @@ class TessellationWidget(RelativeLayout):
 
         self.topRow = RelativeLayout(pos_hint={'x':0, 'y':0.95}, size_hint=(1,.05))
         # Add save state btn
-        self.save_state_button = Button(text = 'Save State', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':0, 'y':0}, size_hint=(.20,1))
+        self.save_state_button = ToolBtn(text = 'Save State', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':0, 'y':0}, size_hint=(.20,1))
+        self.save_state_button.tooltip.text = "press to save current tiling info for later use"
         self.topRow.add_widget(self.save_state_button)
         self.save_state_button.bind(on_press=self.save_state)
         # Add export button
-        self.export_button = Button(text = 'Export', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':.20, 'y':0}, size_hint=(.20,1))
+        self.export_button = ToolBtn(text = 'Export', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':.20, 'y':0}, size_hint=(.20,1))
+        self.export_button.tooltip.text = "Press to export tiling to CSV format"
         self.topRow.add_widget(self.export_button)
         self.export_button.bind(on_press=self.export_tiling)
         # Add undo button
-        self.undo_button = Button(text = 'Undo', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':.40, 'y':0}, size_hint=(.20,1))
+        self.undo_button = ToolBtn(text = 'Undo', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':.40, 'y':0}, size_hint=(.20,1))
+        self.undo_button.tooltip.text= "Press to undo last tessellation edit"
         self.topRow.add_widget(self.undo_button)
         self.undo_button.bind(on_press=self.undo)
         # Add reset button
-        self.reset_button = Button(text = 'Reset', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':.60, 'y':0}, size_hint=(.20,1))
+        self.reset_button = ToolBtn(text = 'Reset', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':.60, 'y':0}, size_hint=(.20,1))
+        self.reset_button.tooltip.text = "Press to reset tiling edits to original"
         self.topRow.add_widget(self.reset_button)
         self.reset_button.bind(on_press=self.reset)
         # Add help button
-        self.help_button = Button(text = 'Help/Controls', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':.80, 'y':0}, size_hint=(.20,1))
+        self.help_button = ToolBtn(text = 'Help/Controls', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':.80, 'y':0}, size_hint=(.20,1))
+        self.help_button.tooltip.text = "Press to display information about controls"
         self.topRow.add_widget(self.help_button)
         self.help_button.bind(on_press=self.show_help)
         self.add_widget(self.topRow)
@@ -134,27 +164,32 @@ class TessellationWidget(RelativeLayout):
 
         self.buttons = RelativeLayout(pos_hint={'x':.8, 'y':.3}, size_hint=(.2,.50))
         # Add freeform button
-        self.freeform_button = Button(text = 'Toggle Freeform', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':0, 'y':0}, size_hint=(1,.2))
+        self.freeform_button = ToolBtn(text = 'Toggle Freeform', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':0, 'y':0}, size_hint=(1,.2))
+        self.freeform_button.tooltip.text = "Toggle 'Freeform' Tessellation functionality"
         self.buttons.add_widget(self.freeform_button)
         self.freeform_button.bind(on_press=self.make_freeform)
 
         # Add flip horizontal button
-        self.horizontal_button = Button(text = 'Flip Horizontal', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':0, 'y':.2}, size_hint=(1,.2))
+        self.horizontal_button = ToolBtn(text = 'Flip Horizontal', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':0, 'y':.2}, size_hint=(1,.2))
+        self.horizontal_button.tooltip.text = "Flip tiling horizontally over x axis"
         self.buttons.add_widget(self.horizontal_button)
         self.horizontal_button.bind(on_press=self.flip_horizontal)
 
         # Add flip vertical button
-        self.vertical_button = Button(text = 'Flip Vertical', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':0, 'y':.4}, size_hint=(1,.2))
+        self.vertical_button = ToolBtn(text = 'Flip Vertical', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':0, 'y':.4}, size_hint=(1,.2))
+        self.vertical_button.tooltip.text = "Flip tiling vertically over y axis"
         self.buttons.add_widget(self.vertical_button)
         self.vertical_button.bind(on_press=self.flip_vertical)
 
         # Add alternate row button
-        self.alternate_row_button = Button(text = 'Alternate Rows', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':0, 'y':.6}, size_hint=(1,.2))
+        self.alternate_row_button = ToolBtn(text = 'Alternate Rows', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':0, 'y':.6}, size_hint=(1,.2))
+        self.alternate_row_button.tooltip.text="Press to flip shapes in every other row"
         self.buttons.add_widget(self.alternate_row_button)
         self.alternate_row_button.bind(on_press=self.alternate_rows)
 
         # Add alternate column button
-        self.alternate_col_button = Button(text = 'Alternate Columns', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':0, 'y':.8}, size_hint=(1,.2))
+        self.alternate_col_button = ToolBtn(text = 'Alternate Columns', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':0, 'y':.8}, size_hint=(1,.2))
+        self.alternate_col_button.tooltip.text = "Press to flip shapes in every other column"
         self.buttons.add_widget(self.alternate_col_button)
         self.alternate_col_button.bind(on_press=self.alternate_cols)
         self.add_widget(self.buttons)
