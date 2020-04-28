@@ -497,7 +497,7 @@ class CustomLayout(BoxLayout):
                                           pos_hint = {'bottom': 0.3})
         self.back_button.tooltip.text ="Go back to main menu"
         # Add change color button
-        self.color_picker_button = Button(text = 'Choose Color',
+        self.color_picker_button = ToolBtn(text = 'Choose Color',
                                           font_size = '12dp',
                                           background_color = (1,1,1,1),
                                           size_hint = (.35,.07),
@@ -505,7 +505,7 @@ class CustomLayout(BoxLayout):
         self.color_picker_button.tooltip.text ="Find a color that suits your tessellation"
 
         #Add background color button
-        self.background_color_picker_button = Button(text = 'Choose Background',
+        self.background_color_picker_button = ToolBtn(text = 'Choose Background',
                                                      font_size = '12dp',
                                                      background_color = (1,1,1,1),
                                                      size_hint = (.45,.07),
