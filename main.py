@@ -472,16 +472,19 @@ class CustomLayout(BoxLayout):
         self.saved_states= []
         self.back_button = Button(text = 'Back',
                                           background_color = (1,1,1,1),
+                                          font_size = '12dp',
                                           size_hint = (.3,.07),
                                           pos_hint = {'bottom': 0.3})
         # Add change color button
         self.color_picker_button = Button(text = 'Choose Color',
+                                          font_size = '12dp',
                                           background_color = (1,1,1,1),
                                           size_hint = (.35,.07),
                                           pos_hint = {'bottom': 0.3})
 
         #Add background color button
         self.background_color_picker_button = Button(text = 'Choose Background',
+                                                     font_size = '12dp',
                                                      background_color = (1,1,1,1),
                                                      size_hint = (.45,.07),
                                                      pos_hint = {'bottom': 0.3})
