@@ -20,7 +20,8 @@ def getCanny(image, sigma_val=0.33):
 
 def processImage(image):
     sketch = cv.imread(image)
-    imgray = cv.cvtColor(sketch, cv.COLOR_BGR2GRAY)
+    sketch_flipped = cv.flip(sketch,0)
+    imgray = cv.cvtColor(sketch_flipped, cv.COLOR_BGR2GRAY)
     imgray = cv.bilateralFilter(imgray, 11, 17, 17)
     cannyImg = getCanny(imgray)
     # cv.imshow("Edges",cannyImg)

@@ -87,8 +87,6 @@ class RootWidget(BoxLayout):
 class Tooltip(Label):
     pass
 
-
-
 #widget for main menu 'splash screen'
 class MainMenuWidget(GridLayout):
     def __init__(self, **kwargs):
@@ -459,7 +457,29 @@ class BoxGrid(BoxLayout):
         if (self.main_shape_info != None and len(self.main_shape_info) > 1):
             self.btn.setup_btns(False)
 
+class Tooltip(Label):
+    pass
 
+class ToolBtn(Button):
+    def __init__(self,**kwargs):
+        self.tooltip = Tooltip()
+        self.tooltext=''
+        self.tooltip.text = self.tooltext
+        Window.bind(mouse_pos=self.on_mouse_pos)
+        super(Button, self).__init__(**kwargs)
+    def on_mouse_pos(self, *args):
+        if not self.get_root_window():
+            return
+        pos = args[1]
+        self.tooltip.pos = pos
+        Clock.unschedule(self.display_tooltip)
+        self.close_tooltip()
+        if self.collide_point(*self.to_widget(*pos)):
+            Clock.schedule_once(self.display_tooltip,1)
+    def close_tooltip(self,*args):
+        Window.remove_widget(self.tooltip)
+    def display_tooltip(self,*args):
+        Window.add_widget(self.tooltip)
 
 #layout for baseunit and functions
 class CustomLayout(BoxLayout):
@@ -470,17 +490,19 @@ class CustomLayout(BoxLayout):
         Window.bind(on_key_down=self.key_action) #Binds Keyboard for key detection
         Window.bind(on_resize=self.on_window_resize)
         self.saved_states= []
-        self.back_button = Button(text = 'Back',
+        self.back_button = ToolBtn(text = 'Back',
                                           background_color = (1,1,1,1),
                                           font_size = '12dp',
                                           size_hint = (.3,.07),
                                           pos_hint = {'bottom': 0.3})
+        self.back_button.tooltip.text ="Go back to main menu"
         # Add change color button
         self.color_picker_button = Button(text = 'Choose Color',
                                           font_size = '12dp',
                                           background_color = (1,1,1,1),
                                           size_hint = (.35,.07),
                                           pos_hint = {'bottom': 0.3})
+        self.color_picker_button.tooltip.text ="Find a color that suits your tessellation"
 
         #Add background color button
         self.background_color_picker_button = Button(text = 'Choose Background',
@@ -488,6 +510,7 @@ class CustomLayout(BoxLayout):
                                                      background_color = (1,1,1,1),
                                                      size_hint = (.45,.07),
                                                      pos_hint = {'bottom': 0.3})
+        self.background_color_picker_button.tooltip.text = "Choose color for tessellation background"
         self.add_widget(self.back_button)
         self.back_button.bind(on_press=self.go_back)
         self.add_widget(self.color_picker_button)
@@ -506,11 +529,11 @@ class CustomLayout(BoxLayout):
                            pos_hint={'center_x': .5, 'center_y': .5},
                            size_hint = (.4, .4),
                            auto_dismiss = True)
-        self.help_button = Button(text = '?',
+        self.help_button = ToolBtn(text = '?',
                                    size_hint = (.1, .04),
                                    background_color = (1,1,1,.3),
                                    pos_hint = {'top':1})
-
+        self.help_button.tooltip.text = "Click for controls help and descriptions"
         self.help_button.bind(on_press = open_help)
         self.add_widget(self.help_button)
 

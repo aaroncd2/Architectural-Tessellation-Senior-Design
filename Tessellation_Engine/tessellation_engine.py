@@ -9,6 +9,7 @@ from kivy.uix.widget import Widget
 from kivy.uix.textinput import TextInput
 from kivy.graphics import *
 from kivy.graphics.vertex_instructions import Mesh
+from kivy.clock import Clock
 from kivy.core.window import Window
 
 import sys
@@ -31,7 +32,31 @@ class CanvasWidget(RelativeLayout):
     def __init__(self, **kwargs):
         super(CanvasWidget, self).__init__(**kwargs)
         self.lines = InstructionGroup()
-        
+
+class Tooltip(Label):
+    pass
+
+class ToolBtn(Button):
+    def __init__(self,**kwargs):
+        self.tooltip = Tooltip()
+        self.tooltext=''
+        self.tooltip.text = self.tooltext
+        Window.bind(mouse_pos=self.on_mouse_pos)
+        super(Button, self).__init__(**kwargs)
+    def on_mouse_pos(self, *args):
+        if not self.get_root_window():
+            return
+        pos = args[1]
+        self.tooltip.pos = pos
+        Clock.unschedule(self.display_tooltip)
+        self.close_tooltip()
+        if self.collide_point(*self.to_widget(*pos)):
+            Clock.schedule_once(self.display_tooltip,1)
+    def close_tooltip(self,*args):
+        Window.remove_widget(self.tooltip)
+    def display_tooltip(self,*args):
+        Window.add_widget(self.tooltip)
+
 class TessellationWidget(RelativeLayout):
     def __init__(self, **kwargs):
         super(TessellationWidget, self).__init__(**kwargs)
@@ -44,26 +69,31 @@ class TessellationWidget(RelativeLayout):
         self.saved_type = None
         self.stroke_color = [255,255,255,1]
         self.fill_color = [0,0,1,1]
-        
+
         self.topRow = RelativeLayout(pos_hint={'x':0, 'y':0.95}, size_hint=(1,.05))
         # Add save state btn
-        self.save_state_button = Button(text = 'Save State', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':0, 'y':0}, size_hint=(.20,1))
+        self.save_state_button = ToolBtn(text = 'Save State', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':0, 'y':0}, size_hint=(.20,1))
+        self.save_state_button.tooltip.text = "press to save current tiling info for later use"
         self.topRow.add_widget(self.save_state_button)
         self.save_state_button.bind(on_press=self.save_state)
         # Add export button
-        self.export_button = Button(text = 'Export', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':.20, 'y':0}, size_hint=(.20,1))
+        self.export_button = ToolBtn(text = 'Export', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':.20, 'y':0}, size_hint=(.20,1))
+        self.export_button.tooltip.text = "Press to export tiling to CSV format"
         self.topRow.add_widget(self.export_button)
         self.export_button.bind(on_press=self.export_tiling)
         # Add undo button
-        self.undo_button = Button(text = 'Undo', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':.40, 'y':0}, size_hint=(.20,1))
+        self.undo_button = ToolBtn(text = 'Undo', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':.40, 'y':0}, size_hint=(.20,1))
+        self.undo_button.tooltip.text= "Press to undo last tessellation edit"
         self.topRow.add_widget(self.undo_button)
         self.undo_button.bind(on_press=self.undo)
         # Add reset button
-        self.reset_button = Button(text = 'Reset', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':.60, 'y':0}, size_hint=(.20,1))
+        self.reset_button = ToolBtn(text = 'Reset', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':.60, 'y':0}, size_hint=(.20,1))
+        self.reset_button.tooltip.text = "Press to reset tiling edits to original"
         self.topRow.add_widget(self.reset_button)
         self.reset_button.bind(on_press=self.reset)
         # Add help button
-        self.help_button = Button(text = 'Help/Controls', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':.80, 'y':0}, size_hint=(.20,1))
+        self.help_button = ToolBtn(text = 'Help/Controls', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':.80, 'y':0}, size_hint=(.20,1))
+        self.help_button.tooltip.text = "Press to display information about controls"
         self.topRow.add_widget(self.help_button)
         self.help_button.bind(on_press=self.show_help)
         self.add_widget(self.topRow)
@@ -82,9 +112,9 @@ class TessellationWidget(RelativeLayout):
         self.rotation_slider = CustomSlider(min=0, max=360, value=0, value_track = True)
         self.rotation_slider.bind(value=self.rotate_polygon)
         self.rotation_value = 0
-        self.input_box = TextInput(text='0', input_filter='float', multiline=False, font_size='10dp', size_hint=(.95,.75))
+        self.input_box = TextInput(text='0', input_filter='float', multiline=False, font_size='12dp', size_hint=(.95,.75))
         self.input_box.bind(on_text_validate=self.on_enter)
-        self.label = Label(text ='Rotation:', font_size='10dp')
+        self.label = Label(text ='Rotation:', font_size='12dp')
         self.rotation_label_box.add_widget(self.label)
         self.rotation_label_box.add_widget(self.input_box)
         self.rotation_box.add_widget(self.rotation_label_box)
@@ -93,7 +123,7 @@ class TessellationWidget(RelativeLayout):
 
         # Add scale slider
         self.scale_box = BoxLayout(orientation='horizontal', pos_hint={'x':0, 'y':0}, size_hint=(1,.25))
-        self.scale_label = Label(text='Scale', font_size='10dp')
+        self.scale_label = Label(text='Scale', font_size='12dp')
         self.scale_box.add_widget(self.scale_label)
         self.slide_scale = CustomSlider(min=-50, max=50, value=0, value_track = True)
         self.scaling = 0
@@ -103,9 +133,9 @@ class TessellationWidget(RelativeLayout):
 
         # Add horizontal translation slider
         self.horizontal_box = BoxLayout(orientation='horizontal', pos_hint={'x':0, 'y':.5}, size_hint=(1,.25))
-        self.h_label = Label(text='Horizontal Spacing', font_size='10dp')
+        self.h_label = Label(text='Horizontal Spacing', font_size='12dp')
         self.horizontal_box.add_widget(self.h_label)
-        self.slide_horizontal = CustomSlider(min=-30, max=30, value=0, value_track = True)
+        self.slide_horizontal = CustomSlider(min=-50, max=50, value=0, value_track = True)
         self.xSpacing = 0
         self.slide_horizontal.bind(value = self.adjust_horizontal_spacing)
         self.horizontal_box.add_widget(self.slide_horizontal)
@@ -113,9 +143,9 @@ class TessellationWidget(RelativeLayout):
 
         # Add vertical translation slider
         self.vertical_box = BoxLayout(orientation='horizontal', pos_hint={'x':0, 'y':.25}, size_hint=(1,.25))
-        self.v_label = Label(text='Vertical Spacing', font_size='10dp')
+        self.v_label = Label(text='Vertical Spacing', font_size='12dp')
         self.vertical_box.add_widget(self.v_label)
-        self.slide_vertical = CustomSlider(min=-30, max=30, value=0, value_track = True)
+        self.slide_vertical = CustomSlider(min=-50, max=50, value=0, value_track = True)
         self.ySpacing = 0
         self.slide_vertical.bind(value = self.adjust_vertical_spacing)
         self.vertical_box.add_widget(self.slide_vertical)
@@ -125,46 +155,51 @@ class TessellationWidget(RelativeLayout):
         self.labels = RelativeLayout(pos_hint={'x':.8, 'y':0}, size_hint=(.2,.30))
         # Add tiling type label
         self.label_box = BoxLayout(orientation='vertical', pos_hint={'x':0, 'y':0}, size_hint=(1,1))
-        self.rec_label = Label(text='Tessellation Type:', font_size='10dp')
+        self.rec_label = Label(text='Tessellation Type:', font_size='12dp')
         self.label_box.add_widget(self.rec_label)
-        self.rec_type = Label(text='Freeform', font_size='10dp')
+        self.rec_type = Label(text='Freeform', font_size='12dp')
         self.label_box.add_widget(self.rec_type)
         self.labels.add_widget(self.label_box)
         self.add_widget(self.labels)
 
         self.buttons = RelativeLayout(pos_hint={'x':.8, 'y':.3}, size_hint=(.2,.50))
         # Add freeform button
-        self.freeform_button = Button(text = 'Toggle Freeform', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':0, 'y':0}, size_hint=(1,.2))
+        self.freeform_button = ToolBtn(text = 'Toggle Freeform', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':0, 'y':0}, size_hint=(1,.2))
+        self.freeform_button.tooltip.text = "Toggle 'Freeform' Tessellation functionality"
         self.buttons.add_widget(self.freeform_button)
         self.freeform_button.bind(on_press=self.make_freeform)
 
         # Add flip horizontal button
-        self.horizontal_button = Button(text = 'Flip Horizontal', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':0, 'y':.2}, size_hint=(1,.2))
+        self.horizontal_button = ToolBtn(text = 'Flip Horizontal', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':0, 'y':.2}, size_hint=(1,.2))
+        self.horizontal_button.tooltip.text = "Flip tiling horizontally over x axis"
         self.buttons.add_widget(self.horizontal_button)
         self.horizontal_button.bind(on_press=self.flip_horizontal)
 
         # Add flip vertical button
-        self.vertical_button = Button(text = 'Flip Vertical', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':0, 'y':.4}, size_hint=(1,.2))
+        self.vertical_button = ToolBtn(text = 'Flip Vertical', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':0, 'y':.4}, size_hint=(1,.2))
+        self.vertical_button.tooltip.text = "Flip tiling vertically over y axis"
         self.buttons.add_widget(self.vertical_button)
         self.vertical_button.bind(on_press=self.flip_vertical)
 
         # Add alternate row button
-        self.alternate_row_button = Button(text = 'Alternate Rows', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':0, 'y':.6}, size_hint=(1,.2))
+        self.alternate_row_button = ToolBtn(text = 'Alternate Rows', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':0, 'y':.6}, size_hint=(1,.2))
+        self.alternate_row_button.tooltip.text="Press to flip shapes in every other row"
         self.buttons.add_widget(self.alternate_row_button)
         self.alternate_row_button.bind(on_press=self.alternate_rows)
 
         # Add alternate column button
-        self.alternate_col_button = Button(text = 'Alternate Columns', background_color = (1,1,1,1), font_size='10dp', pos_hint={'x':0, 'y':.8}, size_hint=(1,.2))
+        self.alternate_col_button = ToolBtn(text = 'Alternate Columns', background_color = (1,1,1,1), font_size='12dp', pos_hint={'x':0, 'y':.8}, size_hint=(1,.2))
+        self.alternate_col_button.tooltip.text = "Press to flip shapes in every other column"
         self.buttons.add_widget(self.alternate_col_button)
         self.alternate_col_button.bind(on_press=self.alternate_cols)
         self.add_widget(self.buttons)
 
+    # changes the label of the tiling type, used in displaying initial tiling
     def change_rec_label_text(self):
         if self.type == None:
             self.rec_type.text = "Freeform"
         else:
             self.rec_type.text = self.type
-
 
     # Display initial tiling
     def display_initial_tiling(self,tf):
@@ -393,6 +428,10 @@ class TessellationWidget(RelativeLayout):
         yInc2 = yInc2 + (self.ySpacing)
     
         # determine direction of hexagon
+        pLeft = None
+        pRight = None
+        pDown = None
+        pUp = None
         pointsUp = False
         pointsRight = False
         tiltsUp = False
@@ -400,14 +439,29 @@ class TessellationWidget(RelativeLayout):
         hasDoubleMax = False
         isLeftHorizontal = False
         isRightHorizontal = False
+        axisAligned = False
+        xAligned = False
+        yAligned = False
         count = 0
         while count < 6:
             if exterior.exterior.coords[count][0] == bounds[0]:
-                pLeft = exterior.exterior.coords[count]
+                if pLeft == None:
+                    pLeft = exterior.exterior.coords[count]
+                else:
+                    axisAligned = True
+                    yAligned = True
+                    if exterior.exterior.coords[count][1] > pLeft[1]:
+                        pLeft = exterior.exterior.coords[count]
             if exterior.exterior.coords[count][0] == bounds[2]:
                 if exterior.exterior.coords[count][1] == bounds[3] or exterior.exterior.coords[count][1] == bounds[1]:
                     hasDoubleMax = True
-                pRight = exterior.exterior.coords[count]
+                if pRight == None:
+                    pRight = exterior.exterior.coords[count]
+                else:
+                    yAligned = True
+                    axisAligned = True
+                    if exterior.exterior.coords[count][1] > pRight[1]:
+                        pRight = exterior.exterior.coords[count]
                 if count == 0:
                     xMax = max(exterior.exterior.coords[1][0], exterior.exterior.coords[5][0])
                     if xMax == exterior.exterior.coords[1][0] and exterior.exterior.coords[1][1] > exterior.exterior.coords[5][1]:
@@ -427,9 +481,23 @@ class TessellationWidget(RelativeLayout):
                     elif xMax == exterior.exterior.coords[count + 1][0] and exterior.exterior.coords[count + 1][1] > exterior.exterior.coords[count - 1][1]:
                         tiltsUp = True
             if exterior.exterior.coords[count][1] == bounds[1]:
-                pDown = exterior.exterior.coords[count]
+                if pDown == None:
+                    pDown = exterior.exterior.coords[count]
+                else:
+                    axisAligned = True
+                    xAligned = True
+                    midx = (bounds[2] - bounds[0]) / 2
+                    if abs(exterior.exterior.coords[count][0] - midx) < abs(pDown[0] - midx):
+                        pDown = exterior.exterior.coords[count]
             if exterior.exterior.coords[count][1] == bounds[3]:
-                pUp = exterior.exterior.coords[count]
+                if pUp == None:
+                    pUp = exterior.exterior.coords[count]
+                else:
+                    axisAligned = True
+                    xAligned = True
+                    midx = (bounds[2] - bounds[0]) / 2
+                    if abs(exterior.exterior.coords[count][0] - midx) < abs(pUp[0] - midx):
+                        pUp = exterior.exterior.coords[count]
                 if count == 0:
                     yMax = max(exterior.exterior.coords[1][1], exterior.exterior.coords[5][1])
                     if yMax == exterior.exterior.coords[1][1] and exterior.exterior.coords[1][0] > exterior.exterior.coords[5][0]:
@@ -478,24 +546,38 @@ class TessellationWidget(RelativeLayout):
                         if pointsUp:
                             if tiltsUp:
                                 if tiltsRight:
-                                    #print("RIGHT + UP | UP + RIGHT")
-                                    if isRightHorizontal:
-                                        px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
+                                    print("RIGHT + UP | UP + RIGHT")
+                                    if isRightHorizontal and axisAligned:
+                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
+                                        py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
+                                    elif isRightHorizontal:
+                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
                                         py = (p[1] + (yInc * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
                                     else:
-                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) * scale_factor
+                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
                                         py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
                                 else:
-                                    #print("RIGHT + UP | UP + LEFT")
-                                    px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
-                                    py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) + scale_factor
+                                    print("RIGHT + UP | UP + LEFT")
+                                    if isRightHorizontal and axisAligned:
+                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
+                                        py = (p[1] + (yInc * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
+                                    elif isRightHorizontal:
+                                        px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
+                                        py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) + scale_factor
+                                    else:
+                                        px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
+                                        py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) + scale_factor
                             else:
                                 if tiltsRight:
-                                    #print("RIGHT + UP | DOWN + RIGHT")
-                                    px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
-                                    py = (p[1] + (yInc * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
+                                    print("RIGHT + UP | DOWN + RIGHT")
+                                    if isRightHorizontal and axisAligned:
+                                        px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
+                                        py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
+                                    else:
+                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
+                                        py = (p[1] + (yInc * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
                                 else:
-                                    #print("RIGHT + UP | DOWN + LEFT")
+                                    print("RIGHT + UP | DOWN + LEFT")
                                     if hasDoubleMax:
                                         px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
                                         py = (p[1] + (yInc * xCount) + (yInc2 * yCount)) + scale_factor
@@ -505,12 +587,28 @@ class TessellationWidget(RelativeLayout):
                         else:
                             if tiltsUp:
                                 if tiltsRight:
-                                    #print("RIGHT + DOWN | UP + RIGHT")
-                                    px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
-                                    py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
+                                    print("RIGHT + DOWN | UP + RIGHT")
+                                    if xAligned and yAligned:
+                                        px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
+                                        py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
+                                    elif isRightHorizontal and axisAligned:
+                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
+                                        py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) + scale_factor  
+                                    elif isRightHorizontal:
+                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
+                                        py = (p[1] - (yInc * xCount) - ((yInc - yInc2) * yCount)) + scale_factor
+                                    elif axisAligned:
+                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
+                                        py = (p[1] - (yInc * xCount) - ((yInc2) * yCount)) + scale_factor
+                                    else:
+                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
+                                        py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
                                 else:
-                                    #print("RIGHT + DOWN | UP + LEFT")
-                                    if isRightHorizontal:
+                                    print("RIGHT + DOWN | UP + LEFT")
+                                    if isRightHorizontal and axisAligned:
+                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
+                                        py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) + scale_factor
+                                    elif isRightHorizontal:
                                         px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
                                         py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) + scale_factor
                                     else:
@@ -518,27 +616,41 @@ class TessellationWidget(RelativeLayout):
                                         py = (p[1] - (yInc * xCount) - ((yInc - yInc2) * yCount)) + scale_factor
                             else:
                                 if tiltsRight:
-                                    #print("RIGHT + DOWN | DOWN + RIGHT")
-                                    px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
-                                    py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
+                                    print("RIGHT + DOWN | DOWN + RIGHT")
+                                    if isRightHorizontal and axisAligned:
+                                        px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
+                                        py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
+                                    elif isRightHorizontal:
+                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
+                                        py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) + scale_factor
+                                    else:
+                                        px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
+                                        py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
                                 else:
-                                    #print("RIGHT + DOWN | DOWN + LEFT")
+                                    print("RIGHT + DOWN | DOWN + LEFT")
                                     px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
                                     py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) + scale_factor
                     else:
                         if pointsUp:
                             if tiltsUp:
                                 if tiltsRight:
-                                    #print("LEFT + UP | UP + RIGHT")
-                                    px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
-                                    py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
+                                    print("LEFT + UP | UP + RIGHT")
+                                    if isLeftHorizontal and axisAligned:
+                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
+                                        py = (p[1] + (yInc * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
+                                    elif isLeftHorizontal:
+                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
+                                        py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
+                                    else:
+                                        px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
+                                        py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
                                 else:
-                                    #print("LEFT + UP | UP + LEFT")
+                                    print("LEFT + UP | UP + LEFT")
                                     px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
                                     py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
                             else:
                                 if tiltsRight:
-                                    #print("LEFT + UP | DOWN + RIGHT")
+                                    print("LEFT + UP | DOWN + RIGHT")
                                     if isLeftHorizontal:
                                         px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
                                         py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
@@ -546,13 +658,13 @@ class TessellationWidget(RelativeLayout):
                                         px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
                                         py = (p[1] + (yInc * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
                                 else:
-                                    #print("LEFT + UP | DOWN + LEFT")
+                                    print("LEFT + UP | DOWN + LEFT")
                                     px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
                                     py = (p[1] + (yInc2 * xCount) - ((yInc - yInc2) * yCount)) + scale_factor
                         else:
                             if tiltsUp:
                                 if tiltsRight:
-                                    #print("LEFT + DOWN | UP + RIGHT")
+                                    print("LEFT + DOWN | UP + RIGHT")
                                     if hasDoubleMax:
                                         px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
                                         py = (p[1] - (yInc2 * xCount) - (yInc * yCount)) + scale_factor
@@ -560,16 +672,16 @@ class TessellationWidget(RelativeLayout):
                                         px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
                                         py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
                                 else:
-                                    #print("LEFT + DOWN | UP + LEFT")
+                                    print("LEFT + DOWN | UP + LEFT")
                                     px = (p[0] + (xInc2 * xCount) + (xInc * yCount)) + scale_factor
                                     py = (p[1] - (yInc * xCount) - ((yInc - yInc2) * yCount)) + scale_factor 
                             else:
                                 if tiltsRight:
-                                    #print("LEFT + DOWN | DOWN + RIGHT")
+                                    print("LEFT + DOWN | DOWN + RIGHT")
                                     px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
                                     py = (p[1] - (yInc2 * xCount) + ((yInc - yInc2) * yCount)) + scale_factor
                                 else:
-                                    #print("LEFT + DOWN | DOWN + LEFT")
+                                    print("LEFT + DOWN | DOWN + LEFT")
                                     if isLeftHorizontal:
                                         px = (p[0] + (xInc * xCount) + (xInc2 * yCount)) + scale_factor
                                         py = (p[1] - (yInc * xCount) - ((yInc - yInc2) * yCount)) + scale_factor
