@@ -133,8 +133,6 @@ class LoadExistingChooser(FileChooserListView):
             return data
         else:
             return ""
-        #print(data)
-        #print(self.rootpath)
     def selected(self,filename,*args):
             if (filename == True):
                 global fp
@@ -152,7 +150,6 @@ class LoadExistingChooser(FileChooserListView):
                     line_count = 0
                     for row in csv_reader:
                         if line_count == 0:
-                            #print(f'Column names are {", ".join(row)}')
                             line_count += 1
                         else:
                             loaded_type = row[0]
@@ -211,20 +208,13 @@ class LoadExistingChooser(FileChooserListView):
                             csvtessellcoords[24].append(float(row[51]))
                             csvtessellcoords[24].append(float(row[52])) 
                             line_count += 1
-                            #print(f'Processed {line_count} lines.')
                 global f_coords
                 points = list(zip(coo[::2],coo[1::2]))
-                print(points)
-                print(coo)
                 poly = Polygon(points)
                 f_coords = poly.exterior.coords
-                #f_coords = sm.shape_model(coo)
-                #print(f_coords)
                 global loaded_csv_tessel
-                #global is_load_csv
                 global is_load_csv
                 loaded_csv_tessel = csvtessellcoords
-                #print(loaded_csv_tessel[0][0])
                 is_load_csv = True
                 b_grid = BoxGrid()
                 self.parent.add_widget(b_grid)
@@ -242,11 +232,8 @@ class FileChooser(FileChooserListView):
             return data
         else:
             return ""
-        #print(data)
-        #print(self.rootpath)
     def selected(self,filename,*args):
             if (filename == True):
-
                 global fp
                 #store file path
                 fp = args[0][0]
@@ -254,41 +241,34 @@ class FileChooser(FileChooserListView):
                     data = fp
                     head, tail = os.path.split(data)
                     f.write(head)
-
-                #print(fp)
                 #use file path to process as image in imageprocessing.py
                 global f_coords
                 global is_load_csv
                 is_load_csv = False
                 coo = ip.processImage(fp)
                 #print(coo)
+                #insert stress test for points here
                 f_coords = sm.shape_model(coo)
-                #print(f_coords)
                 b_grid = BoxGrid()
                 self.parent.add_widget(b_grid)
-                
                 self.parent.remove_widget(self)
             else:
                 self.ids.image.source = filename[0]
 
-
 class ReccomendationButton(Button):
     def __init__(self, **kwargs):
+       
         self.tooltip = Tooltip()
         self.tooltext=''
         self.tooltip.text = self.tooltext
         Window.bind(mouse_pos=self.on_mouse_pos)
         super(Button, self).__init__(**kwargs)
         #self.size = 175, 145
-
+        
         self.background_color = [.3, .3, 0.3, .75]
         self.pressed=False
         self.index = None
-        if (the_poly != None):
-            with self.canvas.after:
-                Line(points = the_poly)
-            with self.canvas.before:
-                Line(points = the_poly)
+        
     def on_mouse_pos(self, *args):
         if not self.get_root_window():
             return
@@ -304,12 +284,8 @@ class ReccomendationButton(Button):
         Window.add_widget(self.tooltip)
 
     def on_press(self, **kwargs):
-        #print(self.index)
-        #print(self.parent.parent.parent.children[1])
-        #self.parent.parent.parent.children
         self.pressed=True
         self.parent.parent.parent.children[1].draw_recommendation(self.index)
-        #self.button_normal =''
         self.background_color = [.3, .7, .4, .75]
         self.parent.parent.press_helper_func(self)
 
@@ -317,34 +293,21 @@ class ReccomendationButtons(FloatLayout):
     def __init__(self, **kwargs):
         super(FloatLayout, self).__init__(**kwargs)
         self.size_hint= None, None
-        #self.saved_states = []
-
     def press_helper_func(self,eleref):
-        #print(eleref)
         for btn in self.reccrows.children:
             if btn != eleref:
-                print(self.btns_info[btn.index])
                 tempsaveinfo = self.btns_info[btn.index]
                 if len(tempsaveinfo) != 5:
                     btn.background_color = [.3, .3, 0.3, .75]
                 else:
                     btn.background_color =[1, .3, .4, .85]
-        #print(self.reccrows.children)
-
     def setup_btns(self, is_resize):
-
-
-        #print(self.parent.main_shape_info)
         self.btns_info = self.parent.main_shape_info
         self.numreccs = len(self.btns_info)
-        #print("shape info")
-        #print(self.btns_info)
-        #print(self.numreccs)
         self.reccrows= GridLayout(rows=self.numreccs , cols=1)
         self.reccrows.size_hint = None, None
         global the_poly
         the_poly = self.make_positive(self.btns_info[0][0])
-
         poly = Polygon(the_poly)
         sizeX = Window.size[0] * (.14)
         sizeY = Window.size[1] / self.numreccs
@@ -355,35 +318,75 @@ class ReccomendationButtons(FloatLayout):
         center = (poly.centroid.coords[0])
         xoff = (sizeX/2) - center[0]
         Yoff = (sizeY/2) - center[1]
-
         if xscale > yscale:
             the_poly = affinity.scale(the_poly, xfact= xscale, yfact= yscale)
         else:
-            the_poly = affinity.scale(the_poly, xfact= xscale, yfact= xscale)
-
+            the_poly = affinity.scale(the_poly, xfact= yscale, yfact= xscale)
         the_poly = affinity.translate(the_poly, xoff= xoff, yoff=Yoff)
+        if the_poly.bounds[2] > sizeX :
+            the_poly = affinity.translate(the_poly, xoff= (sizeX - the_poly.bounds[2]), yoff=0)
+            # while the_poly.bounds[0] <= 0.0:
+            #     the_poly = affinity.scale(the_poly, xfact= .99, yfact= .99)
+        elif the_poly.bounds[0] < 0:
+                    the_poly = affinity.translate(the_poly, xoff= (the_poly.bounds[0] * (-1)), yoff=0)
+        if the_poly.bounds[3] > sizeY :
+            the_poly = affinity.translate(the_poly, xoff=0 , yoff=(sizeY - the_poly.bounds[3]))
+        elif the_poly.bounds[1] < 0:
+            the_poly = affinity.translate(the_poly, xoff=0 , yoff=( the_poly.bounds[1] * (-1)))
 
         the_poly = self.shapely_to_kivy(the_poly)
+        with self.canvas.before:
+            Line(points = the_poly)
+        with self.canvas:
+            Line(points = the_poly)
         with self.canvas.after:
             Line(points = the_poly)
-
+        
         self.reccrows.size = (Window.size[0] * (.14)), Window.size[1]
         u = self.numreccs
         for k in range(0, self.numreccs):
-
             u = u - 1
             if (k != 0):
                 the_poly = self.make_positive(self.btns_info[k][0])
                 btn_height = (Window.size[1] / self.numreccs)
                 yoff = (Yoff ) + btn_height* k
-                the_poly = affinity.translate(the_poly, xoff= xoff, yoff= yoff)
                 if xscale > yscale:
                     the_poly = affinity.scale(the_poly, xfact= xscale, yfact= yscale)
                 else:
                     the_poly = affinity.scale(the_poly, xfact= xscale, yfact= xscale)
+                the_poly = affinity.translate(the_poly, xoff= xoff, yoff= yoff)
+                
+                if the_poly.bounds[2] > sizeX:
+                    the_poly = affinity.translate(the_poly, xoff= ((sizeX) - the_poly.bounds[2]), yoff=0)
+                elif the_poly.bounds[0] < 0:
+                    the_poly = affinity.translate(the_poly, xoff= (the_poly.bounds[0] * (-1)), yoff=0)
+                    # while the_poly.bounds[0] <= 0.0:
+                    #     the_poly = affinity.scale(the_poly, xfact= .99, yfact= .99)
+                heightifkis1 = btn_height * (k-1)
+                if k == 1 :
+                    heightifkis1 = btn_height
+                if the_poly.bounds[3] > (btn_height * k):
+                    #temp_yoff = (btn_height *(k+1))
+                    the_poly = affinity.translate(the_poly, xoff=0 , yoff=((btn_height *(k+1)) - (the_poly.bounds[3])))
+                    # while the_poly.bounds[1] <= (btn_height * (k-1)):
+                    #     the_poly = affinity.scale(the_poly, xfact= .99, yfact= .99)
+                elif the_poly.bounds[1] < heightifkis1:
+                    the_poly = affinity.translate(the_poly, xoff=0 , yoff=((btn_height * k) - the_poly.bounds[1]))
+                #poly_center = the_poly.centroid.coords[0]   
+                # if poly_center[0] < (sizeX/2):
+                #     the_poly = affinity.translate(the_poly, xoff= ((sizeX/2) - poly_center[0]), yoff=0)
+                # if poly_center[0] > (sizeX/2):
+                #     the_poly = affinity.translate(the_poly, xoff= (poly_center[0] -(sizeX/2) ), yoff=0)
                 the_poly = self.shapely_to_kivy(the_poly)
-            else:
-                the_poly = None
+                if (the_poly != None):
+                    with self.canvas.after:
+                        Line(points = the_poly)
+                    with self.canvas:
+                        Line(points = the_poly)
+                    with self.canvas.before:
+                        Line(points = the_poly)
+                else:
+                    the_poly = None
             temp = ReccomendationButton()
             if str(self.btns_info[u][1]) == "regular":
                 temp.tooltip.text = "Freeform"
@@ -445,9 +448,7 @@ class BoxGrid(BoxLayout):
         self.add_widget(custlay)
         self.add_widget(tessel)
         if is_load_csv == True:
-            print("changing self.polygons")
             self.children[0].polygons = loaded_csv_tessel
-            print("changing type of tessel")
             self.children[0].type = loaded_type
         tessel.display_initial_tiling(is_load_csv)
         tessel.change_rec_label_text()
@@ -486,15 +487,15 @@ class CustomLayout(BoxLayout):
     def __init__(self, **kwargs):
 
         super(CustomLayout, self).__init__(**kwargs)
-
+        
         Window.bind(on_key_down=self.key_action) #Binds Keyboard for key detection
         Window.bind(on_resize=self.on_window_resize)
         self.saved_states= []
-        self.back_button = ToolBtn(text = 'Back',
+        self.back_button = Button(text = 'Back',
                                           background_color = (1,1,1,1),
                                           size_hint = (.3,.07),
                                           pos_hint = {'bottom': 0.3})
-        self.back_button.tooltip.text ="Go back to main menu"
+        #self.back_button.tooltip.text ="Go back to main menu"
         # Add change color button
         self.color_picker_button = ToolBtn(text = 'Choose Color',
                                           background_color = (1,1,1,1),
@@ -540,6 +541,8 @@ class CustomLayout(BoxLayout):
         self.fill = [0,0,1,1]
 
         self.c_coords = f_coords
+        #printprint('c_coords')
+        #print(self.c_coords)
         self.pressed = False
         self.index = -1
         self.edge = -1
@@ -633,7 +636,7 @@ class CustomLayout(BoxLayout):
     def key_action(self, *args):
 
         key_pressed = list(args)
-        #print(key_pressed)
+
 
         #Delete when pressing delete
         if key_pressed[2] == 42 and self.pressed and len(self.canvas_edge) > 3:
@@ -683,13 +686,11 @@ class CustomLayout(BoxLayout):
                     self.parent.add_widget(btns)
                     if (new_shape_info != None and len(new_shape_info) >= 1):
                         btns.setup_btns(False)
-
         #Add when pressing a
         elif key_pressed[2] == 4 and self.pressed:
             try:
                 self.canvas.children.remove(self.highlight)
                 mid = midpoint(self.canvas_edge[self.index].points)
-                #print(self.highlight.points)
                 self.c_coords.insert((self.index+1)%len(self.canvas_nodes), tuple(mid))
                 self.draw()
 
@@ -712,8 +713,6 @@ class CustomLayout(BoxLayout):
             self.parent.children[1].original_base_unit = newply
             self.parent.children[1].polygon = newply
             self.parent.children[1].reset(0)
-            #self.parent.children[1].tile_regular_polygon()
-
             if (self.parent.children[0] != None):
                     new_shape_info = tr.identify_shape(newply)
                     self.parent.main_shape_info = new_shape_info
@@ -958,8 +957,6 @@ class CustomLayout(BoxLayout):
             temp.append(self.canvas_nodes[i].pos)
             i = i + 1
         self.c_coords = temp
-        print(self.c_coords)
-
         if touch.grab_current is self:
             touch.ungrab(self)
             poly = []
@@ -967,28 +964,17 @@ class CustomLayout(BoxLayout):
             for xy in self.canvas_nodes:
                 poly.append(self.canvas_nodes[i].pos)
                 i = i + 1
-
-            #print(poly)
             newply = Polygon(poly)
             newply = affinity.translate(newply, xoff= -size[0]/2.95, yoff= -size[1]/4)
             if self.xscale > self.yscale:
                 newply = affinity.scale(newply, xfact= 1/self.yscale, yfact= 1/self.yscale)
             else:
                 newply = affinity.scale(newply, xfact= 1/self.xscale, yfact= 1/self.xscale)
-            #print(self.parent.children[1].polygon)
             self.parent.children[1].reset(0)
             self.parent.children[1].polygon = newply
             self.parent.children[1].base_unit = newply
-            #self.parent.children[1].get_new_recommendations()
-            #print(self.parent.children[1].polygon)
             self.parent.children[1].tile_regular_polygon()
-            #print("parker")
-            #print(self.parent.children[0])
             if (self.parent.children[0] != None):
-                #self.saved_states = self.parent.saved_states
-                #print("fetching any saved states")
-                #print(self.saved_states)
-                #print("got saved states ...")
                 new_shape_info = tr.identify_shape(newply)
                 self.parent.main_shape_info = new_shape_info
                 for state in self.saved_states:
@@ -999,22 +985,11 @@ class CustomLayout(BoxLayout):
                 self.parent.add_widget(btns)
                 if (new_shape_info != None and len(new_shape_info) >= 1):
                     btns.setup_btns(False)
-
-
-
-            # self.main_shape_info = tessel.shape_info
-        #btn = ReccomendationButtons()
-        #self.add_widget(btn)
-        #if (self.main_shape_info != None and len(self.main_shape_info) > 1):
-         #   btn.setup_btns()
-
         else:
             pass
+
     def add_saved_state(self, polygon, typet, tf, polygons):
-        #print('adding')
         self.saved_states.append((polygon,typet, tf, polygons,"s"))
-        #print('added')
-        #print(self.saved_states)
         state = (polygon,typet, tf, polygons, "s")
         self.parent.main_shape_info.append(state)
         self.parent.remove_widget(self.parent.children[0])
@@ -1025,9 +1000,8 @@ class CustomLayout(BoxLayout):
 
     #handler for back button
     def go_back(self, *args):
-        #print(self.parent.parent)
         self.parent.parent.back_to_start()
-
+        
     def change_color(self,*args):
 
         r,g,b,a = self.col[0], self.col[1], self.col[2], self.col[3]

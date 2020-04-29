@@ -33,7 +33,7 @@ def shape_model(coords):
 
     coords = list(poly3.exterior.coords)
 
-    if len(coords) > 12:
+    if len(coords) > 12 and len(coords) < 15:
         print('here0') 
         poly3 = Polygon(poly3.simplify(60))
     print(len(coords))
@@ -49,7 +49,7 @@ def shape_model(coords):
     print((sides + 1)-len(points_to_be_deleted))
 
     print(len(angles))
-    if sides > 6 and sides < 10:
+    if sides > 6:
         print('here')
         anomalies = find_anomalies(angles)
         print(anomalies)
@@ -68,7 +68,7 @@ def shape_model(coords):
 
 
     if sides <= 8 and ((inner_angle + 10) > avg_angle > (inner_angle - 10)):
-        poly3 = regular_poly(sides)
+       poly3 = regular_poly(sides)
 
     x,y = poly3.exterior.xy
     plt.plot(x,y)

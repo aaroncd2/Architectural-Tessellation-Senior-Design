@@ -20,11 +20,11 @@ def getCanny(image, sigma_val=0.33):
 
 def processImage(image):
     sketch = cv.imread(image)
-    sketch_flipped = cv.flip(sketch,0)
-    imgray = cv.cvtColor(sketch_flipped, cv.COLOR_BGR2GRAY)
+    #sketch_flipped = cv.flip(sketch,0)
+    imgray = cv.cvtColor(sketch, cv.COLOR_BGR2GRAY)
     imgray = cv.bilateralFilter(imgray, 11, 17, 17)
     cannyImg = getCanny(imgray)
-    # cv.imshow("Edges",cannyImg)
+    #cv.imshow("Edges",cannyImg)
     ret, thresh = cv.threshold(cannyImg, 127, 255, 0)
     contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
     coords = list()
