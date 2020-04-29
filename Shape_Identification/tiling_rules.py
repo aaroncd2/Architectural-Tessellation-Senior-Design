@@ -6,6 +6,7 @@ tiling_rules.py
 '''
 from shapely.geometry import Polygon
 from shapely.geometry import Point
+from shapely.geometry import LineString
 
 '''public functions'''
 # central function that takes in
@@ -67,7 +68,9 @@ def process_quadrilateral(shape):
         max_length = max(side1_length, side2_length, side3_length, side4_length)
         # rotate coordinates to get the longest side between the 
         # zeroth and first coordinates
-        if max_length == side2_length:
+        if max_length == side1_length:
+            rotations = 0
+        elif max_length == side2_length:
             rotations = 1
         elif max_length == side3_length:
             rotations = 2
@@ -98,35 +101,50 @@ def process_quadrilateral(shape):
         first_rec_exterior_coords.append(first_rec_coords[5])
         first_rec_exterior_coords.append(first_rec_coords[0])
         recommendations.append((Polygon(first_rec_coords), "hexagon", True, Polygon(first_rec_exterior_coords)))
-        # second recommendation, only if the quad's shorter sides are next to each other
+        # second recommendation, only if the quad's shorter sides are next to each other and if the exterior parallelogram can
+        # be created without an extraneous lines coming out of the shape
         side2_length = ((second_rec_coords[2][1] - second_rec_coords[1][1])**2 + (second_rec_coords[2][0] - second_rec_coords[1][0])**2)**0.5
         side3_length = ((second_rec_coords[3][1] - second_rec_coords[2][1])**2 + (second_rec_coords[3][0] - second_rec_coords[2][0])**2)**0.5
         side4_length = ((second_rec_coords[4][1] - second_rec_coords[3][1])**2 + (second_rec_coords[4][0] - second_rec_coords[3][0])**2)**0.5
         second_max_length = max(side2_length, side3_length, side4_length) 
         if second_max_length == side2_length:
-            second_rec_coords.append((second_rec_coords[0][0] - second_to_first_vertex_len_x, second_rec_coords[0][1] - second_to_first_vertex_len_y))
-            second_rec_coords.append(second_rec_coords[2])
-            second_rec_coords.append(second_rec_coords[3])
-            second_rec_exterior_coords = list()
-            second_rec_exterior_coords.append(second_rec_coords[0])
-            second_rec_exterior_coords.append(second_rec_coords[1])
-            second_rec_exterior_coords.append(second_rec_coords[2])
-            second_rec_exterior_coords.append(second_rec_coords[5])
-            second_rec_exterior_coords.append(second_rec_coords[0])
-            # recommendations.append((Polygon(second_rec_coords), "parallelogram", True, Polygon(second_rec_exterior_coords)))
+            # LineString intersection test to see if the resulting polygon is valid
+            line_string_coords = []
+            line_string_coords.append(second_rec_coords[0])
+            line_string_coords.append((second_rec_coords[0][0] - second_to_first_vertex_len_x, second_rec_coords[0][1] - second_to_first_vertex_len_y))
+            line_string_coords.append(second_rec_coords[2])
+            line_string = LineString(line_string_coords)
+            if line_string.intersection(shape).length == 0:
+                second_rec_coords.append((second_rec_coords[0][0] - second_to_first_vertex_len_x, second_rec_coords[0][1] - second_to_first_vertex_len_y))
+                second_rec_coords.append(second_rec_coords[2])
+                second_rec_coords.append(second_rec_coords[3])
+                second_rec_exterior_coords = list()
+                second_rec_exterior_coords.append(second_rec_coords[0])
+                second_rec_exterior_coords.append(second_rec_coords[1])
+                second_rec_exterior_coords.append(second_rec_coords[2])
+                second_rec_exterior_coords.append(second_rec_coords[5])
+                second_rec_exterior_coords.append(second_rec_coords[0])
+                recommendations.append((Polygon(second_rec_coords), "parallelogram", True, Polygon(second_rec_exterior_coords)))
         elif second_max_length == side4_length:
             zeroth_to_first_vertex_len_x = second_rec_coords[1][0] - second_rec_coords[0][0]
             zeroth_to_first_vertex_len_y = second_rec_coords[1][1] - second_rec_coords[0][1]
             second_rec_coords.append(second_rec_coords[3])
-            second_rec_coords.append((second_rec_coords[3][0] + zeroth_to_first_vertex_len_x, second_rec_coords[3][1] + zeroth_to_first_vertex_len_y))
-            second_rec_coords.append(second_rec_coords[1])
-            second_rec_exterior_coords = list()
-            second_rec_exterior_coords.append(second_rec_coords[0])
-            second_rec_exterior_coords.append(second_rec_coords[1])
-            second_rec_exterior_coords.append(second_rec_coords[6])
-            second_rec_exterior_coords.append(second_rec_coords[5])
-            second_rec_exterior_coords.append(second_rec_coords[0])
-            # recommendations.append((Polygon(second_rec_coords), "parallelogram", True, Polygon(second_rec_exterior_coords)))
+            # LineString intersection test to see if the resulting polygon is valid
+            line_string_coords = []
+            line_string_coords.append(second_rec_coords[3])
+            line_string_coords.append((second_rec_coords[3][0] + zeroth_to_first_vertex_len_x, second_rec_coords[3][1] + zeroth_to_first_vertex_len_y))
+            line_string_coords.append(second_rec_coords[1])
+            line_string = LineString(line_string_coords)
+            if line_string.intersection(shape).length == 0:
+                second_rec_coords.append((second_rec_coords[3][0] + zeroth_to_first_vertex_len_x, second_rec_coords[3][1] + zeroth_to_first_vertex_len_y))
+                second_rec_coords.append(second_rec_coords[1])
+                second_rec_exterior_coords = list()
+                second_rec_exterior_coords.append(second_rec_coords[0])
+                second_rec_exterior_coords.append(second_rec_coords[1])
+                second_rec_exterior_coords.append(second_rec_coords[6])
+                second_rec_exterior_coords.append(second_rec_coords[5])
+                second_rec_exterior_coords.append(second_rec_coords[0])
+                recommendations.append((Polygon(second_rec_coords), "parallelogram", True, Polygon(second_rec_exterior_coords)))
         return recommendations
     else:
         # the given shape is a concave quad
