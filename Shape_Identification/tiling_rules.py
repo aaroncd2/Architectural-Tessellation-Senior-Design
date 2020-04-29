@@ -106,18 +106,37 @@ def process_quadrilateral(shape):
         side3_length = ((second_rec_coords[3][1] - second_rec_coords[2][1])**2 + (second_rec_coords[3][0] - second_rec_coords[2][0])**2)**0.5
         side4_length = ((second_rec_coords[4][1] - second_rec_coords[3][1])**2 + (second_rec_coords[4][0] - second_rec_coords[3][0])**2)**0.5
         second_max_length = max(side2_length, side3_length, side4_length) 
-        slope_1 = (second_rec_coords[1][1] - second_rec_coords[0][1]) / (second_rec_coords[1][0] - second_rec_coords[0][0])
-        slope_2 = (second_rec_coords[2][1] - second_rec_coords[1][1]) / (second_rec_coords[2][0] - second_rec_coords[1][0])
-        slope_3 = (second_rec_coords[3][1] - second_rec_coords[2][1]) / (second_rec_coords[3][0] - second_rec_coords[2][0])
-        slope_4 = (second_rec_coords[4][1] - second_rec_coords[3][1]) / (second_rec_coords[4][0] - second_rec_coords[3][0])
+        # calculation of slopes with check to prevent divide by zero error
+        try:
+            slope_1 = (second_rec_coords[1][1] - second_rec_coords[0][1]) / (second_rec_coords[1][0] - second_rec_coords[0][0])
+        except ZeroDivisionError:
+            print('cannot divide by zero')
+            slope_1 = (second_rec_coords[1][1] - second_rec_coords[0][1]) / 0.01
+        try:
+            slope_2 = (second_rec_coords[2][1] - second_rec_coords[1][1]) / (second_rec_coords[2][0] - second_rec_coords[1][0])
+        except ZeroDivisionError:
+            print('cannot divide by zero')
+            slope_2 = (second_rec_coords[2][1] - second_rec_coords[1][1]) / 0.01
+        try:
+            slope_3 = (second_rec_coords[3][1] - second_rec_coords[2][1]) / (second_rec_coords[3][0] - second_rec_coords[2][0])
+        except ZeroDivisionError:
+            print('cannot divide by zero')
+            slope_3 = (second_rec_coords[3][1] - second_rec_coords[2][1]) / 0.01
+        try:
+            slope_4 = (second_rec_coords[4][1] - second_rec_coords[3][1]) / (second_rec_coords[4][0] - second_rec_coords[3][0])
+        except ZeroDivisionError:
+            print('cannot divide by zero')
+            slope_4 = (second_rec_coords[4][1] - second_rec_coords[3][1]) / 0.01
         slope_list = [slope_1, slope_2, slope_3, slope_4]
         for i in range (0, len(slope_list)):
             print('coord ', i, ': ', second_rec_coords[i])
             print('slope ', i, ': ', slope_list[i])
+        slope_list.sort()
         # check to make sure slope difference is large enough for slopes 1 and 3
         slope_threshold = 0.1
         if second_max_length == side2_length:
             # check to make sure slope difference is large enough for slopes 2 and 4
+            print('side 2 second max length')
             if True:
                 second_rec_coords.append((second_rec_coords[0][0] - second_to_first_vertex_len_x, second_rec_coords[0][1] - second_to_first_vertex_len_y))
                 second_rec_coords.append(second_rec_coords[2])
@@ -131,6 +150,7 @@ def process_quadrilateral(shape):
                 recommendations.append((Polygon(second_rec_coords), "parallelogram", True, Polygon(second_rec_exterior_coords)))
         elif second_max_length == side4_length:
             # check to make sure slope difference is large enough for slopes 2 and 4
+            print('side 4 second max length')
             if True:
                 zeroth_to_first_vertex_len_x = second_rec_coords[1][0] - second_rec_coords[0][0]
                 zeroth_to_first_vertex_len_y = second_rec_coords[1][1] - second_rec_coords[0][1]
