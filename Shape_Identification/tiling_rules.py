@@ -108,38 +108,43 @@ def process_quadrilateral(shape):
         side4_length = ((second_rec_coords[4][1] - second_rec_coords[3][1])**2 + (second_rec_coords[4][0] - second_rec_coords[3][0])**2)**0.5
         second_max_length = max(side2_length, side3_length, side4_length) 
         if second_max_length == side2_length:
-            # LineString intersectiong test to see if the resulting polygon is valid
-            print('max length 2')
+            # LineString intersection test to see if the resulting polygon is valid
             line_string_coords = []
             line_string_coords.append(second_rec_coords[0])
             line_string_coords.append((second_rec_coords[0][0] - second_to_first_vertex_len_x, second_rec_coords[0][1] - second_to_first_vertex_len_y))
             line_string_coords.append(second_rec_coords[2])
             line_string = LineString(line_string_coords)
-            print(line_string.intersection(shape).length != 0)
-            second_rec_coords.append((second_rec_coords[0][0] - second_to_first_vertex_len_x, second_rec_coords[0][1] - second_to_first_vertex_len_y))
-            second_rec_coords.append(second_rec_coords[2])
-            second_rec_coords.append(second_rec_coords[3])
-            second_rec_exterior_coords = list()
-            second_rec_exterior_coords.append(second_rec_coords[0])
-            second_rec_exterior_coords.append(second_rec_coords[1])
-            second_rec_exterior_coords.append(second_rec_coords[2])
-            second_rec_exterior_coords.append(second_rec_coords[5])
-            second_rec_exterior_coords.append(second_rec_coords[0])
-            recommendations.append((Polygon(second_rec_coords), "parallelogram", True, Polygon(second_rec_exterior_coords)))
+            if line_string.intersection(shape).length == 0:
+                second_rec_coords.append((second_rec_coords[0][0] - second_to_first_vertex_len_x, second_rec_coords[0][1] - second_to_first_vertex_len_y))
+                second_rec_coords.append(second_rec_coords[2])
+                second_rec_coords.append(second_rec_coords[3])
+                second_rec_exterior_coords = list()
+                second_rec_exterior_coords.append(second_rec_coords[0])
+                second_rec_exterior_coords.append(second_rec_coords[1])
+                second_rec_exterior_coords.append(second_rec_coords[2])
+                second_rec_exterior_coords.append(second_rec_coords[5])
+                second_rec_exterior_coords.append(second_rec_coords[0])
+                recommendations.append((Polygon(second_rec_coords), "parallelogram", True, Polygon(second_rec_exterior_coords)))
         elif second_max_length == side4_length:
-            # LineString intersectiong test to see if the resulting polygon is valid
             zeroth_to_first_vertex_len_x = second_rec_coords[1][0] - second_rec_coords[0][0]
             zeroth_to_first_vertex_len_y = second_rec_coords[1][1] - second_rec_coords[0][1]
             second_rec_coords.append(second_rec_coords[3])
-            second_rec_coords.append((second_rec_coords[3][0] + zeroth_to_first_vertex_len_x, second_rec_coords[3][1] + zeroth_to_first_vertex_len_y))
-            second_rec_coords.append(second_rec_coords[1])
-            second_rec_exterior_coords = list()
-            second_rec_exterior_coords.append(second_rec_coords[0])
-            second_rec_exterior_coords.append(second_rec_coords[1])
-            second_rec_exterior_coords.append(second_rec_coords[6])
-            second_rec_exterior_coords.append(second_rec_coords[5])
-            second_rec_exterior_coords.append(second_rec_coords[0])
-            recommendations.append((Polygon(second_rec_coords), "parallelogram", True, Polygon(second_rec_exterior_coords)))
+            # LineString intersection test to see if the resulting polygon is valid
+            line_string_coords = []
+            line_string_coords.append(second_rec_coords[3])
+            line_string_coords.append((second_rec_coords[3][0] + zeroth_to_first_vertex_len_x, second_rec_coords[3][1] + zeroth_to_first_vertex_len_y))
+            line_string_coords.append(second_rec_coords[1])
+            line_string = LineString(line_string_coords)
+            if line_string.intersection(shape).length == 0:
+                second_rec_coords.append((second_rec_coords[3][0] + zeroth_to_first_vertex_len_x, second_rec_coords[3][1] + zeroth_to_first_vertex_len_y))
+                second_rec_coords.append(second_rec_coords[1])
+                second_rec_exterior_coords = list()
+                second_rec_exterior_coords.append(second_rec_coords[0])
+                second_rec_exterior_coords.append(second_rec_coords[1])
+                second_rec_exterior_coords.append(second_rec_coords[6])
+                second_rec_exterior_coords.append(second_rec_coords[5])
+                second_rec_exterior_coords.append(second_rec_coords[0])
+                recommendations.append((Polygon(second_rec_coords), "parallelogram", True, Polygon(second_rec_exterior_coords)))
         return recommendations
     else:
         # the given shape is a concave quad
