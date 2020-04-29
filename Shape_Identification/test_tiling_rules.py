@@ -55,7 +55,8 @@ convex_quad_4 = Polygon([(4, 0), (1, -1), (0, 0), (2, 10), (4, 0)])
 convex_quad_5 = Polygon([(4, 0), (8, 8), (13, 0), (9, -20), (4, 0)])
 hexagon_1 = Polygon([(0, 0), (1, 1), (5, 1), (6, 0), (6, -3), (4, -5), (0, 0)])
 pentagon_1 = Polygon([(0, 0), (-2, -3), (-5, 1), (-4, 7), (1, 5), (0, 0)])
-line_string = LineString([(-7, -7), (-1, -1)])
+line_string = LineString([(-7, -7), (0, 0), (5, 5)])
+line_string_2 = LineString([(0, 0), (-5, -5), (-5, 3), (3, 3)])
 universals = [hexagon_1, pentagon_1]
 concave_quads = [concave_quad_1, concave_quad_2, concave_quad_3]
 convex_quads = [convex_quad_1, convex_quad_2, convex_quad_3, convex_quad_4, convex_quad_5]
@@ -66,15 +67,16 @@ all_tests_passed = True
 # test intersection between linestring and polygon
 plot_polygon(triangle_1)
 print('testing intersection: ')
-print(line_string.intersects(triangle_1))
+print(line_string_2.intersection(triangle_1))
+print(line_string_2.intersection(triangle_1).length)
 
-# testing recommendations for hexagons
-for universal in universals:
-    plot_polygon(universal)
-    universal_recommendations = tr.identify_shape(universal)
-    for recommendation in universal_recommendations:
-        plot_polygon(recommendation[0])
-        plot_polygon(recommendation[3])
+# testing recommendations for universals
+# for universal in universals:
+    # plot_polygon(universal)
+    # universal_recommendations = tr.identify_shape(universal)
+    # for recommendation in universal_recommendations:
+        # plot_polygon(recommendation[0])
+        # plot_polygon(recommendation[3])
 
 # testing recommendations for convex quads
 # for convex_quad in convex_quads:
