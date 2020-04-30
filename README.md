@@ -8,6 +8,8 @@ Developed by: Kevin Mattappally, Mauricio Velazquez, Parker Mooseker, and Aaron 
 ## Application Overview
 
 ## Image and CSV Uploading
+![](Image_Processing/Images/concave_quad2.JPG)
+*caption for concave quad*
 
 ## Recommendations
 
