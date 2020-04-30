@@ -10,6 +10,18 @@ Our solution for this problem is DATO, the Design Architectural Tessellation Opt
 
 ## Application Overview
 
+### Title Page
+![](README_Images/Title_Page.PNG)
+*The title page of DATO*
+
+The title page is what you see when you first launch the application. This screen gives you the option to start from a new image or load an existing CSV file that you have previously exported from the application. Both options will open a file chooser dialog where you can navigate to files on your local file system. The next time you use the application, these file dialogs will default to the folder you selected a file from
+
+### Main Page
+![](README_Images/Main_Page.PNG)
+*The main page of DATO*
+
+The main page is where the majority of your time with DATO will be spent. The buttons on the left contain recommendations for ways in which the base unit can be tiled without blank space. The white shape with large vertices is your editable base unit. The area on the far right is the tessellation engine where the final pattern is displayed and modified. All of these sections are explained in more detail later in this document.
+
 ## Image and CSV Uploading
 ![](Image_Processing/Images/concave_quad2.JPG)
 *caption for concave quad*
