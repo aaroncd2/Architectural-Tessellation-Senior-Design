@@ -1,9 +1,12 @@
 # DATO: Design Architectural Tessellation Optimizer
-A Gonzaga University Senior Design Project
+**A Gonzaga University Senior Design Project**
 
-Developed by: Kevin Mattappally, Mauricio Velazquez, Parker Mooseker, and Aaron Dodge
+**Developed by: Kevin Mattappally, Mauricio Velazquez, Parker Mooseker, and Aaron Dodge**
 
 ## About
+Architects who design the exterior facade and interior layout of a structure are often inspired by geometric shapes from mathematics, nature, and history. This inspiration often manifests itself in the form of tessellations, an arrangement of geometric shapes laid together to fill a plane. Tessellations are incorporated into many designs that we see every day, appearing on everything from building facades, to carpet patterns, to the pathways we walk across on our university campus. These patterns are vital for providing character to the structures we depend on and ensure that our world is full of unique and interesting designs. The issue with the design and implementation of tessellations is that it is difficult and time consuming. This is largely due to a lack of dedicated, easy to use software that helps support architects’ artistic expression. While its fairly trivial to develop a simple pattern, it's a challenge to  create something truly unique and eye catching. 
+
+Our solution for this problem is DATO, the Design Architectural Tessellation Optimizer. Our app provides a dedicated product for tessellation design inspired by architectural expression. With the intention of supporting an architect’s artistic agency our application has an intuitive workflow that allows architects to quickly and easily design a plethora of patterns and explore new creative avenues they may never have previously considered. Our application allows users to upload an image of a real-world object or hand-drawn sketch that has its geometric properties extracted to create a base unit for a tessellation. The application allows users to edit the generated base unit and recommends alternative base units that can be constructed from the automatically generated one. Once the user has created a base unit they are happy with they are able to modify an automatically generated tiling to fit their exact needs.  Once the user is happy with their created tessellation, they will be able to export it both as a CSV file for use in their architectural projects. Having robust, dedicated digital technology for designing tessellations will greatly expedite the work of architects who need to create these patterns while the recommendation system will support artistic expression by showing alternative designs that architects may never have previously considered. 
 
 ## Application Overview
 
@@ -51,4 +54,14 @@ The tessellation engine is the area on the right half of the screen. This region
 
 **Save State:** Saves the current state of the tiling to easily return to a certain point after making changes. Saved states are added to the recommendation buttons on the far left of the window as buttons with red backgrounds. Saved states are not maintained after closing and reopening the app and should be exported for permanent storage.
 
-**Export:** Opens a file dialog where users can navigate to a folder on their system to save their tiling as a CSV file. Two different CSV files are exported. The one that is just the name that the user saved it as contains metadata about the tiling and can be selected from the title screen's load existing CSV option to continue editing. The one with \_raw appended to the user's named files just contains the coordinates of the tiling at time of export and can be used in AutoCAD or other programs. In the raw CSV file every two columns represents a polygon and the two cells next to one another in the columns represent a single point. Note that the first point is appears twice because it is needed for closing the drawn polygons. Refer to the below image for raw CSV formatting.
+**Export:** Opens a file dialog where users can navigate to a folder on their system to save their tiling as a CSV file. Two different CSV files are exported. The one that is just the name that the user saved it as contains metadata about the tiling and can be selected from the title screen's load existing CSV option to continue editing. The one with \_raw appended to the user's named files just contains the coordinates of the tiling at time of export and can be used in AutoCAD or other programs. In the raw CSV file every two columns represents a polygon and the two cells next to one another in the columns represent a single point. Note that the first point appears twice because it is needed for closing the drawn polygons. Refer to the below image for raw CSV formatting.
+
+![](README_Images/raw_csv.PNG)
+*Formatting of raw CSV output*
+
+**Undo:** Undoes last performed action
+
+**Reset:** Resets the tiling to be a freeform tiling of the current state of the editable base unit. Moving a point, or adding/deleting and edge or vertex on the editable base unit will do the same thing as this reset button
+
+**Help/Controls:** Displays a description of all the controls but inside the app
+
