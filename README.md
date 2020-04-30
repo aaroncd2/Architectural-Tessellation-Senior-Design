@@ -59,3 +59,9 @@ The tessellation engine is the area on the right half of the screen. This region
 ![](README_Images/raw_csv.PNG)
 *Formatting of raw CSV output*
 
+**Undo:** Undoes last performed action
+
+**Reset:** Resets the tiling to be a freeform tiling of the current state of the editable base unit. Moving a point, or adding/deleting and edge or vertex on the editable base unit will do the same thing as this reset button
+
+**Help/Controls:** Displays a description of all the controls but inside the app
+
