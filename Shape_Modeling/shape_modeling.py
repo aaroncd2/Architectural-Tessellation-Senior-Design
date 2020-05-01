@@ -33,9 +33,9 @@ def shape_model(coords):
 
     coords = list(poly3.exterior.coords)
 
-    if len(coords) > 12 and len(coords) < 15:
+    if len(coords) > 12:
         print('here0') 
-        poly3 = Polygon(poly3.simplify(60))
+        poly3 = Polygon(poly3.simplify(40))
     print(len(coords))
 
 
@@ -67,8 +67,8 @@ def shape_model(coords):
     inner_angle = (sides-2) * 180 / sides
 
 
-    if sides <= 8 and ((inner_angle + 10) > avg_angle > (inner_angle - 10)):
-       poly3 = regular_poly(sides)
+    # if sides <= 8 and ((inner_angle + 10) > avg_angle > (inner_angle - 10)):
+    #    poly3 = regular_poly(sides)
 
     x,y = poly3.exterior.xy
     plt.plot(x,y)

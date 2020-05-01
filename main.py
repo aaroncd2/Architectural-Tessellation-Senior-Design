@@ -544,8 +544,9 @@ class CustomLayout(BoxLayout):
         self.fill = [0,0,1,1]
 
         self.c_coords = f_coords
-        #printprint('c_coords')
         #print(self.c_coords)
+        #print("num points:")
+        #print(len(self.c_coords))
         self.pressed = False
         self.index = -1
         self.edge = -1
@@ -1003,6 +1004,7 @@ class CustomLayout(BoxLayout):
 
     #handler for back button
     def go_back(self, *args):
+        Window.clearcolor = (0,0,0,0)
         self.parent.parent.back_to_start()
         
     def change_color(self,*args):
@@ -1101,6 +1103,8 @@ class CustomLayout(BoxLayout):
         self.ColPop_background.dismiss()
         self.col_background = self.picker_background.color
         r,g,b,a = self.col_background[0], self.col_background[1], self.col_background[2], self.col_background[3]
+        #print(self.parent.children[1])
+        #self.parent.children[1].change_tessellation_bg_color(r,g,b,a)
         Window.clearcolor = (r, g, b, a)
 
     def pressed_toggle_edge(self, *args):
