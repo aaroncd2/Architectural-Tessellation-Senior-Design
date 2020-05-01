@@ -112,7 +112,7 @@ class TessellationWidget(RelativeLayout):
         self.rotation_slider = CustomSlider(min=0, max=360, value=0, value_track = True)
         self.rotation_slider.bind(value=self.rotate_polygon)
         self.rotation_value = 0
-        self.input_box = TextInput(text='0', input_filter='float', multiline=False, font_size='12dp', size_hint=(.95,.75))
+        self.input_box = TextInput(text='0', input_filter='float', multiline=False, font_size='12dp', size_hint=(.30,.5), pos_hint={'x':0, 'y':.25})
         self.input_box.bind(on_text_validate=self.on_enter)
         self.label = Label(text ='Rotation:', font_size='12dp')
         self.rotation_label_box.add_widget(self.label)
