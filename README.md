@@ -43,6 +43,28 @@ The recommendation buttons on the left of the screen show different ways that yo
 ![](README_Images/Base_Unit.png)
 *Editable base unit and controls*
 
+The editable base unit allows you to easily control the shape that you are tiling. It allows for clicking and dragging of vertices as well as adding and deleting of edges and vertices. This part of the program also allows you to change the fill and edge color of the polygons in your tiling as well as the background color of the whole window. 
+
+### Base Unit Controls
+
+**Moving Vertices:** Click and drag on a vertex to move it around.
+
+**Deleting Vertices:** Click on a vertex to highlight it in red. Press backspace or delete to remove the vertex from your polygon. You cannot delete vertices if there are only 3, as that would no longer be a polygon.
+
+**Adding Vertices:** Click on an edge to highlight it in red. Press 'A' on your keyboard to add a vertex in the center of that edge.
+
+**Deleting Edges:** Click on an edge to highlight it in red. Press backspace or delete to remove the edge from your polygon. You cannot delete edges if there are only 3, as that would no longer be a polygon.
+
+### Base Unit Buttons
+
+**Question Mark (?):** Opens a small dialog that describe the above base unit controls
+
+**Back:** Returns you to the main page, all changes are lost if you do not export your tiling prior to clicking back
+
+**Choose Color:** Opens a color picker where you can choose the color of both the edges and fill of your tiling's polygons
+
+**Choose Background:** Opens a color picker where you can choose the color of the background of the window
+
 ## Tessellation Engine
 ![](README_Images/Tessellation_Engine.png)
 *Tiling and tiling controls*
