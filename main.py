@@ -57,8 +57,9 @@ class RootWidget(BoxLayout):
     def __init__(self, **kwargs):
         super(RootWidget, self).__init__(**kwargs)
         global size
-        
+        #reference to the window size for resize and screen len
         size = Window.size
+        #create and add main menu to root
         self.main_menu = MainMenuWidget()
         self.add_widget(self.main_menu)
          #self.cb = Button(text='select a file')
@@ -70,12 +71,17 @@ class RootWidget(BoxLayout):
     #file dialog button callback
     def run_file_diag(self):
         self.remove_widget(self.main_menu)
+        #init and add File chooser
         fchooser = FileChooser()
         self.add_widget(fchooser)
+
+    #load csv btn callback
     def load_existing(self):
+        #init and add file chooser
         self.remove_widget(self.main_menu)
         load_existing_chooser = LoadExistingChooser()
         self.add_widget(load_existing_chooser)
+    #function to go back, create new main  menu etc.
     def back_to_start(self):
         self.children[0].remove_widget(self.children[0].children[0])
         self.children[0].remove_widget(self.children[0].children[1])
@@ -84,6 +90,7 @@ class RootWidget(BoxLayout):
         self.main_menu = MainMenuWidget()
         self.add_widget(self.main_menu)
 
+#instance for tooltips
 class Tooltip(Label):
     pass
 
@@ -91,17 +98,20 @@ class Tooltip(Label):
 class MainMenuWidget(GridLayout):
     def __init__(self, **kwargs):
         super(MainMenuWidget, self).__init__(**kwargs)
-        
+        #grid layout for display
         self.cols=2
         self.rows=2
+        #title
         self.add_widget(Label(text="Welcome To DATO"))
         menu_img = Image(source='Image_Processing/Images/flower_pic.jpg')
         self.add_widget(menu_img)
+        #dialog btns 
         self.cb = FileDiagButton()
         self.add_widget(self.cb)
         self.loadbtn = LoadExistingButton()
         self.add_widget(self.loadbtn)
 
+#class for img file dialogue
 class FileDiagButton(Button):
     def __init__(self, **kwargs):
         super(Button, self).__init__(**kwargs)
@@ -109,13 +119,7 @@ class FileDiagButton(Button):
     def on_press(self, **kwargs):
         self.parent.parent.run_file_diag()
 
-
-#class for tooltip btns
-# class ToolBtn(Button):
-#     def __init__(self, **kwargs):
-       
-
-
+#class for csv file dialogue
 class LoadExistingButton(Button):
     def __init__(self, **kwargs):
         super(Button, self).__init__(**kwargs)
@@ -126,6 +130,7 @@ class LoadExistingButton(Button):
 
 #file dialog prompt to load csv file of existing polygon
 class LoadExistingChooser(FileChooserListView):
+    #get path data from file
     def getpath(self):
         with open('csvpathfile.txt', 'r') as f:
             data = f.read()
@@ -133,6 +138,7 @@ class LoadExistingChooser(FileChooserListView):
             return data
         else:
             return ""
+    #call back for selecting a file
     def selected(self,filename,*args):
             if (filename == True):
                 global fp
@@ -144,19 +150,26 @@ class LoadExistingChooser(FileChooserListView):
                     head, tail = os.path.split(data)
                     f.write(head)
                 coo = []
+                #instantiate TE list 
                 csvtessellcoords =[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
                 with open(fp) as csv_file:
                     csv_reader = csv.reader(csv_file, delimiter=',')
                     line_count = 0
+                    #dont read first line for column headers
                     for row in csv_reader:
                         if line_count == 0:
                             line_count += 1
                         else:
+                            #each row load the type
                             loaded_type = row[0]
+                            #if no "None " found as delim end of base unit 
+                            #add base unit
                             if (row[1] != "None"):
                                 coo.append(float(row[1]))
                                 coo.append(float(row[2]))
 
+                            #keepin it under O(n^2)
+                            #add from file in for [[x1,y1][x2,y2][x3,y3]]
                             csvtessellcoords[0].append(float(row[3]))
                             csvtessellcoords[0].append(float(row[4]))
                             csvtessellcoords[1].append(float(row[5]))
@@ -209,9 +222,12 @@ class LoadExistingChooser(FileChooserListView):
                             csvtessellcoords[24].append(float(row[52])) 
                             line_count += 1
                 global f_coords
+                #format points to tuple format for model
                 points = list(zip(coo[::2],coo[1::2]))
+                #make shapely poly
                 poly = Polygon(points)
                 f_coords = poly.exterior.coords
+                #pass tessell and create boxgrid
                 global loaded_csv_tessel
                 global is_load_csv
                 loaded_csv_tessel = csvtessellcoords
@@ -221,10 +237,9 @@ class LoadExistingChooser(FileChooserListView):
                 self.parent.remove_widget(self)
 
 
-
-
 #gile chooser class
 class FileChooser(FileChooserListView):
+    #get path data from file
     def getpath(self):
         with open('imgpathfile.txt', 'r') as f:
             data = f.read()
@@ -232,6 +247,7 @@ class FileChooser(FileChooserListView):
             return data
         else:
             return ""
+    #call back for selecting a file
     def selected(self,filename,*args):
             if (filename == True):
                 global fp
@@ -246,7 +262,6 @@ class FileChooser(FileChooserListView):
                 global is_load_csv
                 is_load_csv = False
                 coo = ip.processImage(fp)
-                #print(coo)
                 #insert stress test for points here
                 f_coords = sm.shape_model(coo)
                 b_grid = BoxGrid()
@@ -255,20 +270,21 @@ class FileChooser(FileChooserListView):
             else:
                 self.ids.image.source = filename[0]
 
+#kivy button extention for the reccomendtaion btns
 class ReccomendationButton(Button):
     def __init__(self, **kwargs):
-       
+        #setup btn tooltip
         self.tooltip = Tooltip()
         self.tooltext=''
         self.tooltip.text = self.tooltext
         Window.bind(mouse_pos=self.on_mouse_pos)
         super(Button, self).__init__(**kwargs)
-        #self.size = 175, 145
-        
+        #set members for selection and color
         self.background_color = [.3, .3, 0.3, .75]
         self.pressed=False
         self.index = None
-        
+    
+    #pause event for tooltips
     def on_mouse_pos(self, *args):
         if not self.get_root_window():
             return
@@ -282,17 +298,19 @@ class ReccomendationButton(Button):
         Window.remove_widget(self.tooltip)
     def display_tooltip(self,*args):
         Window.add_widget(self.tooltip)
-
+    #on btn press cng color and draw stored tiling based on btn index
     def on_press(self, **kwargs):
         self.pressed=True
         self.parent.parent.parent.children[1].draw_recommendation(self.index)
         self.background_color = [.3, .7, .4, .75]
         self.parent.parent.press_helper_func(self)
 
+#widget for dynamic storage of the reccomendation btns
 class ReccomendationButtons(FloatLayout):
     def __init__(self, **kwargs):
         super(FloatLayout, self).__init__(**kwargs)
         self.size_hint= None, None
+    #helper to determine what btn to highlight
     def press_helper_func(self,eleref):
         for btn in self.reccrows.children:
             if btn != eleref:
@@ -301,13 +319,19 @@ class ReccomendationButtons(FloatLayout):
                     btn.background_color = [.3, .3, 0.3, .75]
                 else:
                     btn.background_color =[1, .3, .4, .85]
+    #main setup to get correct size # and binding for reccomendations for buttons                
     def setup_btns(self, is_resize):
+        #get reccommendtaion reference from parent boxgrd
         self.btns_info = self.parent.main_shape_info
+        #num totall reccs
         self.numreccs = len(self.btns_info)
         self.reccrows= GridLayout(rows=self.numreccs , cols=1)
         self.reccrows.size_hint = None, None
+        #create representations to draw on btns
         global the_poly
+        #make points normalized to positive quadrant
         the_poly = self.make_positive(self.btns_info[0][0])
+        #make shapely obj and calculate btn sizes and poly center relative to screen
         poly = Polygon(the_poly)
         sizeX = Window.size[0] * (.14)
         sizeY = Window.size[1] / self.numreccs
@@ -316,25 +340,31 @@ class ReccomendationButtons(FloatLayout):
         xscale = sizeX * .5 / xdistnace
         yscale = sizeY * .5 / ydistance
         center = (poly.centroid.coords[0])
+        #offsets for translations of reps
         xoff = (sizeX/2) - center[0]
         Yoff = (sizeY/2) - center[1]
+        #normalize which way to scale
         if xscale > yscale:
             the_poly = affinity.scale(the_poly, xfact= xscale, yfact= yscale)
         else:
             the_poly = affinity.scale(the_poly, xfact= yscale, yfact= xscale)
+        #initial translate
         the_poly = affinity.translate(the_poly, xoff= xoff, yoff=Yoff)
+        #if out of x scope of btn, translate by difference out of scope back to btn
         if the_poly.bounds[2] > sizeX :
             the_poly = affinity.translate(the_poly, xoff= (sizeX - the_poly.bounds[2]), yoff=0)
             # while the_poly.bounds[0] <= 0.0:
             #     the_poly = affinity.scale(the_poly, xfact= .99, yfact= .99)
         elif the_poly.bounds[0] < 0:
                     the_poly = affinity.translate(the_poly, xoff= (the_poly.bounds[0] * (-1)), yoff=0)
+        #if out of  y scope, translate back by difference in pos
         if the_poly.bounds[3] > sizeY :
             the_poly = affinity.translate(the_poly, xoff=0 , yoff=(sizeY - the_poly.bounds[3]))
         elif the_poly.bounds[1] < 0:
             the_poly = affinity.translate(the_poly, xoff=0 , yoff=( the_poly.bounds[1] * (-1)))
-
+        #conversion call from shapely to kivy obj to be drawn
         the_poly = self.shapely_to_kivy(the_poly)
+        #draw to btn
         with self.canvas.before:
             Line(points = the_poly)
         with self.canvas:
@@ -347,6 +377,7 @@ class ReccomendationButtons(FloatLayout):
         for k in range(0, self.numreccs):
             u = u - 1
             if (k != 0):
+                #same as first w different lengths
                 the_poly = self.make_positive(self.btns_info[k][0])
                 btn_height = (Window.size[1] / self.numreccs)
                 yoff = (Yoff ) + btn_height* k
@@ -355,7 +386,7 @@ class ReccomendationButtons(FloatLayout):
                 else:
                     the_poly = affinity.scale(the_poly, xfact= xscale, yfact= xscale)
                 the_poly = affinity.translate(the_poly, xoff= xoff, yoff= yoff)
-                
+                #if out of x scope of btn, translate by difference out of scope back to btn
                 if the_poly.bounds[2] > sizeX:
                     the_poly = affinity.translate(the_poly, xoff= ((sizeX) - the_poly.bounds[2]), yoff=0)
                 elif the_poly.bounds[0] < 0:
@@ -372,11 +403,6 @@ class ReccomendationButtons(FloatLayout):
                     #     the_poly = affinity.scale(the_poly, xfact= .99, yfact= .99)
                 elif the_poly.bounds[1] < heightifkis1:
                     the_poly = affinity.translate(the_poly, xoff=0 , yoff=((btn_height * k) - the_poly.bounds[1]))
-                #poly_center = the_poly.centroid.coords[0]   
-                # if poly_center[0] < (sizeX/2):
-                #     the_poly = affinity.translate(the_poly, xoff= ((sizeX/2) - poly_center[0]), yoff=0)
-                # if poly_center[0] > (sizeX/2):
-                #     the_poly = affinity.translate(the_poly, xoff= (poly_center[0] -(sizeX/2) ), yoff=0)
                 the_poly = self.shapely_to_kivy(the_poly)
                 if (the_poly != None):
                     with self.canvas.after:
@@ -387,10 +413,12 @@ class ReccomendationButtons(FloatLayout):
                         Line(points = the_poly)
                 else:
                     the_poly = None
+            #create btn for recc
             temp = ReccomendationButton()
             if str(self.btns_info[u][1]) == "regular":
                 temp.tooltip.text = "Freeform"
             else:
+                #set button tooltip text to the reccomendation type
                 temp.tooltip.text = str(self.btns_info[u][1])
             the_poly = None
 
@@ -403,13 +431,13 @@ class ReccomendationButtons(FloatLayout):
                     temp.background_color =[1, .3, .4, .85]
             self.reccrows.add_widget(temp)
             #temp.add_widget(Label(text="testt",valign='bottom'), index=0)
+        #add rows of btns
         self.add_widget(self.reccrows, index=1)
         # # for k in range(0, self.numreccs):
         #      label = Label(text="hello")
         #      self.add_widget(label)
 
-
-
+    #definition for shaply polygon conversion to kivy formatting
     def shapely_to_kivy(self, polygon):
         kivy_points = []
         for p in polygon.exterior.coords:
@@ -442,25 +470,29 @@ class BoxGrid(BoxLayout):
     def __init__(self, **kwargs):
         super(BoxGrid, self).__init__(**kwargs)
         self.b_coords = f_coords
-        
+        #base unit view
         custlay = CustomLayout()
+        #tessellation view
         tessel = TessellationWidget()
         self.add_widget(custlay)
         self.add_widget(tessel)
+        #load in csv if applicable
         if is_load_csv == True:
             self.children[0].polygons = loaded_csv_tessel
             self.children[0].type = loaded_type
+        #display the tiling and change text to proper btns
         tessel.display_initial_tiling(is_load_csv)
         tessel.change_rec_label_text()
+        #set reccomendations from shape idenfification
         self.main_shape_info = tessel.shape_info
+        #create buttons
         self.btn = ReccomendationButtons()
+        #setup btns for reccomendations
         self.add_widget(self.btn)
         if (self.main_shape_info != None and len(self.main_shape_info) > 1):
             self.btn.setup_btns(False)
 
-class Tooltip(Label):
-    pass
-
+#extension of kivy btn for tooltip functionality
 class ToolBtn(Button):
     def __init__(self,**kwargs):
         self.tooltip = Tooltip()
@@ -762,7 +794,7 @@ class CustomLayout(BoxLayout):
                     self.parent.add_widget(btns)
                     if (new_shape_info != None and len(new_shape_info) >= 1):
                         btns.setup_btns(False)
-
+    #resize event for formatting
     def on_window_resize(self, window, width, height):
         self.canvas.remove_group('shape')
         self.canvas.remove(self.shape)
