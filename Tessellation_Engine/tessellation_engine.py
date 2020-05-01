@@ -194,6 +194,13 @@ class TessellationWidget(RelativeLayout):
         self.alternate_col_button.bind(on_press=self.alternate_cols)
         self.add_widget(self.buttons)
 
+    # def change_tessellation_bg_color(self,r,g,b,a):
+    #     self.background_color =(r,g,b,a)
+    #     with self.canvas.before:
+    #         Color(r, g, b, a)
+    #         Rectangle(pos=self.pos, size=self.size)
+
+
     # changes the label of the tiling type, used in displaying initial tiling
     def change_rec_label_text(self):
         if self.type == None:
