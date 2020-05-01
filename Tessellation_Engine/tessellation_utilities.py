@@ -116,6 +116,7 @@ def is_convex(shape):
         # the shape is convex
         return True, list()
 
+# computes the z cross product of three coordinates. Used for determining convexity of polygons
 def compute_z_cross_product(first_coord, second_coord, third_coord):
     dx1 = second_coord[0] - first_coord[0]
     dy1 = second_coord[1] - first_coord[1]
