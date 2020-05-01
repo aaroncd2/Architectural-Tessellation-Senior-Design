@@ -10,13 +10,34 @@ Our solution for this problem is DATO, the Design Architectural Tessellation Opt
 
 ## Application Overview
 
+### Title Page
+![](README_Images/Title_Page.PNG)
+*The title page of DATO*
+
+The title page is what you see when you first launch the application. This screen gives you the option to start from a new image or load an existing CSV file that you have previously exported from the application. Both options will open a file chooser dialog where you can navigate to files on your local file system. The next time you use the application, these file dialogs will default to the folder you selected a file from
+
+### Main Page
+![](README_Images/Main_Page.PNG)
+*The main page of DATO*
+
+The main page is where the majority of your time with DATO will be spent. The buttons on the left contain recommendations for ways in which the base unit can be tiled without blank space. The white shape with large vertices is your editable base unit. The area on the far right is the tessellation engine where the final pattern is displayed and modified. All of these sections are explained in more detail later in this document.
+
 ## Image and CSV Uploading
-![](Image_Processing/Images/concave_quad2.JPG)
-*caption for concave quad*
+![](Image_Processing/Images/concave_quad.JPG)
+
+*An example of the type of image that consistently gives you accurrate results within the app*
+
+### Image Uploading
+Clicking on the choose new image button on the title page will bring up a file dialog where you can navigate through your local file system to upload a .PNG or .JPG image of a sketch or other real world object. For the best results, it is advised to use an image that is not too noisy. A sketch of a shape on paper or an object on a plain, single colored background gives the app the best chance at replicating your desired base unit automatically. Images drawn in software like Paint or Krita will always give consistent results. If the originally generated base unit is not what you were expecting or what you wanted, don't worry! Our easy to use base unit manipulation controls (Described under the base unit editing section of this document) allow you to add/delete points and edges and move them around to create your desired shape. Image processing only extracts the edges of shapes, this means details in the center of images are not kept when generating your base unit.
+
+### CSV Uploading
+Clicking on the load existing CSV button from the title page will bring up a file dialog where you can navigate through your local file system to upload a CSV that you have previously exported from the application to get right back to where you were in a previous session. Note that upon export, the app creates 2 different CSV files. The CSV file with \_raw appended to your given name SHOULD NOT be uploaded to the application. The raw file is for use in other applications and does not have the metadata required to load back in your tiling. Instead use the CSV file with the exact name that you exported to reload in your tiling.
 
 ## Recommendations
 ![](README_Images/Recommendations.png)
 *Recommended base units created using user's base unit*
+
+The recommendation buttons on the left of the screen show different ways that your base unit can be altered so that it can tile edge-to-edge without any empty space between polygons. There are unique recommendations for all tirangles and quadrilaterals and universal recommendations for all shapes. The unique recommendations are arguably more interesting, but all recommendations aim to convert the exterior of the base unit to be either a parallelogram or hexagon with 3 sets of parallel edges. This is because those shapes can always tile a plane without any spaces between them. These recommendations will dynamically update as users edit the base unit.
 
 ## Base Unit Editing
 ![](README_Images/Base_Unit.png)
