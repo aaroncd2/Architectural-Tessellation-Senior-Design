@@ -1,3 +1,8 @@
+"""
+Save dialog is displayed upon clicking the export button. 
+Extends kivy's Popup widget
+"""
+
 from kivy.uix.popup import Popup
 from kivy.uix.gridlayout import GridLayout 
 from kivy.uix.boxlayout import BoxLayout
@@ -10,12 +15,12 @@ from kivy.core.window import Window
 import pandas as pd
 
 class SaveDialog(Popup):
-    def __init__(self,my_widget,**kwargs):  # my_widget is now the object where popup was called from.
+    def __init__(self,my_widget,**kwargs):  # my_widget is now the object where popup was called from (Tessellation Widget).
         super(SaveDialog,self).__init__(**kwargs)
         
         self.my_widget = my_widget
-        self.data = self.my_widget.df
-        self.raw_data = self.my_widget.raw_df
+        self.data = self.my_widget.df # The pandas dataframe with metadata from TessellationWidget's export function
+        self.raw_data = self.my_widget.raw_df # The pandas dataframe without metadata from TessellationWidget's export function
 
         self.title = 'Save Your Tiling'
         self.content = GridLayout(rows=4, cols=1)

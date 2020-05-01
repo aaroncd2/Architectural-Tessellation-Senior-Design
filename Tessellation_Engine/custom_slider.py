@@ -1,6 +1,7 @@
 """
 Extension of the built in Slider class.
 Saves previous values on touch down events
+Used for undo functionality
 """
 from kivy.uix.slider import Slider
 

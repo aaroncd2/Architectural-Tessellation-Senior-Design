@@ -1,3 +1,9 @@
+"""
+tessellation_engine.py
+This is the primary file for all things related to creating the tilings on the right side of the screen.
+It includes the algorithms for tiling parallelograms and hexagons
+"""
+
 from kivy.app import App
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
@@ -28,14 +34,21 @@ from Tessellation_Engine.custom_slider import CustomSlider
 from Tessellation_Engine.help_dialog import HelpDialog
 
 ### START TESSELLATION ENGINE ###
+# Create this for the canvas space for drawing tilings.
+# Using the CanvasWidget's canvas space rather than the TessellationWidget's canvas space
+# prevents us from needing to translate our coordinates to avoid drawing on top of controls
+# Consider moving this to its own file
 class CanvasWidget(RelativeLayout):
     def __init__(self, **kwargs):
         super(CanvasWidget, self).__init__(**kwargs)
         self.lines = InstructionGroup()
 
+# The following two classes Tooltip and ToolBtn are for displaying tooltips on hover over button
+# These are used in many places throughout the app and should be put into their own files and imported here
 class Tooltip(Label):
     pass
 
+# Move w/ Tooltip to its own file
 class ToolBtn(Button):
     def __init__(self,**kwargs):
         self.tooltip = Tooltip()
@@ -57,16 +70,18 @@ class ToolBtn(Button):
     def display_tooltip(self,*args):
         Window.add_widget(self.tooltip)
 
+# Beginning of the TessellationWidget
+# This is what is created in main.py and added to the right half of the screen
+# The important stuff in this file is here
 class TessellationWidget(RelativeLayout):
+    # Init creates the class' members and its UI components
     def __init__(self, **kwargs):
         super(TessellationWidget, self).__init__(**kwargs)
-        #self.cols = 1
-        #self.rows = 3
-        self.polygons = []
-        self.actions = []
-        self.exterior = None
-        self.type = None
-        self.saved_type = None
+        self.polygons = [] # List of lists of kivy style polygons [[x1,y1,x2,y2,...,xn,yn], [x1,y1,x2,y2,...,xn,yn]]
+        self.actions = [] # List utilized as a stack for undo functionality
+        self.exterior = None # Used to hold the exterior coordinates of recommended base units
+        self.type = None # type of the current tiling, can be freeform, parallelogram or hexagon
+        self.saved_type = None # variable for storing the type when the toggle freeform button is clicked, allows for toggling
         self.stroke_color = [255,255,255,1]
         self.fill_color = [0,0,1,1]
 
@@ -111,7 +126,7 @@ class TessellationWidget(RelativeLayout):
         self.rotation_label_box = BoxLayout(orientation='horizontal')
         self.rotation_slider = CustomSlider(min=0, max=360, value=0, value_track = True)
         self.rotation_slider.bind(value=self.rotate_polygon)
-        self.rotation_value = 0
+        self.rotation_value = 0 # holds the current rotation value
         self.input_box = TextInput(text='0', input_filter='float', multiline=False, font_size='12dp', size_hint=(.30,.5), pos_hint={'x':0, 'y':.25})
         self.input_box.bind(on_text_validate=self.on_enter)
         self.label = Label(text ='Rotation:', font_size='12dp')
@@ -126,7 +141,7 @@ class TessellationWidget(RelativeLayout):
         self.scale_label = Label(text='Scale', font_size='12dp')
         self.scale_box.add_widget(self.scale_label)
         self.slide_scale = CustomSlider(min=-50, max=50, value=0, value_track = True)
-        self.scaling = 0
+        self.scaling = 0 # holds current scaling value
         self.slide_scale.bind(value = self.scale_polygons)
         self.scale_box.add_widget(self.slide_scale)
         self.sliders.add_widget(self.scale_box)
@@ -136,7 +151,7 @@ class TessellationWidget(RelativeLayout):
         self.h_label = Label(text='Horizontal Spacing', font_size='12dp')
         self.horizontal_box.add_widget(self.h_label)
         self.slide_horizontal = CustomSlider(min=-50, max=50, value=0, value_track = True)
-        self.xSpacing = 0
+        self.xSpacing = 0 # holds horizontal spacing value
         self.slide_horizontal.bind(value = self.adjust_horizontal_spacing)
         self.horizontal_box.add_widget(self.slide_horizontal)
         self.sliders.add_widget(self.horizontal_box)
@@ -146,7 +161,7 @@ class TessellationWidget(RelativeLayout):
         self.v_label = Label(text='Vertical Spacing', font_size='12dp')
         self.vertical_box.add_widget(self.v_label)
         self.slide_vertical = CustomSlider(min=-50, max=50, value=0, value_track = True)
-        self.ySpacing = 0
+        self.ySpacing = 0 # holds vertical spacing value
         self.slide_vertical.bind(value = self.adjust_vertical_spacing)
         self.vertical_box.add_widget(self.slide_vertical)
         self.sliders.add_widget(self.vertical_box)
@@ -202,14 +217,18 @@ class TessellationWidget(RelativeLayout):
             self.rec_type.text = self.type
 
     # Display initial tiling
+    # tf is True if the initial tiling is being loaded in from an existing CSV.
+    # tf is False if the initial tiling is being created for the first time from an image.
+    # Note that changing the xNum and yNum will break the load existing CSV functionality in main
+    # as it is currently hard-coded for a 5x5 grid
     def display_initial_tiling(self,tf):
-        self.xNum = 5
-        self.yNum = 5
-        points = self.parent.b_coords
-        self.polygon = Polygon(points)
-        self.base_unit = self.polygon
-        self.original_base_unit = self.polygon
-        self.shape_info = tr.identify_shape(self.base_unit)
+        self.xNum = 5 # number of polygons in the x-direction (number of columns)
+        self.yNum = 5 # number of polygons in the y-direction (number of rows)
+        points = self.parent.b_coords # getting the points from parent BoxGrid in main
+        self.polygon = Polygon(points) # holds the polygon to be tiled, this is a Shapely object
+        self.base_unit = self.polygon # holds the unedited base unit which will always be the same as the editable base unit
+        self.original_base_unit = self.polygon # holds the base from the beginning of the image import for resetting when 'r' is pressed
+        self.shape_info = tr.identify_shape(self.base_unit) # holds the recommendations generated by shape_identification as a list of tuples
         if tf == False:
             if self.type == None:
                 self.type = 'regular'
@@ -219,18 +238,23 @@ class TessellationWidget(RelativeLayout):
                 self.tile_parallelogram()
             elif self.type == 'hexagon':
                 self.tile_hexagon()
-        else:
-            
+        else: 
             self.draw_polygons()
-        self.unscaled_polygons = self.polygons
+        # unscaled_polygons is needed for smoothly scaling polygons. All transformations that are applied to self.polygons
+        # are also applied to self.unscaled_polygons except for scaling, see scale_polygons() for more info
+        self.unscaled_polygons = self.polygons 
 
+    # currently unused class, likely can be removed 
     def set_coords(self, num):
         self.points = num
 
     # Tiles polygons in an xNum by yNum grid utilizing bounding boxes
+    # Though its called tile_regular_polygon, tile_freeform may be a better name as it is used for 
+    # creating bounding-box (freeform) tilings of all polygons
     def tile_regular_polygon(self):
-        polygon = tu.shapely_to_kivy(self.polygon)
-        bounds = self.polygon.bounds
+        polygon = tu.shapely_to_kivy(self.polygon) # gets self.polygon's coordinates in kivy polygon format
+        bounds = self.polygon.bounds # shapely function that returns tuple in format (minX, minY, maxX, maxY)
+        # calculate increment between polygons
         xInc = abs(bounds[2] - bounds[0]) + (self.xSpacing)
         yInc = abs(bounds[3] - bounds[1]) + (self.ySpacing)
 
@@ -245,8 +269,9 @@ class TessellationWidget(RelativeLayout):
                 yNext = yCount * yInc
                 count = 0
                 for p in polygon:
-                    if count % 2 == 0:
-                        temp.append(p + xNext)
+                    # Even indices are x parts of coordinates, odd indices are y-parts of coordinates
+                    if count % 2 == 0: 
+                        temp.append(p + xNext) 
                     else:
                         temp.append(p + yNext)
                     count = count + 1
@@ -260,9 +285,11 @@ class TessellationWidget(RelativeLayout):
         self.draw_polygons()
         self.unscaled_polygons = self.polygons
 
-    # tiles a parallelogram
+    # Creates an edge to edge tiling of any parallelogram
+    # Only called upon clicking a parallelogram recommendation or toggling a previously parallelogram tiling
+    # back from being freeform. Refer to DATO Documentation document for deeper explaination of algorithms
     def tile_parallelogram(self):
-        # calculate increment between shapes
+        # calculate increment between shapes. this could be broken into its own function.
         scale_factor = self.slide_scale.value
         shape = self.polygon
         exterior = tu.make_positive(self.rec_shape[3])
@@ -298,7 +325,7 @@ class TessellationWidget(RelativeLayout):
         xInc2 = xInc2 + (self.xSpacing)
         yInc2 = yInc2 + (self.ySpacing)
     
-        # determine direction of parallelogram
+        # determine direction of parallelogram. This also could be its own function
         pLeft = None 
         pRight = None
         pointsRight = False
@@ -390,8 +417,10 @@ class TessellationWidget(RelativeLayout):
         self.unscaled_polygons = self.polygons
 
     # tiles a hexagon (with 3 sets of parallel edges)
+    # Only called upon clicking a hexagon recommendation or toggling a previously hexagon tiling
+    # back from being freeform. Refer to DATO Documentation document for deeper explaination of algorithms
     def tile_hexagon(self):
-        # calculate increment between shapes
+        # calculate increment between shapes. this could be its own function
         scale_factor = self.slide_scale.value
         shape = self.polygon
         exterior = tu.make_positive(self.rec_shape[3])
@@ -427,7 +456,7 @@ class TessellationWidget(RelativeLayout):
         xInc2 = xInc2 + (self.xSpacing)
         yInc2 = yInc2 + (self.ySpacing)
     
-        # determine direction of hexagon
+        # determine direction of hexagon. could be its own function
         pLeft = None
         pRight = None
         pDown = None
@@ -739,6 +768,7 @@ class TessellationWidget(RelativeLayout):
             self.rotation_slider.value = self.rotation_slider.value % 360
         self.rotate_polygon(0, float(self.input_box.text))
 
+    # saves the state of the tiling and adds a button to the recommendation buttons for quick access
     def save_state(self, instance):
         self.parent.children[2].add_saved_state(self.polygon, self.type, True, self.polygons)
 
@@ -764,7 +794,7 @@ class TessellationWidget(RelativeLayout):
                     self.rec_type.text = 'Hexagon'
 
 
-    # flips a polygon horizontally across its center
+    # flips a each polygon horizontally across its center
     def flip_horizontal(self, instance):
         if instance != 0:
             self.actions.append(('horizontal flip', 0))
@@ -801,7 +831,7 @@ class TessellationWidget(RelativeLayout):
             polygons.append(temp)
         self.unscaled_polygons = polygons
 
-    # flips a polygon vertically across its center
+    # flips each polygon vertically across its center
     def flip_vertical(self, instance):
         if instance != 0:
             self.actions.append(('vertical flip', 0))
@@ -864,7 +894,7 @@ class TessellationWidget(RelativeLayout):
                 self.slide_vertical.value = action[1]
                 self.adjust_vertical_spacing(0,0)
 
-    # resets the screen
+    # resets the screen to be a freeform tiling of the current base unit
     def reset(self, instance):
         self.rotation_slider.value = 0
         self.rotation_value = 0
@@ -1158,7 +1188,7 @@ class TessellationWidget(RelativeLayout):
             self.rotation_slider.action_complete = False
 
 
-    # displays the next recommendation to the screen
+    # displays the selected recommendation to the screen
     def draw_recommendation(self, index):
         self.reset(0)
         self.rec_shape = self.shape_info[index]

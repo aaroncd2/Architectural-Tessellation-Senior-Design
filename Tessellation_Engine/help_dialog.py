@@ -1,3 +1,8 @@
+"""
+HelpDialog is a class that extends kivy's Popup class.
+It displays information about the controls of the Tessellation Engine
+"""
+
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
