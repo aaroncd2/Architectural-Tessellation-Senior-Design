@@ -233,7 +233,6 @@ def process_universal(shape):
     # set up second recommendation coordinates with the minimum x value
     # coordinate at the front of the list
     second_rec_coords = list(first_rec_coords)
-    print('coord list: ', second_rec_coords)
     # appending the exterior box to the list
     first_rec_coords.append((min_x, min_y))
     first_rec_coords.append((min_x, max_y))
